@@ -180,7 +180,7 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: S
               <div className="text-right">
                 <div className="text-sm text-slate-400">Session Started</div>
                 <div className="font-mono text-primary">
-                  {currentSession.startTime.toLocaleTimeString()}
+                  {new Date(currentSession.startTime).toLocaleTimeString()}
                 </div>
               </div>
             </div>
