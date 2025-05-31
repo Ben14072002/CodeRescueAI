@@ -1,5 +1,63 @@
 import { z } from "zod";
+import { pgTable, serial, varchar, text, boolean, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
+// Database Tables
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const sessions = pgTable("sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  problemType: varchar("problem_type", { length: 100 }).notNull(),
+  projectDescription: text("project_description"),
+  customProblem: text("custom_problem"),
+  selectedStrategy: varchar("selected_strategy", { length: 100 }).notNull(),
+  startTime: timestamp("start_time").notNull(),
+  completedAt: timestamp("completed_at"),
+  actionSteps: jsonb("action_steps").notNull(),
+  prompts: jsonb("prompts").notNull(),
+  notes: text("notes").notNull().default(""),
+  success: boolean("success").notNull().default(false),
+  progress: integer("progress").notNull().default(0),
+  stepsCompleted: integer("steps_completed").notNull().default(0),
+  totalTimeSpent: integer("total_time_spent").notNull().default(0),
+});
+
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  theme: varchar("theme", { length: 20 }).notNull().default("dark"),
+  defaultPromptStyle: varchar("default_prompt_style", { length: 20 }).notNull().default("direct"),
+  lastProblemType: varchar("last_problem_type", { length: 100 }),
+});
+
+// Relations
+export const usersRelations = relations(users, ({ many, one }) => ({
+  sessions: many(sessions),
+  preferences: one(userPreferences),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+// Zod Schemas
 export const sessionSchema = z.object({
   id: z.number(),
   problemType: z.string(),
@@ -34,6 +92,9 @@ export const userPreferencesSchema = z.object({
   lastProblemType: z.string().optional(),
 });
 
+// Types from database tables
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
 export type Session = z.infer<typeof sessionSchema>;
 export type UserPreferences = z.infer<typeof userPreferencesSchema>;
 
