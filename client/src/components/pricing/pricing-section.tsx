@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ interface PricingSectionProps {
 
 export function PricingSection({ onSelectPlan }: PricingSectionProps) {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan>("pro");
 
   const handleSelectPlan = (plan: PricingPlan) => {
@@ -21,11 +23,13 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
     }
     
     if (!user) {
-      // User needs to sign in first
+      // User needs to sign in first - trigger auth modal
+      onSelectPlan(plan);
       return;
     }
     
-    onSelectPlan(plan);
+    // Redirect to checkout with plan
+    setLocation(`/checkout?plan=${plan}`);
   };
 
   const getPlanIcon = (plan: PricingPlan) => {
