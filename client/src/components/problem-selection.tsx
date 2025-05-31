@@ -1,0 +1,177 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit } from "lucide-react";
+import { problemData } from "@/lib/problem-data";
+import { useSession } from "@/hooks/use-session";
+
+interface ProblemSelectionProps {
+  onAnalyze: () => void;
+  onBack: () => void;
+}
+
+export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
+  const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
+  const [customProblem, setCustomProblem] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const { createSession } = useSession();
+
+  const problemIcons = {
+    complexity_overwhelm: Layers,
+    integration_issues: Unlink,
+    lost_direction: Compass,
+    no_planning: HelpCircle,
+    repeated_failures: RotateCcw,
+    custom: Edit,
+  };
+
+  const problemColors = {
+    complexity_overwhelm: "text-amber-500",
+    integration_issues: "text-red-500",
+    lost_direction: "text-purple-500",
+    no_planning: "text-orange-500",
+    repeated_failures: "text-cyan-500",
+    custom: "text-slate-500",
+  };
+
+  const handleProblemSelect = (problemType: string) => {
+    setSelectedProblem(problemType);
+  };
+
+  const handleAnalyze = () => {
+    if (!selectedProblem) return;
+
+    createSession({
+      problemType: selectedProblem,
+      projectDescription,
+      customProblem: selectedProblem === "custom" ? customProblem : undefined,
+      selectedStrategy: selectedProblem === "custom" ? "custom" : problemData[selectedProblem]?.strategy || "",
+      startTime: new Date(),
+      actionSteps: problemData[selectedProblem]?.steps.map((step, index) => ({
+        id: index,
+        title: step.title,
+        completed: false,
+        timeSpent: 0,
+      })) || [],
+      prompts: problemData[selectedProblem]?.prompts.map((prompt, index) => ({
+        id: index,
+        text: prompt.text,
+        used: false,
+      })) || [],
+      notes: "",
+      success: false,
+      progress: 0,
+      stepsCompleted: 0,
+      totalTimeSpent: 0,
+    });
+
+    onAnalyze();
+  };
+
+  return (
+    <section className="animate-fade-in">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-4">What's happening with your AI assistant?</h2>
+          <p className="text-slate-400">Select the problem that best describes your current situation</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {Object.entries(problemData).map(([key, problem]) => {
+            const Icon = problemIcons[key as keyof typeof problemIcons];
+            const colorClass = problemColors[key as keyof typeof problemColors];
+            const isSelected = selectedProblem === key;
+
+            return (
+              <Card
+                key={key}
+                className={`cursor-pointer transition-all surface-800 border-slate-700 hover:border-primary ${
+                  isSelected ? "border-primary surface-700" : ""
+                }`}
+                onClick={() => handleProblemSelect(key)}
+              >
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <Icon className={`w-8 h-8 ${colorClass} mb-3 mx-auto`} />
+                    <h3 className="text-lg font-semibold mb-2">{problem.title}</h3>
+                  </div>
+                  <p className="text-slate-400 text-sm mb-4">{problem.description}</p>
+                  <div className="text-xs text-slate-500">
+                    <span className={`bg-${colorClass.split('-')[1]}-500/20 ${colorClass.replace('text-', 'text-')} px-2 py-1 rounded`}>
+                      {problem.strategy} Strategy
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+
+          {/* Custom Problem Card */}
+          <Card
+            className={`cursor-pointer transition-all surface-800 border-slate-700 hover:border-primary ${
+              selectedProblem === "custom" ? "border-primary surface-700" : ""
+            }`}
+            onClick={() => handleProblemSelect("custom")}
+          >
+            <CardContent className="p-6">
+              <div className="text-center mb-4">
+                <Edit className="w-8 h-8 text-slate-500 mb-3 mx-auto" />
+                <h3 className="text-lg font-semibold mb-2">Something Else</h3>
+              </div>
+              <p className="text-slate-400 text-sm mb-4">Describe your specific situation for custom guidance</p>
+              <div className="text-xs text-slate-500">
+                <span className="bg-slate-500/20 text-slate-400 px-2 py-1 rounded">Custom Strategy</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Custom Problem Description */}
+        {selectedProblem === "custom" && (
+          <Card className="surface-800 border-slate-700 mb-6 animate-slide-up">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Describe Your Situation</h3>
+              <div className="space-y-4">
+                <div>
+                  <Textarea
+                    value={customProblem}
+                    onChange={(e) => setCustomProblem(e.target.value)}
+                    placeholder="Describe what's happening with your AI assistant and what you're trying to build..."
+                    className="bg-slate-700 border-slate-600"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="projectDescription">Project Description (Optional)</Label>
+                  <Input
+                    id="projectDescription"
+                    type="text"
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
+                    placeholder="e.g., Building a todo app with user authentication"
+                    className="bg-slate-700 border-slate-600 mt-2"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="text-center">
+          <Button
+            onClick={handleAnalyze}
+            disabled={!selectedProblem}
+            size="lg"
+            className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+          >
+            <Search className="w-5 h-5 mr-2" />
+            Get Solution Strategy
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}

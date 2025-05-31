@@ -1,0 +1,212 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --background: 222 84% 5%; /* #0F172A */
+  --foreground: 210 40% 98%; /* #F8FAFC */
+  --muted: 215 28% 17%; /* #1E293B */
+  --muted-foreground: 215 20% 65%; /* #94A3B8 */
+  --popover: 222 84% 5%; /* #0F172A */
+  --popover-foreground: 210 40% 98%; /* #F8FAFC */
+  --card: 215 28% 17%; /* #1E293B */
+  --card-foreground: 210 40% 98%; /* #F8FAFC */
+  --border: 215 28% 17%; /* #334155 */
+  --input: 215 28% 17%; /* #334155 */
+  --primary: 207 90% 54%; /* #3B82F6 */
+  --primary-foreground: 210 40% 98%; /* #F8FAFC */
+  --secondary: 215 25% 27%; /* #475569 */
+  --secondary-foreground: 210 40% 98%; /* #F8FAFC */
+  --accent: 215 25% 27%; /* #475569 */
+  --accent-foreground: 210 40% 98%; /* #F8FAFC */
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
+  --ring: 207 90% 54%; /* #3B82F6 */
+  --radius: 0.5rem;
+  
+  /* Custom colors for CodeBreaker */
+  --surface-800: 215 28% 17%; /* #1E293B */
+  --surface-700: 215 25% 27%; /* #334155 */
+  --surface-600: 215 20% 35%; /* #475569 */
+  
+  --amber-400: 45 96% 64%; /* #FBBF24 */
+  --amber-500: 45 93% 58%; /* #F59E0B */
+  --emerald-400: 158 64% 52%; /* #34D399 */
+  --emerald-500: 160 84% 39%; /* #10B981 */
+  --red-400: 0 91% 71%; /* #F87171 */
+  --red-500: 0 84% 60%; /* #EF4444 */
+  --purple-400: 270 91% 65%; /* #A78BFA */
+  --purple-500: 271 81% 56%; /* #8B5CF6 */
+  --orange-400: 31 91% 65%; /* #FB923C */
+  --orange-500: 25 95% 53%; /* #F97316 */
+  --cyan-400: 187 85% 53%; /* #22D3EE */
+  --cyan-500: 189 94% 43%; /* #06B6D4 */
+}
+
+.dark {
+  --background: 222 84% 5%; /* #0F172A */
+  --foreground: 210 40% 98%; /* #F8FAFC */
+  --muted: 215 28% 17%; /* #1E293B */
+  --muted-foreground: 215 20% 65%; /* #94A3B8 */
+  --popover: 222 84% 5%; /* #0F172A */
+  --popover-foreground: 210 40% 98%; /* #F8FAFC */
+  --card: 215 28% 17%; /* #1E293B */
+  --card-foreground: 210 40% 98%; /* #F8FAFC */
+  --border: 215 28% 17%; /* #334155 */
+  --input: 215 28% 17%; /* #334155 */
+  --primary: 207 90% 54%; /* #3B82F6 */
+  --primary-foreground: 210 40% 98%; /* #F8FAFC */
+  --secondary: 215 25% 27%; /* #475569 */
+  --secondary-foreground: 210 40% 98%; /* #F8FAFC */
+  --accent: 215 25% 27%; /* #475569 */
+  --accent-foreground: 210 40% 98%; /* #F8FAFC */
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
+  --ring: 207 90% 54%; /* #3B82F6 */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .surface-800 {
+    background-color: hsl(var(--surface-800));
+  }
+  
+  .surface-700 {
+    background-color: hsl(var(--surface-700));
+  }
+  
+  .surface-600 {
+    background-color: hsl(var(--surface-600));
+  }
+
+  .text-amber-400 {
+    color: hsl(var(--amber-400));
+  }
+  
+  .text-amber-500 {
+    color: hsl(var(--amber-500));
+  }
+  
+  .bg-amber-500\/20 {
+    background-color: hsl(var(--amber-500) / 0.2);
+  }
+  
+  .text-emerald-400 {
+    color: hsl(var(--emerald-400));
+  }
+  
+  .text-emerald-500 {
+    color: hsl(var(--emerald-500));
+  }
+  
+  .bg-emerald-500 {
+    background-color: hsl(var(--emerald-500));
+  }
+  
+  .bg-emerald-500\/10 {
+    background-color: hsl(var(--emerald-500) / 0.1);
+  }
+  
+  .border-emerald-500\/20 {
+    border-color: hsl(var(--emerald-500) / 0.2);
+  }
+  
+  .text-red-400 {
+    color: hsl(var(--red-400));
+  }
+  
+  .text-red-500 {
+    color: hsl(var(--red-500));
+  }
+  
+  .bg-red-500\/20 {
+    background-color: hsl(var(--red-500) / 0.2);
+  }
+  
+  .text-purple-400 {
+    color: hsl(var(--purple-400));
+  }
+  
+  .text-purple-500 {
+    color: hsl(var(--purple-500));
+  }
+  
+  .bg-purple-500\/20 {
+    background-color: hsl(var(--purple-500) / 0.2);
+  }
+  
+  .text-orange-400 {
+    color: hsl(var(--orange-400));
+  }
+  
+  .text-orange-500 {
+    color: hsl(var(--orange-500));
+  }
+  
+  .bg-orange-500\/20 {
+    background-color: hsl(var(--orange-500) / 0.2);
+  }
+  
+  .text-cyan-400 {
+    color: hsl(var(--cyan-400));
+  }
+  
+  .text-cyan-500 {
+    color: hsl(var(--cyan-500));
+  }
+  
+  .bg-cyan-500\/20 {
+    background-color: hsl(var(--cyan-500) / 0.2);
+  }
+}
+
+/* Animation utilities */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .transform-gpu {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
