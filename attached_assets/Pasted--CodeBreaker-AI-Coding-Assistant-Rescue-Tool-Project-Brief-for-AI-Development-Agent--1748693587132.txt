@@ -1,0 +1,278 @@
+# CodeBreaker - AI Coding Assistant Rescue Tool
+## Project Brief for AI Development Agent
+
+### 🎯 CORE MISSION
+Build a web application that helps developers get unstuck when AI coding assistants (Windsurf, Lovable, Replit AI) fail or get stuck in loops.
+
+### 📋 PROJECT OVERVIEW
+**Product Name:** CodeBreaker  
+**Timeline:** 3 days MVP  
+**Platform:** Web application (HTML/CSS/JavaScript)  
+**Target Users:** Developers using AI coding assistants  
+**Core Value:** Provides specific strategies and prompts to break AI out of failure modes  
+
+---
+
+## 🔧 TECHNICAL REQUIREMENTS
+
+### Technology Stack
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (keep it simple)
+- **Styling:** Tailwind CSS or simple custom CSS
+- **Backend:** None required for MVP (client-side only)
+- **Storage:** localStorage for user data persistence
+- **Deployment:** Static hosting (Replit, Netlify, or Vercel)
+
+### Core Features (MVP)
+1. **Problem Identifier Interface**
+2. **Solution Database**
+3. **Prompt Generator**
+4. **Progress Tracker**
+
+---
+
+## 🎨 USER INTERFACE DESIGN
+
+### Landing Page
+- Clear headline: "When your AI coding assistant gets stuck, we break you free"
+- Simple problem selection interface
+- Clean, developer-friendly design
+- Dark mode preferred (developers love dark mode)
+
+### Main Application Flow
+1. **Problem Selection Screen**
+2. **Solution Dashboard**  
+3. **Action Steps Interface**
+4. **Progress Tracking**
+
+---
+
+## 📊 CORE FUNCTIONALITY
+
+### 1. Problem Identifier
+**Input Methods:**
+- Multiple choice selection of common failure modes
+- Text area for describing current situation
+- Optional: code paste area
+
+**Failure Modes to Detect:**
+- "AI is building everything at once and creating messy code"
+- "AI can't connect two features together"
+- "AI forgot the original plan and is adding random stuff"
+- "AI has no clear plan and jumps around randomly"
+- "AI keeps suggesting the same broken solution"
+
+### 2. Solution Database
+**For Each Failure Mode, Provide:**
+
+#### Complexity Overwhelm
+- **Strategy:** "Break and Isolate"
+- **Prompts:** 
+  - "Stop. Build only [specific feature] first. Ignore everything else."
+  - "Create a minimal working version of X that I can test separately"
+  - "What's the simplest possible version of this feature?"
+- **Action Steps:**
+  1. Identify the core feature
+  2. Remove all extras temporarily  
+  3. Build and test one piece
+  4. Add complexity gradually
+
+#### Integration Issues
+- **Strategy:** "Bridge Building"
+- **Prompts:**
+  - "Create a simple data bridge between Feature A and Feature B"
+  - "Test the connection with fake data first"
+  - "What's the minimal interface these two features need to share?"
+- **Action Steps:**
+  1. Test each feature separately
+  2. Define the data contract
+  3. Build simple connection
+  4. Test integration step by step
+
+#### Lost Direction
+- **Strategy:** "Plan Recovery"
+- **Prompts:**
+  - "Here's my original goal: [user inputs goal]. What should I remove to get back on track?"
+  - "Show me the 3 most important features for my original vision"
+  - "What's the minimum viable version of what I wanted to build?"
+- **Action Steps:**
+  1. Revisit original requirements
+  2. List current features
+  3. Cut non-essential items
+  4. Create simple roadmap
+
+#### No Planning
+- **Strategy:** "Step-by-Step Roadmap"
+- **Prompts:**
+  - "Break this project into 5 logical steps I can build one at a time"
+  - "What's step 1 of building this? Just step 1, nothing else."
+  - "Create a checklist where each item takes 30-60 minutes max"
+- **Action Steps:**
+  1. Define end goal clearly
+  2. Work backwards to identify steps
+  3. Order steps logically
+  4. Focus on one step at a time
+
+### 3. Prompt Generator
+**Dynamic Prompts Based on User Input:**
+- Personalized prompts using user's specific project details
+- Copy-to-clipboard functionality
+- Multiple prompt variations for each strategy
+- Success tracking (which prompts worked)
+
+### 4. Progress Tracker
+**Simple Progress Management:**
+- Checkbox list of action steps
+- Time tracking per step
+- Notes section for what worked/didn't work
+- Success celebration when completed
+
+---
+
+## 💾 DATA STRUCTURE
+
+### Local Storage Schema
+```javascript
+{
+  sessions: [
+    {
+      id: timestamp,
+      problemType: "complexity_overwhelm",
+      projectDescription: "Building a todo app with user auth",
+      selectedStrategy: "break_and_isolate",
+      actionSteps: [
+        { step: "Identify core feature", completed: false, timeSpent: 0 },
+        { step: "Remove extras", completed: true, timeSpent: 15 }
+      ],
+      prompts: ["Stop. Build only the basic todo list first..."],
+      notes: "The first prompt worked great, AI focused better",
+      success: true,
+      completedAt: timestamp
+    }
+  ],
+  userPreferences: {
+    theme: "dark",
+    defaultPromptStyle: "direct"
+  }
+}
+```
+
+---
+
+## 🎯 DEVELOPMENT PHASES
+
+### Phase 1: Core Structure (Day 1)
+- Basic HTML structure
+- CSS styling and layout
+- Problem selection interface
+- Static solution database
+
+### Phase 2: Functionality (Day 2)  
+- JavaScript for problem detection
+- Dynamic prompt generation
+- localStorage implementation
+- Progress tracking logic
+
+### Phase 3: Polish & Test (Day 3)
+- UI improvements
+- Mobile responsiveness
+- Bug fixes and optimization
+- User testing and refinements
+
+---
+
+## 📱 USER EXPERIENCE FLOW
+
+### Primary User Journey
+1. **Landing:** User arrives frustrated with stuck AI
+2. **Identify:** Quick selection of their problem type
+3. **Strategy:** Clear explanation of approach to fix it
+4. **Action:** Specific prompts and steps to follow
+5. **Track:** Monitor progress and success
+6. **Success:** AI gets unstuck, project progresses
+
+### Success Metrics
+- Time to get unstuck (target: under 10 minutes)
+- Success rate of suggested strategies
+- User returns for future problems
+
+---
+
+## 🔍 IMPLEMENTATION DETAILS
+
+### File Structure
+```
+/codebreaker
+  /index.html
+  /styles
+    /main.css
+  /scripts
+    /app.js
+    /solutions.js
+    /storage.js
+  /assets
+    /icons
+```
+
+### Key JavaScript Modules
+- **ProblemIdentifier:** Handles problem selection and analysis
+- **SolutionEngine:** Matches problems to strategies and prompts
+- **PromptGenerator:** Creates personalized prompts
+- **ProgressTracker:** Manages user progress and success tracking
+- **StorageManager:** Handles localStorage operations
+
+---
+
+## 🚀 DEPLOYMENT CHECKLIST
+
+### Pre-Launch
+- [ ] All core features working
+- [ ] Mobile responsive design
+- [ ] Cross-browser testing
+- [ ] Performance optimization
+- [ ] Error handling implemented
+
+### Launch Requirements
+- Clean, professional UI
+- Fast loading times
+- Intuitive user flow
+- Clear value proposition
+- Working on all major browsers
+
+---
+
+## 📈 POST-MVP EXPANSION IDEAS
+- Community-submitted solutions
+- Integration with popular AI coding tools
+- Advanced problem detection using code analysis
+- Success rate analytics
+- Premium features for complex projects
+
+---
+
+## ⚠️ IMPORTANT NOTES FOR AI AGENT
+
+### DO NOT:
+- Over-engineer the solution
+- Add unnecessary complexity
+- Build features not in this spec
+- Use external APIs or databases
+- Create user authentication (not needed for MVP)
+
+### DO:
+- Keep it simple and focused
+- Test each feature as you build it
+- Use semantic HTML and clean CSS
+- Comment your JavaScript clearly
+- Build mobile-first responsive design
+- Focus on the core user problem
+
+### IF YOU GET STUCK:
+1. Re-read this brief
+2. Focus on the simplest version first
+3. Build one feature completely before moving to the next
+4. Test frequently with basic HTML/CSS before adding JavaScript
+5. Remember: This tool is meant to help developers get unstuck - don't get stuck building it!
+
+---
+
+**SUCCESS DEFINITION:** A working web app where a frustrated developer can identify their AI problem, get specific prompts to fix it, and track their progress to success.
