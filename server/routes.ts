@@ -11,14 +11,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 const PRICING_PLANS = {
   pro_monthly: {
     priceId: 'price_1RUpnDK0aFmFV51vSQKWq1Tg',
-    name: 'Pro Developer',
-    price: 19,
+    name: 'Rescue Pro',
+    price: 9.99,
     interval: 'month'
   },
   pro_yearly: {
     priceId: 'price_1RUpnDK0aFmFV51vqCD84vGa',
-    name: 'Pro Developer',
-    price: 190, // Assuming yearly discount
+    name: 'Rescue Pro',
+    price: 95.88,
     interval: 'year'
   }
 };

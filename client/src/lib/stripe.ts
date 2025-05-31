@@ -11,48 +11,50 @@ export const stripePromise = loadStripe(stripePublishableKey);
 
 export const PRICING_PLANS = {
   free: {
-    name: 'Free',
+    name: 'Rescue Starter',
     price: 0,
     priceId: null,
     interval: 'month',
     features: [
-      '5 rescue sessions per month',
-      'All core strategies',
-      'Progress tracking',
+      '3 AI rescues per month',
+      'Basic problem detection',
+      'Standard solution library',
       'Community support'
     ],
     limits: {
-      sessionsPerMonth: 5
+      sessionsPerMonth: 3
     }
   },
   pro_monthly: {
-    name: 'Pro Developer',
-    price: 19,
+    name: 'Rescue Pro',
+    price: 9.99,
     priceId: 'price_1RUpnDK0aFmFV51vSQKWq1Tg',
     interval: 'month',
     features: [
-      'Unlimited rescue sessions',
-      'Custom prompt generator',
-      'Advanced analytics',
-      'Priority support',
-      'Export session data'
+      'Unlimited AI rescues',
+      'Advanced problem analysis',
+      'Premium solution templates',
+      'Priority email support',
+      'Session history & analytics',
+      'Custom prompt generator'
     ],
     limits: {
       sessionsPerMonth: -1 // Unlimited
     }
   },
   pro_yearly: {
-    name: 'Pro Developer',
-    price: 190,
+    name: 'Rescue Pro',
+    price: 95.88,
     priceId: 'price_1RUpnDK0aFmFV51vqCD84vGa',
     interval: 'year',
     features: [
-      'Unlimited rescue sessions',
+      'Unlimited AI rescues',
+      'Advanced problem analysis',
+      'Premium solution templates',
+      'Priority email support',
+      'Session history & analytics',
       'Custom prompt generator',
-      'Advanced analytics',
-      'Priority support',
-      'Export session data',
-      '2 months free'
+      '20% annual savings'
     ],
     limits: {
       sessionsPerMonth: -1 // Unlimited
