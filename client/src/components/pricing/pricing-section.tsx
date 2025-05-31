@@ -14,7 +14,7 @@ interface PricingSectionProps {
 export function PricingSection({ onSelectPlan }: PricingSectionProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const [selectedPlan, setSelectedPlan] = useState<PricingPlan>("pro");
+  const [isYearly, setIsYearly] = useState(false);
 
   const handleSelectPlan = (plan: PricingPlan) => {
     if (plan === "free") {
@@ -34,10 +34,9 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
 
   const getPlanIcon = (plan: PricingPlan) => {
     switch (plan) {
-      case "pro":
+      case "pro_monthly":
+      case "pro_yearly":
         return <Crown className="w-6 h-6" />;
-      case "team":
-        return <Users className="w-6 h-6" />;
       default:
         return null;
     }
@@ -45,13 +44,17 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
 
   const getPlanColor = (plan: PricingPlan) => {
     switch (plan) {
-      case "pro":
+      case "pro_monthly":
+      case "pro_yearly":
         return "text-primary";
-      case "team":
-        return "text-purple-500";
       default:
         return "text-slate-400";
     }
+  };
+
+  // Get the plans to display based on billing cycle
+  const getDisplayPlans = (): PricingPlan[] => {
+    return ["free", isYearly ? "pro_yearly" : "pro_monthly"];
   };
 
   return (
@@ -64,12 +67,37 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
             Start free and upgrade when you need more power
           </p>
+          
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center mt-8 space-x-4">
+            <span className={`text-sm ${!isYearly ? 'text-slate-100' : 'text-slate-400'}`}>
+              Monthly
+            </span>
+            <button
+              onClick={() => setIsYearly(!isYearly)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isYearly ? 'bg-primary' : 'bg-slate-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isYearly ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className={`text-sm ${isYearly ? 'text-slate-100' : 'text-slate-400'}`}>
+              Yearly
+              <Badge className="ml-2 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                Save 20%
+              </Badge>
+            </span>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {Object.entries(PRICING_PLANS).map(([key, plan]) => {
-            const planKey = key as PricingPlan;
-            const isPopular = planKey === "pro";
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {getDisplayPlans().map((planKey) => {
+            const plan = PRICING_PLANS[planKey];
+            const isPopular = planKey.includes("pro");
             const isCurrentPlan = user?.subscriptionTier === planKey;
             
             return (
@@ -77,7 +105,7 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
                 key={planKey}
                 className={`relative surface-800 border-slate-700 ${
                   isPopular ? "border-primary bg-primary/5" : ""
-                } ${selectedPlan === planKey ? "ring-2 ring-primary" : ""}`}
+                }`}
               >
                 {isPopular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -102,7 +130,14 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
                       ${plan.price}
                     </span>
                     {plan.price > 0 && (
-                      <span className="text-slate-400">/month</span>
+                      <span className="text-slate-400">
+                        /{plan.interval}
+                      </span>
+                    )}
+                    {plan.interval === 'year' && (
+                      <div className="text-sm text-emerald-400 mt-1">
+                        $15.83/month when billed annually
+                      </div>
                     )}
                   </div>
 
@@ -129,16 +164,14 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
                     className={`w-full ${
                       planKey === "free"
                         ? "bg-slate-700 hover:bg-slate-600"
-                        : planKey === "pro"
-                        ? "bg-primary hover:bg-primary/90"
-                        : "bg-purple-600 hover:bg-purple-700"
+                        : "bg-primary hover:bg-primary/90"
                     }`}
                   >
                     {isCurrentPlan 
                       ? "Current Plan" 
                       : planKey === "free" 
                       ? "Get Started" 
-                      : "Upgrade Now"
+                      : isYearly ? "Subscribe Yearly" : "Subscribe Monthly"
                     }
                   </Button>
 

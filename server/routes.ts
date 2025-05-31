@@ -9,15 +9,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 });
 
 const PRICING_PLANS = {
-  pro: {
-    priceId: process.env.STRIPE_PRO_PRICE_ID || 'price_1234567890abcdef', // Replace with actual price ID
+  pro_monthly: {
+    priceId: 'price_1RUpnDK0aFmFV51vSQKWq1Tg',
     name: 'Pro Developer',
-    price: 19
+    price: 19,
+    interval: 'month'
   },
-  team: {
-    priceId: process.env.STRIPE_TEAM_PRICE_ID || 'price_0987654321fedcba', // Replace with actual price ID
-    name: 'Team',
-    price: 49
+  pro_yearly: {
+    priceId: 'price_1RUpnDK0aFmFV51vqCD84vGa',
+    name: 'Pro Developer',
+    price: 190, // Assuming yearly discount
+    interval: 'year'
   }
 };
 

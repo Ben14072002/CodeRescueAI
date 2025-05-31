@@ -14,6 +14,7 @@ export const PRICING_PLANS = {
     name: 'Free',
     price: 0,
     priceId: null,
+    interval: 'month',
     features: [
       '5 rescue sessions per month',
       'All core strategies',
@@ -24,10 +25,11 @@ export const PRICING_PLANS = {
       sessionsPerMonth: 5
     }
   },
-  pro: {
+  pro_monthly: {
     name: 'Pro Developer',
     price: 19,
-    priceId: 'price_test_pro', // Test price ID
+    priceId: 'price_1RUpnDK0aFmFV51vSQKWq1Tg',
+    interval: 'month',
     features: [
       'Unlimited rescue sessions',
       'Custom prompt generator',
@@ -39,21 +41,21 @@ export const PRICING_PLANS = {
       sessionsPerMonth: -1 // Unlimited
     }
   },
-  team: {
-    name: 'Team',
-    price: 49,
-    priceId: 'price_test_team', // Test price ID  
+  pro_yearly: {
+    name: 'Pro Developer',
+    price: 190,
+    priceId: 'price_1RUpnDK0aFmFV51vqCD84vGa',
+    interval: 'year',
     features: [
-      'Everything in Pro',
-      'Team collaboration',
-      'Shared session library',
-      'Admin dashboard',
-      'Custom integrations',
-      'Dedicated support'
+      'Unlimited rescue sessions',
+      'Custom prompt generator',
+      'Advanced analytics',
+      'Priority support',
+      'Export session data',
+      '2 months free'
     ],
     limits: {
-      sessionsPerMonth: -1, // Unlimited
-      teamMembers: 10
+      sessionsPerMonth: -1 // Unlimited
     }
   }
 } as const;
