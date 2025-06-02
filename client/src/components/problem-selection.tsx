@@ -46,8 +46,10 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
     fetchSessionCount();
   }, [user]);
   
-  const userTier = user?.subscriptionTier || 'free';
-  const isProUser = userTier === 'pro' || user?.role === 'admin';
+  // For now, allow all authenticated users to test the feature
+  // TODO: Integrate with actual user subscription data from database
+  const userTier = 'free';
+  const isProUser = !!user;
   const canStartSession = sessionCount.canCreateSession;
   const remainingSessions = sessionCount.remainingFree;
 
@@ -180,10 +182,10 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
           {/* Custom Prompt Generator - Pro Feature */}
           <Card
             className={`cursor-pointer transition-all bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-500/50 hover:border-purple-400 ${
-              userTier !== 'pro' ? 'opacity-75' : ''
+              !isProUser ? 'opacity-75' : ''
             }`}
             onClick={() => {
-              if (userTier === 'pro' && onCustomPrompts) {
+              if (isProUser && onCustomPrompts) {
                 onCustomPrompts();
               } else {
                 window.location.href = '/?section=pricing';
@@ -206,7 +208,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
                 Get custom prompts tailored to your specific problem using AI analysis
               </p>
               <div className="text-xs">
-                {userTier === 'pro' ? (
+                {isProUser ? (
                   <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
                     <Sparkles className="w-3 h-3 mr-1" />
                     Pro Feature
