@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -32,9 +32,22 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // For now, allow all authenticated users to test the feature
-  // TODO: Integrate with actual user subscription data from database
-  const isProUser = !!user;
+  // Check if user has Pro subscription
+  const [userTier, setUserTier] = useState<string>('free');
+  
+  useEffect(() => {
+    if (user) {
+      // Fetch user subscription status
+      fetch(`/api/subscription-status/${user.uid}`)
+        .then(res => res.json())
+        .then(data => {
+          setUserTier(data.tier || 'free');
+        })
+        .catch(() => setUserTier('free'));
+    }
+  }, [user]);
+  
+  const isProUser = userTier === 'pro' || userTier === 'pro_monthly' || userTier === 'pro_yearly';
 
   const generateCustomPrompts = async () => {
     if (!problemDescription.trim()) {
