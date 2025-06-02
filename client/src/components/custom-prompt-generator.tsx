@@ -32,7 +32,9 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const isProUser = user?.subscriptionTier === 'pro';
+  // For now, allow all authenticated users to test the feature
+  // TODO: Integrate with actual user subscription data from database
+  const isProUser = !!user;
 
   const generateCustomPrompts = async () => {
     if (!problemDescription.trim()) {

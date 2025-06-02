@@ -47,6 +47,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
   }, [user]);
   
   const userTier = user?.subscriptionTier || 'free';
+  const isProUser = userTier === 'pro' || user?.role === 'admin';
   const canStartSession = sessionCount.canCreateSession;
   const remainingSessions = sessionCount.remainingFree;
 

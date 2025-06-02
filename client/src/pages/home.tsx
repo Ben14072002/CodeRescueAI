@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LandingSection } from "@/components/landing-section";
 import { ProblemSelection } from "@/components/problem-selection";
 import { SolutionDashboard } from "@/components/solution-dashboard";
+import { CustomPromptGenerator } from "@/components/custom-prompt-generator";
 import { SuccessModal } from "@/components/success-modal";
 import { CopyToast } from "@/components/copy-toast";
 import { AuthModal } from "@/components/auth/auth-modal";
@@ -9,7 +10,7 @@ import { UserDashboard } from "@/components/user-dashboard";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
 
-type Section = "landing" | "problems" | "solution" | "dashboard";
+type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts";
 
 export default function Home() {
   const [currentSection, setCurrentSection] = useState<Section>("landing");
@@ -33,6 +34,7 @@ export default function Home() {
   const navigateToSolution = () => setCurrentSection("solution");
   const navigateToLanding = () => setCurrentSection("landing");
   const navigateToDashboard = () => setCurrentSection("dashboard");
+  const navigateToCustomPrompts = () => setCurrentSection("custom-prompts");
 
   const handleSuccess = () => {
     setShowSuccessModal(true);
@@ -126,6 +128,7 @@ export default function Home() {
           <ProblemSelection
             onAnalyze={navigateToSolution}
             onBack={navigateToLanding}
+            onCustomPrompts={navigateToCustomPrompts}
           />
         )}
         
@@ -136,6 +139,10 @@ export default function Home() {
             onSuccess={handleSuccess}
             onCopy={handleCopy}
           />
+        )}
+
+        {currentSection === "custom-prompts" && (
+          <CustomPromptGenerator onBack={navigateToProblems} />
         )}
 
         {currentSection === "dashboard" && (
