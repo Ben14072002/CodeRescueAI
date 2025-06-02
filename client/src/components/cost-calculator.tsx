@@ -7,24 +7,30 @@ import { DollarSign, Clock, TrendingUp } from "lucide-react";
 
 export function CostCalculator() {
   const [checkpointCost, setCheckpointCost] = useState([0.25]);
-  const [checkpointsWasted, setCheckpointsWasted] = useState([15]);
-  const [timesPerMonth, setTimesPerMonth] = useState([3]);
+  const [checkpointsWasted, setCheckpointsWasted] = useState([20]);
+  const [timesPerMonth, setTimesPerMonth] = useState([4]);
 
   const costPerIncident = checkpointCost[0] * checkpointsWasted[0];
   const monthlyCost = costPerIncident * timesPerMonth[0];
   const yearlyCost = monthlyCost * 12;
   const savings = monthlyCost - 9.99; // Cost of Rescue Pro
+  const roiPercentage = savings > 0 ? Math.round((savings / 9.99) * 100) : 0;
 
   return (
     <section className="mb-20">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
-            Calculate Your Checkpoint Waste
+            <span className="text-red-400">Stop Burning Money</span> on Stuck AI Tools
           </h2>
           <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-            See how much you're spending on wasted checkpoints when AI tools like Replit, Lovable, or Windsurf get stuck
+            Calculate how much you're losing when Replit, Lovable, or Windsurf get stuck in loops
           </p>
+          <div className="mt-4 inline-flex items-center bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2">
+            <span className="text-amber-400 text-sm font-medium">
+              💡 Most developers waste 15-30 checkpoints per stuck session
+            </span>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -96,52 +102,67 @@ export function CostCalculator() {
               <CardTitle className="text-xl text-slate-100">Your Hidden Costs</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="text-center mb-6">
+                <p className="text-sm text-slate-400 mb-2">You're currently wasting</p>
+                <div className="text-4xl font-bold text-red-400 mb-1">
+                  ${monthlyCost.toFixed(2)}
+                </div>
+                <p className="text-sm text-slate-500">per month on stuck AI sessions</p>
+              </div>
+
               <div className="grid grid-cols-1 gap-4">
-                <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                  <div className="flex items-center">
-                    <DollarSign className="w-5 h-5 text-red-400 mr-3" />
-                    <div>
-                      <p className="text-sm text-slate-400">Cost per incident</p>
-                      <p className="text-xl font-bold text-red-400">${costPerIncident}</p>
-                    </div>
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <DollarSign className="w-5 h-5 text-red-400 mr-2" />
+                    <span className="text-sm text-slate-400">Per stuck session</span>
                   </div>
+                  <p className="text-2xl font-bold text-red-400">${costPerIncident.toFixed(2)}</p>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                  <div className="flex items-center">
-                    <Clock className="w-5 h-5 text-orange-400 mr-3" />
-                    <div>
-                      <p className="text-sm text-slate-400">Monthly lost revenue</p>
-                      <p className="text-xl font-bold text-orange-400">${monthlyCost}</p>
-                    </div>
+                <div className="bg-red-600/10 border border-red-600/20 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <TrendingUp className="w-5 h-5 text-red-500 mr-2" />
+                    <span className="text-sm text-slate-400">Annual waste</span>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-red-600/10 border border-red-600/20 rounded-lg">
-                  <div className="flex items-center">
-                    <TrendingUp className="w-5 h-5 text-red-500 mr-3" />
-                    <div>
-                      <p className="text-sm text-slate-400">Yearly lost revenue</p>
-                      <p className="text-2xl font-bold text-red-500">${yearlyCost.toLocaleString()}</p>
-                    </div>
-                  </div>
+                  <p className="text-3xl font-bold text-red-500">${yearlyCost.toFixed(0)}</p>
+                  <p className="text-xs text-slate-500 mt-1">That's a lot of coffee money!</p>
                 </div>
               </div>
 
-              {savings > 0 && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 text-center">
-                  <h3 className="text-lg font-semibold text-emerald-400 mb-2">
-                    Monthly Savings with CodeBreaker
+              {savings > 0 ? (
+                <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 border-2 border-emerald-500/30 rounded-lg p-6 text-center relative overflow-hidden">
+                  <div className="absolute top-3 right-3">
+                    <Badge className="bg-emerald-500 text-white font-bold text-xs">
+                      INSTANT ROI
+                    </Badge>
+                  </div>
+                  <h3 className="text-xl font-bold text-emerald-400 mb-3">
+                    💰 Your Monthly Savings
                   </h3>
-                  <p className="text-3xl font-bold text-emerald-400 mb-2">
-                    ${savings.toFixed(2)}
+                  <div className="flex items-baseline justify-center mb-4">
+                    <span className="text-4xl font-bold text-emerald-300">${savings.toFixed(2)}</span>
+                    <span className="text-lg text-slate-400 ml-2">saved</span>
+                  </div>
+                  <div className="bg-emerald-500/20 rounded-lg p-3 mb-3">
+                    <p className="text-sm text-emerald-300 font-semibold">
+                      Pay $9.99, save ${savings.toFixed(2)} = {roiPercentage}% return
+                    </p>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Annual savings: <span className="text-emerald-400 font-bold">${(savings * 12).toFixed(0)}</span>
                   </p>
-                  <p className="text-sm text-slate-400">
-                    Rescue Pro pays for itself in minutes
+                </div>
+              ) : (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 text-center">
+                  <h3 className="text-lg font-semibold text-yellow-400 mb-2">
+                    🎯 Still Worth It
+                  </h3>
+                  <p className="text-sm text-slate-300 mb-2">
+                    Even with light usage, CodeBreaker prevents frustrating AI loops
                   </p>
-                  <Badge className="mt-3 bg-emerald-500/20 text-emerald-400 border-emerald-500/20">
-                    {Math.round(savings / 9.99 * 100)}% ROI
-                  </Badge>
+                  <p className="text-xs text-slate-400">
+                    One prevented 6-hour debugging session = month paid for
+                  </p>
                 </div>
               )}
 
