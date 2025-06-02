@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { DollarSign, Clock, TrendingUp } from "lucide-react";
 
 export function CostCalculator() {
-  const [checkpointCost, setCheckpointCost] = useState([2]);
+  const [checkpointCost, setCheckpointCost] = useState([0.25]);
   const [checkpointsWasted, setCheckpointsWasted] = useState([15]);
   const [timesPerMonth, setTimesPerMonth] = useState([3]);
 
@@ -36,19 +36,19 @@ export function CostCalculator() {
             <CardContent className="space-y-8">
               <div>
                 <Label className="text-slate-300 text-base mb-4 block">
-                  Cost per checkpoint: ${checkpointCost[0]}
+                  Cost per checkpoint: ${checkpointCost[0].toFixed(2)}
                 </Label>
                 <Slider
                   value={checkpointCost}
                   onValueChange={setCheckpointCost}
-                  max={5}
-                  min={0.5}
-                  step={0.5}
+                  max={1}
+                  min={0.15}
+                  step={0.05}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-slate-500 mt-2">
-                  <span>$0.50</span>
-                  <span>$5.00</span>
+                  <span>$0.15</span>
+                  <span>$1.00</span>
                 </div>
               </div>
 
