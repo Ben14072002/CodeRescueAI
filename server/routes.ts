@@ -266,8 +266,8 @@ Return a JSON object with this structure:
           },
         ],
         mode: 'subscription',
-        success_url: `${req.protocol}://${req.get('host')}/?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.protocol}://${req.get('host')}/?upgrade=cancelled`,
+        success_url: `http://localhost:5000/?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `http://localhost:5000/?upgrade=cancelled`,
         allow_promotion_codes: true,
         billing_address_collection: 'required',
         metadata: {
