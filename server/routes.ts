@@ -246,8 +246,7 @@ Return a JSON object with this structure:
         });
       }
 
-      // Create a simple payment link instead of checkout session
-      // This bypasses URL validation issues
+      // Try payment link first - this bypasses many configuration issues
       const paymentLink = await stripe.paymentLinks.create({
         line_items: [
           {
@@ -258,11 +257,17 @@ Return a JSON object with this structure:
         metadata: {
           userId: user.id.toString(),
           firebaseUid: userId.toString(),
-          plan: plan
+          plan: plan,
+          customer_email: user.email
+        },
+        after_completion: {
+          type: 'redirect',
+          redirect: {
+            url: 'http://localhost:5000/?upgrade=success'
+          }
         }
       });
 
-      // Return the payment link URL
       res.json({ sessionId: null, url: paymentLink.url });
     } catch (error: any) {
       console.error('Stripe checkout error:', error);
