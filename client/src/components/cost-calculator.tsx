@@ -6,11 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { DollarSign, Clock, TrendingUp } from "lucide-react";
 
 export function CostCalculator() {
-  const [hourlyRate, setHourlyRate] = useState([75]);
-  const [stuckHours, setStuckHours] = useState([4]);
+  const [checkpointCost, setCheckpointCost] = useState([2]);
+  const [checkpointsWasted, setCheckpointsWasted] = useState([15]);
   const [timesPerMonth, setTimesPerMonth] = useState([3]);
 
-  const costPerIncident = hourlyRate[0] * stuckHours[0];
+  const costPerIncident = checkpointCost[0] * checkpointsWasted[0];
   const monthlyCost = costPerIncident * timesPerMonth[0];
   const yearlyCost = monthlyCost * 12;
   const savings = monthlyCost - 9.99; // Cost of Rescue Pro
@@ -20,10 +20,10 @@ export function CostCalculator() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
-            Calculate Your AI Frustration Cost
+            Calculate Your Checkpoint Waste
           </h2>
           <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-            See how much money you're losing when your AI assistant gets stuck in loops
+            See how much you're spending on wasted checkpoints when AI tools like Replit, Lovable, or Windsurf get stuck
           </p>
         </div>
 
@@ -36,37 +36,37 @@ export function CostCalculator() {
             <CardContent className="space-y-8">
               <div>
                 <Label className="text-slate-300 text-base mb-4 block">
-                  Your hourly rate: ${hourlyRate[0]}
+                  Cost per checkpoint: ${checkpointCost[0]}
                 </Label>
                 <Slider
-                  value={hourlyRate}
-                  onValueChange={setHourlyRate}
-                  max={200}
-                  min={25}
-                  step={5}
+                  value={checkpointCost}
+                  onValueChange={setCheckpointCost}
+                  max={5}
+                  min={0.5}
+                  step={0.5}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-slate-500 mt-2">
-                  <span>$25/hr</span>
-                  <span>$200/hr</span>
+                  <span>$0.50</span>
+                  <span>$5.00</span>
                 </div>
               </div>
 
               <div>
                 <Label className="text-slate-300 text-base mb-4 block">
-                  Hours wasted per stuck session: {stuckHours[0]}
+                  Checkpoints wasted per stuck session: {checkpointsWasted[0]}
                 </Label>
                 <Slider
-                  value={stuckHours}
-                  onValueChange={setStuckHours}
-                  max={8}
-                  min={1}
-                  step={0.5}
+                  value={checkpointsWasted}
+                  onValueChange={setCheckpointsWasted}
+                  max={50}
+                  min={5}
+                  step={5}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-slate-500 mt-2">
-                  <span>1 hour</span>
-                  <span>8 hours</span>
+                  <span>5 checkpoints</span>
+                  <span>50 checkpoints</span>
                 </div>
               </div>
 
@@ -147,7 +147,7 @@ export function CostCalculator() {
 
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                 <p className="text-sm text-slate-300 text-center">
-                  <strong>Average developer</strong> saves <strong>3.2 hours</strong> per month with CodeBreaker
+                  <strong>Average developer</strong> saves <strong>{Math.round(checkpointsWasted[0] * 0.7)} checkpoints</strong> per month with CodeBreaker
                 </p>
               </div>
             </CardContent>
