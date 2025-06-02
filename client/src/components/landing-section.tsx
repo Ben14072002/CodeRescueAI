@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CostCalculator } from "@/components/cost-calculator";
+import { FAQSection } from "@/components/faq-section";
+import { Footer } from "@/components/footer";
 import { 
   Play, 
   Bot, 
@@ -240,8 +243,11 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
         </div>
       </section>
 
+      {/* Cost Calculator */}
+      <CostCalculator />
+
       {/* Pricing Preview */}
-      <section className="mb-20">
+      <section className="mb-20" id="pricing">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4 text-slate-100">
             Simple, Developer-Friendly Pricing
@@ -319,6 +325,9 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      <FAQSection />
 
       {/* Final CTA */}
       <section className="text-center">
