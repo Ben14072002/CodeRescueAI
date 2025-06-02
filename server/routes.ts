@@ -217,11 +217,20 @@ Return a JSON object with this structure:
         // userId is not numeric (Firebase UID), create temp user
         user = await storage.getUserByEmail(`${userId}@firebase.temp`);
         if (!user) {
-          user = await storage.createUser({
-            username: `firebase_${userId.substring(0, 8)}`,
-            email: `${userId}@firebase.temp`,
-            role: "user"
-          });
+          try {
+            user = await storage.createUser({
+              username: `firebase_${userId.substring(0, 8)}_${Date.now()}`,
+              email: `${userId}@firebase.temp`,
+              role: "user"
+            });
+          } catch (createError) {
+            // If username still conflicts, try with random suffix
+            user = await storage.createUser({
+              username: `user_${Math.random().toString(36).substring(7)}`,
+              email: `${userId}@firebase.temp`,
+              role: "user"
+            });
+          }
         }
       }
       
