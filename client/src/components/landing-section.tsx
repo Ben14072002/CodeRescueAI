@@ -317,7 +317,10 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                     Session history & analytics
                   </li>
                 </ul>
-                <Button className="w-full bg-primary hover:bg-primary/90">
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
+                >
                   Upgrade to Pro
                 </Button>
               </CardContent>
