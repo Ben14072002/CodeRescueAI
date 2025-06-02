@@ -70,6 +70,27 @@ export function useSession() {
     }
   };
 
+  // Check if user has reached their monthly session limit
+  const getMonthlySessionCount = () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    return sessions.filter(session => 
+      new Date(session.startTime) >= startOfMonth
+    ).length;
+  };
+
+  const canCreateSession = (userTier: string = 'free') => {
+    if (userTier === 'free') {
+      return getMonthlySessionCount() < 3; // Free tier limit
+    }
+    return true; // Pro tier has unlimited sessions
+  };
+
+  const getRemainingFreeSessionsCount = () => {
+    return Math.max(0, 3 - getMonthlySessionCount());
+  };
+
   const getSessionStats = () => {
     const totalSessions = sessions.length;
     const successfulSessions = sessions.filter(s => s.success).length;
@@ -82,6 +103,8 @@ export function useSession() {
       successful: successfulSessions,
       successRate: totalSessions > 0 ? (successfulSessions / totalSessions) * 100 : 0,
       averageTime: Math.round(averageTime),
+      monthlyCount: getMonthlySessionCount(),
+      remainingFree: getRemainingFreeSessionsCount(),
     };
   };
 
@@ -94,5 +117,8 @@ export function useSession() {
     markSessionSuccess,
     getSessionStats,
     setCurrentSession,
+    getMonthlySessionCount,
+    canCreateSession,
+    getRemainingFreeSessionsCount,
   };
 }

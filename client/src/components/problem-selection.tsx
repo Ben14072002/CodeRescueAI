@@ -4,9 +4,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown } from "lucide-react";
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
+import { useAuth } from "@/hooks/use-auth";
 
 interface ProblemSelectionProps {
   onAnalyze: () => void;
@@ -17,7 +19,12 @@ export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
   const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const { createSession } = useSession();
+  const { createSession, canCreateSession, getRemainingFreeSessionsCount } = useSession();
+  const { user } = useAuth();
+  
+  const userTier = user?.subscriptionTier || 'free';
+  const canStartSession = canCreateSession(userTier);
+  const remainingSessions = getRemainingFreeSessionsCount();
 
   const problemIcons = {
     complexity_overwhelm: Layers,
@@ -43,6 +50,11 @@ export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
 
   const handleAnalyze = () => {
     if (!selectedProblem) return;
+
+    // Check if user has reached their session limit
+    if (!canStartSession) {
+      return; // This will be handled by the disabled button state
+    }
 
     createSession({
       problemType: selectedProblem,
@@ -77,6 +89,18 @@ export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-4">What's happening with your AI assistant?</h2>
           <p className="text-slate-400">Select the problem that best describes your current situation</p>
+          
+          {/* Usage tracking display */}
+          {userTier === 'free' && (
+            <div className="mt-4 flex justify-center">
+              <Badge variant="outline" className="bg-slate-800 border-slate-600 text-slate-300">
+                {remainingSessions} rescues remaining this month
+                {remainingSessions === 0 && (
+                  <Crown className="w-4 h-4 ml-2 text-amber-500" />
+                )}
+              </Badge>
+            </div>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -161,15 +185,29 @@ export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
         )}
 
         <div className="text-center">
-          <Button
-            onClick={handleAnalyze}
-            disabled={!selectedProblem}
-            size="lg"
-            className="bg-primary hover:bg-primary/90 disabled:opacity-50"
-          >
-            <Search className="w-5 h-5 mr-2" />
-            Get Solution Strategy
-          </Button>
+          {!canStartSession && userTier === 'free' ? (
+            <div className="space-y-4">
+              <p className="text-slate-400">You've used all 3 free rescues this month</p>
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => window.location.href = '/?section=pricing'}
+              >
+                <Crown className="w-5 h-5 mr-2" />
+                Upgrade to Rescue Pro - $9.99/month
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleAnalyze}
+              disabled={!selectedProblem}
+              size="lg"
+              className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+            >
+              <Search className="w-5 h-5 mr-2" />
+              Get Solution Strategy
+            </Button>
+          )}
         </div>
       </div>
     </section>

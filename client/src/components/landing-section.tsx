@@ -253,23 +253,30 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           <div className="grid md:grid-cols-2 gap-8">
             <Card className="surface-800 border-slate-700">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-bold mb-4 text-slate-100">Free Rescue</h3>
+                <h3 className="text-2xl font-bold mb-4 text-slate-100">Rescue Starter</h3>
                 <p className="text-4xl font-bold text-primary mb-6">$0</p>
                 <ul className="text-left space-y-3 mb-8">
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    5 rescue sessions per month
+                    3 AI rescues per month
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    All core strategies
+                    Basic problem detection
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Progress tracking
+                    Standard solution library
+                  </li>
+                  <li className="flex items-center text-slate-300">
+                    <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
+                    Community support
                   </li>
                 </ul>
-                <Button className="w-full bg-slate-700 hover:bg-slate-600">
+                <Button 
+                  onClick={onGetStarted}
+                  className="w-full bg-slate-700 hover:bg-slate-600"
+                >
                   Start Free
                 </Button>
               </CardContent>
@@ -278,30 +285,34 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
             <Card className="surface-800 border-primary bg-primary/5">
               <CardContent className="p-8">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-2xl font-bold text-slate-100">Pro Developer</h3>
+                  <h3 className="text-2xl font-bold text-slate-100">Rescue Pro</h3>
                   <Badge className="bg-primary text-white">Most Popular</Badge>
                 </div>
-                <p className="text-4xl font-bold text-primary mb-6">$19<span className="text-lg text-slate-400">/month</span></p>
+                <p className="text-4xl font-bold text-primary mb-6">$9.99<span className="text-lg text-slate-400">/month</span></p>
                 <ul className="text-left space-y-3 mb-8">
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Unlimited rescue sessions
+                    Unlimited AI rescues
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Custom prompt generator
+                    Advanced problem analysis
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Advanced analytics
+                    Premium solution templates
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Priority support
+                    Priority email support
+                  </li>
+                  <li className="flex items-center text-slate-300">
+                    <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
+                    Session history & analytics
                   </li>
                 </ul>
                 <Button className="w-full bg-primary hover:bg-primary/90">
-                  Start 7-Day Trial
+                  Upgrade to Pro
                 </Button>
               </CardContent>
             </Card>
