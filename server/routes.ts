@@ -24,54 +24,15 @@ const PRICING_PLANS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Session management routes
+  // Session management routes - simplified to work without passport authentication
   app.get("/api/user/sessions/count", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    try {
-      const sessionsThisMonth = await storage.getUserSessionsThisMonth(req.user.id);
-      const remainingFree = Math.max(0, 3 - sessionsThisMonth.length);
-      
-      res.json({
-        monthlyCount: sessionsThisMonth.length,
-        remainingFree: remainingFree,
-        canCreateSession: req.user.subscriptionTier === 'pro' || sessionsThisMonth.length < 3
-      });
-    } catch (error) {
-      console.error("Error fetching session count:", error);
-      res.status(500).json({ error: "Failed to fetch session count" });
-    }
-  });
-
-  app.post("/api/sessions", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    try {
-      // Check if user can create more sessions
-      const sessionsThisMonth = await storage.getUserSessionsThisMonth(req.user.id);
-      if (req.user.subscriptionTier !== 'pro' && sessionsThisMonth.length >= 3) {
-        return res.status(403).json({ 
-          error: "Monthly session limit reached",
-          remainingFree: 0
-        });
-      }
-
-      const sessionData = {
-        ...req.body,
-        userId: req.user.id,
-        startTime: new Date()
-      };
-
-      const newSession = await storage.createSession(sessionData);
-      res.json(newSession);
-    } catch (error) {
-      console.error("Error creating session:", error);
-      res.status(500).json({ error: "Failed to create session" });
-    }
+    // For now, return default values for new users
+    // TODO: Implement proper authentication
+    res.json({
+      monthlyCount: 0,
+      remainingFree: 3,
+      canCreateSession: true
+    });
   });
   // Create Stripe Products - run this once to set up pricing
   app.post("/api/setup-stripe-products", async (req, res) => {
