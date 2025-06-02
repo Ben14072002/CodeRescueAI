@@ -71,7 +71,7 @@ const CheckoutForm = ({ planName, onSuccess }: { planName: string; onSuccess: ()
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [clientSecret, setClientSecret] = useState("");
   const [planName, setPlanName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -79,6 +79,11 @@ export default function Checkout() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const plan = urlParams.get('plan');
+    
+    // Wait for auth to finish loading
+    if (loading) {
+      return;
+    }
     
     if (!plan || !user) {
       setLocation('/');
@@ -105,7 +110,7 @@ export default function Checkout() {
         console.error('Checkout session error:', error);
         setLocation('/pricing');
       });
-  }, [user, setLocation]);
+  }, [user, loading, setLocation]);
 
   const handleSuccess = () => {
     setLocation('/dashboard');

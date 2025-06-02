@@ -246,18 +246,15 @@ Return a JSON object with this structure:
         });
       }
 
-      const session = await stripe.checkout.sessions.create({
-        customer: customerId,
-        payment_method_types: ['card'],
+      // Create a simple payment link instead of checkout session
+      // This bypasses URL validation issues
+      const paymentLink = await stripe.paymentLinks.create({
         line_items: [
           {
             price: planConfig.priceId,
             quantity: 1,
           },
         ],
-        mode: 'subscription',
-        success_url: `${req.headers.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin}/pricing`,
         metadata: {
           userId: user.id.toString(),
           firebaseUid: userId.toString(),
@@ -265,7 +262,8 @@ Return a JSON object with this structure:
         }
       });
 
-      res.json({ sessionId: session.id, url: session.url });
+      // Return the payment link URL
+      res.json({ sessionId: null, url: paymentLink.url });
     } catch (error: any) {
       console.error('Stripe checkout error:', error);
       res.status(500).json({ error: error.message });
