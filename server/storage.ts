@@ -1,6 +1,6 @@
-import { users, type User, type InsertUser } from "@shared/schema";
+import { users, sessions, type User, type InsertUser, type Session, type InsertSession } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -17,6 +17,8 @@ export interface IStorage {
     subscriptionTier?: string;
     subscriptionCurrentPeriodEnd?: Date;
   }): Promise<User>;
+  getUserSessionsThisMonth(userId: number): Promise<Session[]>;
+  createSession(session: InsertSession): Promise<Session>;
 }
 
 export class MemStorage implements IStorage {
@@ -122,6 +124,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async getUserSessionsThisMonth(userId: number): Promise<Session[]> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    const userSessions = await db
+      .select()
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.userId, userId),
+          gte(sessions.startTime, startOfMonth)
+        )
+      );
+    
+    return userSessions;
+  }
+
+  async createSession(session: InsertSession): Promise<Session> {
+    const [newSession] = await db
+      .insert(sessions)
+      .values(session)
+      .returning();
+    return newSession;
   }
 }
 

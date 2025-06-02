@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ProblemSelectionProps {
   onAnalyze: () => void;
@@ -19,12 +20,34 @@ export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
   const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const { createSession, canCreateSession, getRemainingFreeSessionsCount } = useSession();
+  const [sessionCount, setSessionCount] = useState({ monthlyCount: 0, remainingFree: 3, canCreateSession: true });
+  const { createSession } = useSession();
   const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchSessionCount = async () => {
+      if (user) {
+        try {
+          const response = await apiRequest("GET", "/api/user/sessions/count");
+          const data = await response.json();
+          setSessionCount(data);
+        } catch (error) {
+          console.error("Failed to fetch session count:", error);
+          // For unauthenticated users, fall back to local storage count
+          setSessionCount({ monthlyCount: 0, remainingFree: 3, canCreateSession: true });
+        }
+      } else {
+        // For unauthenticated users, use local storage
+        setSessionCount({ monthlyCount: 0, remainingFree: 3, canCreateSession: true });
+      }
+    };
+
+    fetchSessionCount();
+  }, [user]);
   
   const userTier = user?.subscriptionTier || 'free';
-  const canStartSession = canCreateSession(userTier);
-  const remainingSessions = getRemainingFreeSessionsCount();
+  const canStartSession = sessionCount.canCreateSession;
+  const remainingSessions = sessionCount.remainingFree;
 
   const problemIcons = {
     complexity_overwhelm: Layers,
