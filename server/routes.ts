@@ -255,29 +255,29 @@ Return a JSON object with this structure:
         });
       }
 
-      // Try payment link first - this bypasses many configuration issues
-      const paymentLink = await stripe.paymentLinks.create({
+      // Create checkout session - more reliable than payment links
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
         line_items: [
           {
             price: planConfig.priceId,
             quantity: 1,
           },
         ],
+        mode: 'subscription',
+        success_url: `${req.protocol}://${req.get('host')}/?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.protocol}://${req.get('host')}/?upgrade=cancelled`,
+        allow_promotion_codes: true,
+        billing_address_collection: 'required',
         metadata: {
           userId: user.id.toString(),
           firebaseUid: userId.toString(),
-          plan: plan,
-          customer_email: user.email
-        },
-        after_completion: {
-          type: 'redirect',
-          redirect: {
-            url: 'http://localhost:5000/?upgrade=success'
-          }
+          plan: plan
         }
       });
 
-      res.json({ sessionId: null, url: paymentLink.url });
+      res.json({ sessionId: session.id, url: session.url });
     } catch (error: any) {
       console.error('Stripe checkout error:', error);
       res.status(500).json({ error: error.message });
