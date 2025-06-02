@@ -19,9 +19,10 @@ import { useSession } from "@/hooks/use-session";
 
 interface UserDashboardProps {
   onClose: () => void;
+  onSettings?: () => void;
 }
 
-export function UserDashboard({ onClose }: UserDashboardProps) {
+export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
   const { user, logout } = useAuth();
   const { sessions, getSessionStats } = useSession();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -75,7 +76,12 @@ export function UserDashboard({ onClose }: UserDashboardProps) {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" className="border-slate-600 text-slate-300">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="border-slate-600 text-slate-300"
+            onClick={onSettings}
+          >
             <Settings className="w-4 h-4 mr-2" />
             Settings
           </Button>

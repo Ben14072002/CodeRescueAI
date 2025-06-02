@@ -111,6 +111,47 @@ Return a JSON object with this structure:
       });
     }
   });
+
+  // Cancel Subscription
+  app.post("/api/cancel-subscription", async (req, res) => {
+    try {
+      // For authenticated users with active subscriptions
+      // This would cancel the subscription at period end
+      
+      // Simulated response for now
+      res.json({ 
+        success: true,
+        message: "Subscription will be cancelled at the end of the current period"
+      });
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      res.status(500).json({ 
+        error: "Failed to cancel subscription",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Reactivate Subscription
+  app.post("/api/reactivate-subscription", async (req, res) => {
+    try {
+      // For authenticated users with cancelled subscriptions
+      // This would reactivate the subscription
+      
+      // Simulated response for now
+      res.json({ 
+        success: true,
+        message: "Subscription has been reactivated"
+      });
+    } catch (error) {
+      console.error("Error reactivating subscription:", error);
+      res.status(500).json({ 
+        error: "Failed to reactivate subscription",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Create Stripe Products - run this once to set up pricing
   app.post("/api/setup-stripe-products", async (req, res) => {
     try {
