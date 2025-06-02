@@ -129,7 +129,11 @@ export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
                   <p className="text-amber-400 font-medium">Almost at your limit</p>
                   <p className="text-sm text-slate-400">Upgrade to Pro for unlimited sessions</p>
                 </div>
-                <Button size="sm" className="bg-primary hover:bg-primary/90">
+                <Button 
+                  size="sm" 
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
+                >
                   <Crown className="w-4 h-4 mr-2" />
                   Upgrade
                 </Button>

@@ -218,7 +218,7 @@ export function UserSettings({ onBack }: UserSettingsProps) {
               <div className="space-y-3">
                 <Button 
                   className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/?section=pricing'}
+                  onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
                 >
                   <Crown className="w-4 h-4 mr-2" />
                   Upgrade to Pro - $9.99/month

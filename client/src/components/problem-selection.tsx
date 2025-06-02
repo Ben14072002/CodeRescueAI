@@ -262,7 +262,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
               <Button
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
-                onClick={() => window.location.href = '/?section=pricing'}
+                onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
               >
                 <Crown className="w-5 h-5 mr-2" />
                 Upgrade to Rescue Pro - $9.99/month
