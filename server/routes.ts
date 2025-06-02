@@ -209,7 +209,22 @@ Return a JSON object with this structure:
         return res.status(400).json({ error: "Invalid plan" });
       }
 
-      const user = await storage.getUser(userId);
+      // For Firebase users, create a temporary user record if needed
+      let user;
+      try {
+        user = await storage.getUser(parseInt(userId));
+      } catch (e) {
+        // userId is not numeric (Firebase UID), create temp user
+        user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+        if (!user) {
+          user = await storage.createUser({
+            username: `firebase_${userId.substring(0, 8)}`,
+            email: `${userId}@firebase.temp`,
+            role: "user"
+          });
+        }
+      }
+      
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -226,7 +241,7 @@ Return a JSON object with this structure:
         });
         customerId = customer.id;
         
-        await storage.updateUserSubscription(userId, {
+        await storage.updateUserSubscription(user.id, {
           stripeCustomerId: customerId
         });
       }
@@ -244,7 +259,8 @@ Return a JSON object with this structure:
         success_url: `${req.headers.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.origin}/pricing`,
         metadata: {
-          userId: userId.toString(),
+          userId: user.id.toString(),
+          firebaseUid: userId.toString(),
           plan: plan
         }
       });

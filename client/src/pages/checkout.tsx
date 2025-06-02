@@ -88,7 +88,7 @@ export default function Checkout() {
     // Create checkout session
     apiRequest("POST", "/api/create-checkout-session", { 
       plan, 
-      userId: user.id 
+      userId: user.uid 
     })
       .then((res) => res.json())
       .then((data) => {
