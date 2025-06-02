@@ -58,12 +58,12 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-slate-200 mb-4">Support</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="mailto:support@codebreaker.dev" className="text-slate-400 hover:text-slate-200 transition-colors">
+                <a href="mailto:contact@digitalduo.org" className="text-slate-400 hover:text-slate-200 transition-colors">
                   Contact Support
                 </a>
               </li>
               <li>
-                <a href="mailto:help@codebreaker.dev" className="text-slate-400 hover:text-slate-200 transition-colors">
+                <a href="mailto:contact@digitalduo.org" className="text-slate-400 hover:text-slate-200 transition-colors">
                   Help Center
                 </a>
               </li>
@@ -100,7 +100,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-slate-400 hover:text-slate-200 transition-colors">
+                <a href="/cookie-policy" className="text-slate-400 hover:text-slate-200 transition-colors">
                   Cookie Policy
                 </a>
               </li>
@@ -112,7 +112,7 @@ export function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-slate-400 text-sm">
-            © 2025 CodeBreaker. All rights reserved.
+            © 2025 CodeBreaker by DigitalDuo - Ben Paltinat. All rights reserved.
           </p>
           <p className="text-slate-400 text-sm flex items-center">
             Made with <Heart className="w-4 h-4 mx-1 text-red-500" /> for developers

@@ -9,6 +9,7 @@ import Checkout from "@/pages/checkout";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Refund from "@/pages/refund";
+import CookiePolicy from "@/pages/cookie-policy";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/refund" component={Refund} />
+      <Route path="/cookie-policy" component={CookiePolicy} />
       <Route component={NotFound} />
     </Switch>
   );
