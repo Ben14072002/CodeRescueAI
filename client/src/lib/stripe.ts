@@ -28,7 +28,7 @@ export const PRICING_PLANS = {
   pro_monthly: {
     name: 'Rescue Pro',
     price: 9.99,
-    priceId: 'price_1RUpnDK0aFmFV51vSQKWq1Tg',
+    priceId: 'price_1RVSwMK0aFmFV51v1PsSdU6r',
     interval: 'month',
     features: [
       'Unlimited AI rescues',
@@ -45,7 +45,7 @@ export const PRICING_PLANS = {
   pro_yearly: {
     name: 'Rescue Pro',
     price: 95.88,
-    priceId: 'price_1RUpnDK0aFmFV51vqCD84vGa',
+    priceId: 'price_1RVSwMK0aFmFV51vTFAjTsQL',
     interval: 'year',
     features: [
       'Unlimited AI rescues',

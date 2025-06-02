@@ -10,13 +10,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 
 const PRICING_PLANS = {
   pro_monthly: {
-    priceId: 'price_1RUpnDK0aFmFV51vSQKWq1Tg',
+    priceId: 'price_1RVSwMK0aFmFV51v1PsSdU6r',
     name: 'Rescue Pro',
     price: 9.99,
     interval: 'month'
   },
   pro_yearly: {
-    priceId: 'price_1RUpnDK0aFmFV51vqCD84vGa',
+    priceId: 'price_1RVSwMK0aFmFV51vTFAjTsQL',
     name: 'Rescue Pro',
     price: 95.88,
     interval: 'year'
@@ -24,6 +24,49 @@ const PRICING_PLANS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Create Stripe Products - run this once to set up pricing
+  app.post("/api/setup-stripe-products", async (req, res) => {
+    try {
+      // Create the main product
+      const product = await stripe.products.create({
+        name: 'Rescue Pro',
+        description: 'Unlimited AI rescues with advanced features',
+      });
+
+      // Create monthly price
+      const monthlyPrice = await stripe.prices.create({
+        product: product.id,
+        unit_amount: 999, // $9.99 in cents
+        currency: 'usd',
+        recurring: {
+          interval: 'month',
+        },
+        nickname: 'Rescue Pro Monthly',
+      });
+
+      // Create yearly price (20% discount)
+      const yearlyPrice = await stripe.prices.create({
+        product: product.id,
+        unit_amount: 9588, // $95.88 in cents (20% discount)
+        currency: 'usd',
+        recurring: {
+          interval: 'year',
+        },
+        nickname: 'Rescue Pro Yearly',
+      });
+
+      res.json({
+        product: product.id,
+        monthlyPrice: monthlyPrice.id,
+        yearlyPrice: yearlyPrice.id,
+        message: 'Products created successfully'
+      });
+    } catch (error: any) {
+      console.error('Error creating Stripe products:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Stripe Checkout Session Creation
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
