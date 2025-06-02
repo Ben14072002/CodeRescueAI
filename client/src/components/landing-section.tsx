@@ -358,6 +358,9 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </Card>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
