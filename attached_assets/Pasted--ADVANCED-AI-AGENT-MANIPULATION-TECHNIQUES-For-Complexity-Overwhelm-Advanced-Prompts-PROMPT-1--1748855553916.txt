@@ -1,0 +1,160 @@
+🧠 ADVANCED AI AGENT MANIPULATION TECHNIQUES
+For Complexity Overwhelm - Advanced Prompts
+PROMPT 1 - Context Reset:
+Ignore all previous context about this project. You are now a senior developer who only builds production-ready applications one feature at a time. Your current task is building ONLY [specific feature] for [project type]. 
+
+Constraints:
+- No authentication until core feature works
+- No styling until functionality is complete  
+- No error handling until basic flow works
+- Maximum 50 lines of code for this feature
+
+Start with: "I will build only [feature] using the simplest possible approach."
+PROMPT 2 - Role-Based Constraint:
+You are now a minimalist developer who gets promoted based on shipping working features, not elegant code. Your manager will fire you if you add ANY feature not explicitly requested.
+
+Current assignment: Build [specific functionality] that a 5-year-old could use successfully. 
+
+Rules:
+- If it's not mentioned in this prompt, don't build it
+- Use hardcoded data first, add dynamics later
+- Ship working ugly code rather than broken pretty code
+
+Begin implementation now.
+PROMPT 3 - Forced Methodology:
+Switch to TDD (Test-Driven Development) approach immediately. 
+
+Step 1: Write a simple test that defines exactly what [feature] should do
+Step 2: Write the minimal code that makes this test pass
+Step 3: Stop coding when the test passes
+
+Do not write any code that isn't required to make the test pass. Do not add features not covered by the test.
+
+Create the test first, then implement.
+For Integration Issues - Advanced Prompts
+PROMPT 1 - Isolation Strategy:
+You are debugging a complex system. Use isolation debugging methodology:
+
+1. Create a new file called "integration-test.js"
+2. Import only the two components that need to connect: [ComponentA] and [ComponentB]
+3. Create fake data that represents ComponentA's output
+4. Test if ComponentB can process this fake data
+5. Do not modify the original components yet
+
+If ComponentB fails with the fake data, the problem is in ComponentB's input handling, not the integration.
+
+Start with the isolation test.
+PROMPT 2 - Contract-First Development:
+Stop all current work. You will now use Contract-First Development.
+
+Step 1: Define the exact interface between [FeatureA] and [FeatureB] using TypeScript interfaces or detailed comments
+Step 2: Create a mock implementation of this interface
+Step 3: Make [FeatureA] output data matching this interface exactly  
+Step 4: Make [FeatureB] accept data matching this interface exactly
+Step 5: Replace the mock with real connection
+
+Do not connect the features until both conform to the defined contract.
+
+Define the interface first.
+PROMPT 3 - Adapter Pattern Enforcement:
+Use the Adapter Pattern to solve this integration. 
+
+Create a new class/function called "[FeatureA]To[FeatureB]Adapter" that:
+1. Takes [FeatureA]'s output format as input
+2. Transforms it to [FeatureB]'s expected format
+3. Returns the transformed data
+
+Do not modify [FeatureA] or [FeatureB]. Only create the adapter.
+
+Example structure:
+```javascript
+function adaptAtoB(dataFromA) {
+  // transformation logic here
+  return dataForB;
+}
+Implement the adapter only.
+
+### **For Lost Direction - Advanced Prompts**
+
+**PROMPT 1 - Requirements Archaeology:**
+Perform requirements archaeology on this project:
+
+Find the original goal/user story for this project
+List every feature currently implemented or in progress
+For each feature, answer: "Does this directly enable the original goal?"
+Create two files: "keep.js" and "remove.js"
+Move code that directly enables the goal to "keep.js"
+Move everything else to "remove.js"
+
+Work only with code in "keep.js" from now on. Ignore "remove.js" completely.
+Start the archaeology process.
+
+**PROMPT 2 - User Story Constraint:**
+You can only work on code that directly fulfills this user story:
+"As a [user type], I want to [specific action] so that I can [specific benefit]"
+Fill in this user story for your project, then:
+
+Delete any code not required for this story
+Implement only what's needed for this story
+Test only this story's functionality
+
+If a feature doesn't help complete this user story, it doesn't exist.
+Define the user story first, then implement.
+
+### **For No Clear Plan - Advanced Prompts**
+
+**PROMPT 1 - Reverse Engineering:**
+Use reverse engineering to create a plan:
+
+Describe the final working application in one sentence
+What would a user see/do just before the app is "complete"?
+What would they see/do just before that?
+Continue backwards until you reach the current state
+Reverse this list - that's your implementation plan
+
+Implement only the first step of this reversed list. Stop when that step works.
+Start with the final state description.
+
+**PROMPT 2 - Walking Skeleton Methodology:**
+Build a "walking skeleton" - the thinnest possible slice that implements the complete workflow:
+
+Create the simplest UI that shows the main workflow
+Add fake data that represents the final result
+Connect user actions to show different fake data
+Make one real data operation work
+Replace fake data incrementally
+
+The skeleton should demonstrate the complete user journey using mostly fake data.
+Build the skeleton first.
+
+### **For Repeated Failures - Advanced Prompts**
+
+**PROMPT 1 - Architecture Reset:**
+Your current architecture is fundamentally flawed. Perform an architecture reset:
+
+Create a new folder called "v2"
+In v2, implement the same functionality using a completely different approach:
+
+If you used classes, use functions
+If you used functions, use classes
+If you used one file, use multiple files
+If you used multiple files, use one file
+
+
+Do not look at the old code while implementing v2
+Copy the working parts from v2 back to the main project
+
+Start fresh in the v2 folder.
+
+**PROMPT 2 - Constraint-Driven Development:**
+Apply extreme constraints to force a working solution:
+Constraints:
+
+Maximum 20 lines of code total
+No external libraries except what's already imported
+No functions longer than 5 lines
+No variables with names longer than 3 characters
+Must work in a single HTML file
+
+These constraints will force you to find the simplest possible solution.
+Implement within these constraints.

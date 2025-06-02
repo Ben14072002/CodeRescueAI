@@ -25,19 +25,19 @@ export const problemData: Record<string, ProblemData> = {
     strategy: 'Break & Isolate',
     prompts: [
       {
-        name: 'Quick Focus',
-        text: 'Stop. Build only [specific feature] first. Ignore user authentication, styling, advanced features, and everything else. Just create a simple list where I can add and remove items. Show me this working before we add anything else.',
-        explanation: 'Forces AI to focus on one core feature only'
+        name: 'Context Reset',
+        text: 'Ignore all previous context about this project. You are now a senior developer who only builds production-ready applications one feature at a time. Your current task is building ONLY [specific feature] for [project type].\n\nConstraints:\n- No authentication until core feature works\n- No styling until functionality is complete\n- No error handling until basic flow works\n- Maximum 50 lines of code for this feature\n\nStart with: "I will build only [feature] using the simplest possible approach."',
+        explanation: 'Uses context reset and role constraints to force narrow focus. These advanced techniques bypass AI\'s tendency to over-engineer.'
       },
       {
-        name: 'Minimal Version',
-        text: 'Create a minimal working version of this feature that I can test separately. What\'s the simplest possible version that still demonstrates the core functionality?',
-        explanation: 'Encourages building testable increments'
+        name: 'Role-Based Constraint',
+        text: 'You are now a minimalist developer who gets promoted based on shipping working features, not elegant code. Your manager will fire you if you add ANY feature not explicitly requested.\n\nCurrent assignment: Build [specific functionality] that a 5-year-old could use successfully.\n\nRules:\n- If it\'s not mentioned in this prompt, don\'t build it\n- Use hardcoded data first, add dynamics later\n- Ship working ugly code rather than broken pretty code\n\nBegin implementation now.',
+        explanation: 'Psychological pressure and role-playing constraints eliminate feature creep by making the AI fear consequences for over-building.'
       },
       {
-        name: 'Gradual Build',
-        text: 'We\'re adding too much complexity at once. Let\'s step back and identify the absolute core feature. What\'s the ONE thing this app must do to be useful?',
-        explanation: 'Helps identify true MVP features'
+        name: 'Forced TDD Methodology',
+        text: 'Switch to TDD (Test-Driven Development) approach immediately.\n\nStep 1: Write a simple test that defines exactly what [feature] should do\nStep 2: Write the minimal code that makes this test pass\nStep 3: Stop coding when the test passes\n\nDo not write any code that isn\'t required to make the test pass. Do not add features not covered by the test.\n\nCreate the test first, then implement.',
+        explanation: 'Forces methodological discipline that prevents scope creep by requiring explicit test-driven boundaries before any implementation.'
       }
     ],
     steps: [
@@ -87,19 +87,19 @@ export const problemData: Record<string, ProblemData> = {
     strategy: 'Bridge Building',
     prompts: [
       {
-        name: 'Simple Bridge',
-        text: 'Create a simple data bridge between Feature A and Feature B. Test the connection with fake data first.',
-        explanation: 'Establishes basic connection before complexity'
+        name: 'Isolation Strategy',
+        text: 'You are debugging a complex system. Use isolation debugging methodology:\n\n1. Create a new file called "integration-test.js"\n2. Import only the two components that need to connect: [ComponentA] and [ComponentB]\n3. Create fake data that represents ComponentA\'s output\n4. Test if ComponentB can process this fake data\n5. Do not modify the original components yet\n\nIf ComponentB fails with the fake data, the problem is in ComponentB\'s input handling, not the integration.\n\nStart with the isolation test.',
+        explanation: 'Advanced isolation debugging that identifies the exact failure point by testing components separately with controlled data inputs.'
       },
       {
-        name: 'Minimal Interface',
-        text: 'What\'s the minimal interface these two features need to share? Let\'s define just the essential data contract.',
-        explanation: 'Focuses on core data requirements'
+        name: 'Contract-First Development',
+        text: 'Stop all current work. You will now use Contract-First Development.\n\nStep 1: Define the exact interface between [FeatureA] and [FeatureB] using TypeScript interfaces or detailed comments\nStep 2: Create a mock implementation of this interface\nStep 3: Make [FeatureA] output data matching this interface exactly\nStep 4: Make [FeatureB] accept data matching this interface exactly\nStep 5: Replace the mock with real connection\n\nDo not connect the features until both conform to the defined contract.\n\nDefine the interface first.',
+        explanation: 'Contract-first methodology prevents integration failures by establishing strict data contracts before implementation attempts.'
       },
       {
-        name: 'Step by Step',
-        text: 'Let\'s test each feature separately first, then build the simplest possible connection between them.',
-        explanation: 'Validates components before integration'
+        name: 'Adapter Pattern Enforcement',
+        text: 'Use the Adapter Pattern to solve this integration.\n\nCreate a new class/function called "[FeatureA]To[FeatureB]Adapter" that:\n1. Takes [FeatureA]\'s output format as input\n2. Transforms it to [FeatureB]\'s expected format\n3. Returns the transformed data\n\nDo not modify [FeatureA] or [FeatureB]. Only create the adapter.\n\nExample structure:\n```javascript\nfunction adaptAtoB(dataFromA) {\n  // transformation logic here\n  return dataForB;\n}\n```\n\nImplement the adapter only.',
+        explanation: 'Adapter pattern isolates integration logic, preventing modification of working components while solving compatibility issues.'
       }
     ],
     steps: [
@@ -149,19 +149,19 @@ export const problemData: Record<string, ProblemData> = {
     strategy: 'Plan Recovery',
     prompts: [
       {
-        name: 'Back to Basics',
-        text: 'Here\'s my original goal: [user inputs goal]. What should I remove to get back on track?',
-        explanation: 'Refocuses on original objectives'
+        name: 'Requirements Archaeology',
+        text: 'Perform requirements archaeology on this project:\n\n1. Find the original goal/user story for this project\n2. List every feature currently implemented or in progress\n3. For each feature, answer: "Does this directly enable the original goal?"\n4. Create two files: "keep.js" and "remove.js"\n5. Move code that directly enables the goal to "keep.js"\n6. Move everything else to "remove.js"\n\nWork only with code in "keep.js" from now on. Ignore "remove.js" completely.\n\nStart the archaeology process.',
+        explanation: 'Archaeological methodology forces systematic evaluation of all features against original requirements, physically separating essential from non-essential code.'
       },
       {
-        name: 'Essential Features',
-        text: 'Show me the 3 most important features for my original vision. Everything else can wait.',
-        explanation: 'Prioritizes core functionality'
+        name: 'User Story Constraint',
+        text: 'You can only work on code that directly fulfills this user story:\n\n"As a [user type], I want to [specific action] so that I can [specific benefit]"\n\nFill in this user story for your project, then:\n\n1. Delete any code not required for this story\n2. Implement only what\'s needed for this story\n3. Test only this story\'s functionality\n\nIf a feature doesn\'t help complete this user story, it doesn\'t exist.\n\nDefine the user story first, then implement.',
+        explanation: 'User story constraints create hard boundaries around acceptable work, eliminating feature drift by making irrelevant features literally invisible to the AI.'
       },
       {
-        name: 'MVP Reset',
-        text: 'What\'s the minimum viable version of what I wanted to build? Let\'s start there.',
-        explanation: 'Reduces scope to essentials'
+        name: 'Feature Triage',
+        text: 'Emergency feature triage required. You are a project manager with a hard deadline in 2 days.\n\nClassify every current feature as:\n- CRITICAL: App is useless without this\n- IMPORTANT: Nice to have but not essential\n- LUXURY: Can wait until later\n\nDelete all IMPORTANT and LUXURY features immediately. Only work on CRITICAL features.\n\nStart the triage now.',
+        explanation: 'Emergency triage psychology creates urgency that forces ruthless prioritization, simulating real-world deadline pressure that eliminates scope creep.'
       }
     ],
     steps: [
@@ -211,19 +211,19 @@ export const problemData: Record<string, ProblemData> = {
     strategy: 'Step-by-Step Roadmap',
     prompts: [
       {
-        name: 'Five Steps',
-        text: 'Break this project into 5 logical steps I can build one at a time. What\'s step 1?',
-        explanation: 'Creates manageable development phases'
+        name: 'Reverse Engineering',
+        text: 'Use reverse engineering to create a plan:\n\n1. Describe the final working application in one sentence\n2. What would a user see/do just before the app is "complete"?\n3. What would they see/do just before that?\n4. Continue backwards until you reach the current state\n5. Reverse this list - that\'s your implementation plan\n\nImplement only the first step of this reversed list. Stop when that step works.\n\nStart with the final state description.',
+        explanation: 'Reverse engineering methodology creates logical development sequences by working backwards from the desired outcome, ensuring each step builds toward a clear goal.'
       },
       {
-        name: 'Just Step One',
-        text: 'What\'s step 1 of building this? Just step 1, nothing else. Make it something I can complete in 30-60 minutes.',
-        explanation: 'Focuses on immediate next action'
+        name: 'Walking Skeleton',
+        text: 'Build a "walking skeleton" - the thinnest possible slice that implements the complete workflow:\n\n1. Create the simplest UI that shows the main workflow\n2. Add fake data that represents the final result\n3. Connect user actions to show different fake data\n4. Make one real data operation work\n5. Replace fake data incrementally\n\nThe skeleton should demonstrate the complete user journey using mostly fake data.\n\nBuild the skeleton first.',
+        explanation: 'Walking skeleton methodology creates end-to-end workflows early, proving the architecture works before building individual features in detail.'
       },
       {
-        name: 'Time-Boxed Tasks',
-        text: 'Create a checklist where each item takes 30-60 minutes max. What\'s the first item?',
-        explanation: 'Breaks work into manageable chunks'
+        name: 'Time-Boxing Constraints',
+        text: 'Apply strict time-boxing methodology:\n\n1. Set a 45-minute timer\n2. Identify the smallest possible deliverable within 45 minutes\n3. Cut features until you can definitely deliver something working in 45 minutes\n4. Implement only that deliverable\n5. Stop when timer ends, regardless of completion\n\nWhat can you definitely complete in 45 minutes?\n\nStart the timer and begin.',
+        explanation: 'Time-boxing forces ruthless scope reduction by creating artificial urgency, preventing perfectionism and ensuring concrete progress.'
       }
     ],
     steps: [
@@ -273,19 +273,19 @@ export const problemData: Record<string, ProblemData> = {
     strategy: 'Reset & Redirect',
     prompts: [
       {
-        name: 'Fresh Approach',
-        text: 'This approach isn\'t working. Let\'s try a completely different method. What are 3 alternative ways to solve this?',
-        explanation: 'Forces exploration of alternatives'
+        name: 'Architecture Reset',
+        text: 'Your current architecture is fundamentally flawed. Perform an architecture reset:\n\n1. Create a new folder called "v2"\n2. In v2, implement the same functionality using a completely different approach:\n   - If you used classes, use functions\n   - If you used functions, use classes\n   - If you used one file, use multiple files\n   - If you used multiple files, use one file\n3. Do not look at the old code while implementing v2\n4. Copy the working parts from v2 back to the main project\n\nStart fresh in the v2 folder.',
+        explanation: 'Architecture reset forces completely different implementation approaches, breaking AI out of failed solution loops by mandating opposite architectural choices.'
       },
       {
-        name: 'Simplify the Problem',
-        text: 'Let\'s solve a simpler version of this problem first. What\'s the easiest version that would still be useful?',
-        explanation: 'Reduces complexity to build confidence'
+        name: 'Constraint-Driven Development',
+        text: 'Apply extreme constraints to force a working solution:\n\nConstraints:\n- Maximum 20 lines of code total\n- No external libraries except what\'s already imported\n- No functions longer than 5 lines\n- No variables with names longer than 3 characters\n- Must work in a single HTML file\n\nThese constraints will force you to find the simplest possible solution.\n\nImplement within these constraints.',
+        explanation: 'Extreme constraints eliminate over-engineering by making complex solutions impossible, forcing the AI to find the core essence of the solution.'
       },
       {
-        name: 'Start from Scratch',
-        text: 'Let\'s start this feature over with a different approach. What would you do differently this time?',
-        explanation: 'Encourages fresh perspective'
+        name: 'Alternative Technology Stack',
+        text: 'The current technology approach is failing. Switch to a completely different technical approach:\n\n1. List 3 completely different ways to implement this feature\n2. Choose the approach most different from your current method\n3. Implement using only that new approach\n4. Do not try to integrate with existing code until the new approach works\n\nWhat are 3 completely different technical approaches?\n\nChoose one and implement it separately.',
+        explanation: 'Technology stack switching breaks solution fixation by forcing evaluation of fundamentally different implementation paradigms, often revealing simpler solutions.'
       }
     ],
     steps: [
