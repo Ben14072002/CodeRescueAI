@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown } from "lucide-react";
+import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown, Sparkles } from "lucide-react";
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,9 +14,10 @@ import { apiRequest } from "@/lib/queryClient";
 interface ProblemSelectionProps {
   onAnalyze: () => void;
   onBack: () => void;
+  onCustomPrompts?: () => void;
 }
 
-export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
+export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: ProblemSelectionProps) {
   const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -171,6 +172,50 @@ export function ProblemSelection({ onAnalyze, onBack }: ProblemSelectionProps) {
               <p className="text-slate-400 text-sm mb-4">Describe your specific situation for custom guidance</p>
               <div className="text-xs text-slate-500">
                 <span className="bg-slate-500/20 text-slate-400 px-2 py-1 rounded">Custom Strategy</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Custom Prompt Generator - Pro Feature */}
+          <Card
+            className={`cursor-pointer transition-all bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-500/50 hover:border-purple-400 ${
+              userTier !== 'pro' ? 'opacity-75' : ''
+            }`}
+            onClick={() => {
+              if (userTier === 'pro' && onCustomPrompts) {
+                onCustomPrompts();
+              } else {
+                window.location.href = '/?section=pricing';
+              }
+            }}
+          >
+            <CardContent className="p-6">
+              <div className="text-center mb-4">
+                <div className="relative">
+                  <Sparkles className="w-8 h-8 text-purple-400 mb-3 mx-auto" />
+                  {userTier !== 'pro' && (
+                    <Crown className="w-4 h-4 text-amber-400 absolute -top-1 -right-1" />
+                  )}
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-purple-200">
+                  AI Prompt Generator
+                </h3>
+              </div>
+              <p className="text-purple-300 text-sm mb-4">
+                Get custom prompts tailored to your specific problem using AI analysis
+              </p>
+              <div className="text-xs">
+                {userTier === 'pro' ? (
+                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Pro Feature
+                  </Badge>
+                ) : (
+                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Upgrade Required
+                  </Badge>
+                )}
               </div>
             </CardContent>
           </Card>

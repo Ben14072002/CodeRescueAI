@@ -1,11 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
+import OpenAI from "openai";
 import { storage } from "./storage";
 
 // Use live Stripe key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: "2023-10-16",
+});
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const PRICING_PLANS = {
@@ -33,6 +39,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       remainingFree: 3,
       canCreateSession: true
     });
+  });
+
+  // Custom Prompt Generator - Pro feature using OpenAI
+  app.post("/api/generate-custom-prompts", async (req, res) => {
+    try {
+      const { problemDescription, codeContext, errorMessages } = req.body;
+
+      if (!problemDescription?.trim()) {
+        return res.status(400).json({ 
+          error: "Problem description is required" 
+        });
+      }
+
+      // Build context for AI analysis
+      let contextPrompt = `You are an expert AI coding assistant rescue specialist. A developer is stuck and needs custom prompts to get their AI assistant unstuck. 
+
+Problem Description: ${problemDescription}`;
+
+      if (codeContext?.trim()) {
+        contextPrompt += `\n\nCode Context: ${codeContext}`;
+      }
+
+      if (errorMessages?.trim()) {
+        contextPrompt += `\n\nError Messages: ${errorMessages}`;
+      }
+
+      contextPrompt += `\n\nGenerate 3 custom prompts that use advanced AI manipulation techniques to solve this specific problem. Each prompt should:
+1. Use psychological triggers (role constraints, context reset, urgency)
+2. Be tailored to the exact problem described
+3. Include specific methodology enforcement
+4. Have clear difficulty levels
+
+Return a JSON object with this structure:
+{
+  "prompts": [
+    {
+      "title": "Brief descriptive title",
+      "prompt": "The complete prompt text to copy-paste",
+      "explanation": "Why this prompt works for this specific problem",
+      "difficulty": "beginner|intermediate|advanced"
+    }
+  ]
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system", 
+            content: "You are an expert at creating AI manipulation prompts that redirect stuck coding assistants. Respond only with valid JSON."
+          },
+          {
+            role: "user",
+            content: contextPrompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 2000
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"prompts": []}');
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error generating custom prompts:", error);
+      res.status(500).json({ 
+        error: "Failed to generate custom prompts",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
   });
   // Create Stripe Products - run this once to set up pricing
   app.post("/api/setup-stripe-products", async (req, res) => {
