@@ -1,11 +1,11 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CostCalculator } from "@/components/cost-calculator";
 import { FAQSection } from "@/components/faq-section";
 import { Footer } from "@/components/footer";
-import { LogoWithText } from "./logo";
-import { MazeBackground, HoverMazeEffect } from "./background-effects";
+import { HoverMazeEffect } from "./background-effects";
 import { 
   Play, 
   Bot, 
@@ -28,60 +28,98 @@ interface LandingSectionProps {
 }
 
 export function LandingSection({ onGetStarted }: LandingSectionProps) {
+  useEffect(() => {
+    // Trigger hero animations on mount
+    const animateHero = () => {
+      // Animate headline words with staggered delays
+      const words = document.querySelectorAll('.hero-headline .word');
+      words.forEach((word, index) => {
+        const delay = parseInt(word.getAttribute('data-delay') || '0');
+        setTimeout(() => {
+          (word as HTMLElement).style.animationDelay = `${delay}ms`;
+        }, delay);
+      });
+
+      // Animate other elements
+      setTimeout(() => {
+        const typewriter = document.querySelector('.typewriter-container');
+        const description = document.querySelector('.hero-description');
+        const buttons = document.querySelector('.hero-buttons');
+        const secondaryBtn = document.querySelector('.hero-button-secondary');
+
+        if (typewriter) typewriter.classList.add('animate');
+        if (description) description.classList.add('animate');
+        if (buttons) buttons.classList.add('animate');
+        if (secondaryBtn) secondaryBtn.classList.add('animate');
+
+        // Start typewriter effect
+        const typewriterText = document.querySelector('.typewriter-text');
+        if (typewriterText) {
+          const text = typewriterText.getAttribute('data-text') || '';
+          setTimeout(() => {
+            typewriterText.textContent = text;
+          }, 1200);
+        }
+      }, 800);
+    };
+
+    // Small delay to ensure DOM is ready
+    setTimeout(animateHero, 100);
+  }, []);
+
   return (
-    <div className="min-h-screen relative">
-      <MazeBackground />
+    <div className="min-h-screen relative bg-slate-950">
+      {/* Geometric Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="geometric-bg absolute top-20 left-10 w-16 h-16 border border-blue-500/20 rotate-45"></div>
+        <div className="geometric-bg absolute top-40 right-20 w-12 h-12 border border-emerald-500/20"></div>
+        <div className="geometric-bg absolute bottom-40 left-20 w-20 h-20 border border-cyan-500/20 rotate-12"></div>
+        <div className="geometric-bg absolute bottom-20 right-10 w-14 h-14 border border-purple-500/20 -rotate-12"></div>
+      </div>
       {/* Hero Section */}
-      <section className="text-center mb-20 animate-fade-in">
+      <section className="text-center mb-20 pt-20 pb-10">
         <div className="max-w-6xl mx-auto px-4">
           {/* Hero Badge */}
-          <div className="mb-6">
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-4 py-2">
+          <div className="hero-badge mb-8 opacity-0">
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-4 py-2 animate-pulse">
               <Zap className="w-4 h-4 mr-2" />
               Used by 500+ developers this week
             </Badge>
           </div>
           
-          {/* Logo and Headlines */}
-          <div className="mb-8">
-            <LogoWithText size="xl" className="justify-center mb-6" />
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
-            AI Assistant<br />
-            <span className="text-slate-200">Got Stuck?</span>
+          {/* Main Headlines */}
+          <h1 className="hero-headline text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent leading-tight opacity-0">
+            <span className="word" data-delay="0">AI</span> <span className="word" data-delay="100">Assistant</span><br />
+            <span className="word text-slate-200" data-delay="200">Got</span> <span className="word text-slate-200" data-delay="300">Stuck?</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-slate-300 mb-4 max-w-3xl mx-auto font-medium">
-            Break free in under 10 minutes with battle-tested strategies
-          </p>
+          <div className="typewriter-container opacity-0">
+            <p className="text-xl md:text-2xl text-slate-300 mb-4 max-w-3xl mx-auto font-medium typewriter-text" data-text="Break free in under 10 minutes with battle-tested strategies">
+            </p>
+          </div>
           
-          <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">
+          <p className="hero-description text-lg text-slate-400 mb-12 max-w-2xl mx-auto opacity-0">
             Stop wasting hours on AI loops. Get specific prompts and action plans that actually work.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <HoverMazeEffect>
-              <Button 
-                onClick={onGetStarted}
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all shadow-lg w-full sm:w-auto relative overflow-hidden"
-              >
-                <Play className="w-5 h-5 mr-2" />
-                Start Rescue Session
-              </Button>
-            </HoverMazeEffect>
-            <HoverMazeEffect>
-              <Button 
-                variant="outline"
-                size="lg"
-                className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-4 text-lg w-full sm:w-auto relative overflow-hidden"
-              >
-                <Brain className="w-5 h-5 mr-2" />
-                See How It Works
-              </Button>
-            </HoverMazeEffect>
+          <div className="hero-buttons flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 opacity-0">
+            <Button 
+              onClick={onGetStarted}
+              size="lg"
+              className="floating-cta bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold shadow-lg w-full sm:w-auto relative overflow-hidden"
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Start Rescue Session
+            </Button>
+            <Button 
+              variant="outline"
+              size="lg"
+              className="hero-button-secondary border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-4 text-lg w-full sm:w-auto relative overflow-hidden opacity-0"
+            >
+              <Brain className="w-5 h-5 mr-2" />
+              See How It Works
+            </Button>
           </div>
 
           {/* Trust Indicators */}
