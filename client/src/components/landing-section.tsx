@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { CostCalculator } from "@/components/cost-calculator";
 import { FAQSection } from "@/components/faq-section";
 import { Footer } from "@/components/footer";
+import { LogoWithText } from "./logo";
+import { MazeBackground, HoverMazeEffect } from "./background-effects";
 import { 
   Play, 
   Bot, 
@@ -27,7 +29,8 @@ interface LandingSectionProps {
 
 export function LandingSection({ onGetStarted }: LandingSectionProps) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <MazeBackground />
       {/* Hero Section */}
       <section className="text-center mb-20 animate-fade-in">
         <div className="max-w-6xl mx-auto px-4">
@@ -39,7 +42,11 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
             </Badge>
           </div>
           
-          {/* Main Headlines */}
+          {/* Logo and Headlines */}
+          <div className="mb-8">
+            <LogoWithText size="xl" className="justify-center mb-6" />
+          </div>
+          
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
             AI Assistant<br />
             <span className="text-slate-200">Got Stuck?</span>
@@ -55,22 +62,26 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Button 
-              onClick={onGetStarted}
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all shadow-lg w-full sm:w-auto"
-            >
-              <Play className="w-5 h-5 mr-2" />
-              Start Rescue Session
-            </Button>
-            <Button 
-              variant="outline"
-              size="lg"
-              className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-4 text-lg w-full sm:w-auto"
-            >
-              <Brain className="w-5 h-5 mr-2" />
-              See How It Works
-            </Button>
+            <HoverMazeEffect>
+              <Button 
+                onClick={onGetStarted}
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all shadow-lg w-full sm:w-auto relative overflow-hidden"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Start Rescue Session
+              </Button>
+            </HoverMazeEffect>
+            <HoverMazeEffect>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-4 text-lg w-full sm:w-auto relative overflow-hidden"
+              >
+                <Brain className="w-5 h-5 mr-2" />
+                See How It Works
+              </Button>
+            </HoverMazeEffect>
           </div>
 
           {/* Trust Indicators */}
@@ -105,9 +116,10 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
 
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             {/* Problem Side */}
-            <Card className="bg-red-500/10 border-red-500/20">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-red-400 mb-6">Before CodeBreaker</h3>
+            <HoverMazeEffect>
+              <Card className="bg-red-500/10 border-red-500/20 transition-all duration-300 hover:bg-red-500/15 hover:border-red-500/30">
+                <CardContent className="p-8">
+                  <h3 className="text-2xl font-bold text-red-400 mb-6">Before CodeBreaker</h3>
                 <ul className="space-y-4">
                   {[
                     "AI builds everything at once, creating chaos",
@@ -124,9 +136,11 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                 </ul>
               </CardContent>
             </Card>
+            </HoverMazeEffect>
 
             {/* Solution Side */}
-            <Card className="bg-emerald-500/10 border-emerald-500/20">
+            <HoverMazeEffect>
+            <Card className="bg-emerald-500/10 border-emerald-500/20 transition-all duration-300 hover:bg-emerald-500/15 hover:border-emerald-500/30">
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold text-emerald-400 mb-6">With CodeBreaker</h3>
                 <ul className="space-y-4">
@@ -145,6 +159,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                 </ul>
               </CardContent>
             </Card>
+            </HoverMazeEffect>
           </div>
         </div>
       </section>
