@@ -483,10 +483,10 @@ Generate 3 specialized prompts for this exact situation.`
       case 'checkout.session.completed':
         const session = event.data.object;
         const userId = parseInt(session.metadata.userId);
-        const plan = session.metadata.plan;
+        const plan = session.metadata.plan || 'pro';
         
         if (session.mode === 'subscription') {
-          const subscriptionId = session.subscription;
+          const subscriptionId = session.subscription as string;
           
           await storage.updateUserSubscription(userId, {
             stripeSubscriptionId: subscriptionId,

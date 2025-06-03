@@ -132,8 +132,12 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
         const error = await response.json();
         
         if (response.status === 403) {
-          // User needs Pro subscription
-          setShowProUpgrade(true);
+          // User needs Pro subscription - show upgrade modal
+          toast({
+            title: "Pro Subscription Required",
+            description: "Custom prompt generation requires a Pro subscription. Please upgrade to continue.",
+            variant: "destructive"
+          });
           return;
         }
         
