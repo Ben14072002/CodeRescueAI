@@ -75,6 +75,7 @@ export default function Home() {
                 src={codeBreakeLogo} 
                 alt="CodeBreaker Logo" 
                 className="w-20 md:w-32 h-auto object-contain transition-all duration-300"
+                style={{ backgroundColor: 'transparent', mixBlendMode: 'screen' }}
               />
             </div>
             <div className="flex items-center space-x-4">
