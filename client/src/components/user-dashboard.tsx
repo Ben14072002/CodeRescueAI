@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { LogoWithText } from "./logo";
+import { HoverMazeEffect } from "./background-effects";
 import { 
   User, 
   LogOut, 
@@ -64,6 +66,7 @@ export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-4">
+          <LogoWithText size="md" />
           <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
             <User className="w-6 h-6 text-white" />
           </div>
@@ -102,8 +105,9 @@ export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
       </div>
 
       {/* Subscription Status */}
-      <Card className="surface-800 border-slate-700 mb-6">
-        <CardContent className="p-6">
+      <HoverMazeEffect>
+        <Card className="surface-800 border-slate-700 mb-6 transition-all duration-300 hover:border-primary/30">
+          <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-slate-100 mb-2">Free Plan</h3>
@@ -140,8 +144,9 @@ export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </HoverMazeEffect>
 
       {/* Stats Overview */}
       <div className="grid md:grid-cols-4 gap-4 mb-6">

@@ -197,13 +197,15 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                 color: "text-emerald-500"
               }
             ].map((feature, index) => (
-              <Card key={index} className="surface-800 border-slate-700 hover:border-primary/50 transition-colors">
-                <CardContent className="p-8 text-center">
-                  <feature.icon className={`w-12 h-12 ${feature.color} mx-auto mb-4`} />
-                  <h3 className="text-xl font-semibold mb-4 text-slate-100">{feature.title}</h3>
-                  <p className="text-slate-400">{feature.description}</p>
-                </CardContent>
-              </Card>
+              <HoverMazeEffect key={index}>
+                <Card className="surface-800 border-slate-700 hover:border-primary/50 transition-all duration-300 hover:bg-slate-800/50">
+                  <CardContent className="p-8 text-center">
+                    <feature.icon className={`w-12 h-12 ${feature.color} mx-auto mb-4 animate-pulse-slow`} />
+                    <h3 className="text-xl font-semibold mb-4 text-slate-100">{feature.title}</h3>
+                    <p className="text-slate-400">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </HoverMazeEffect>
             ))}
           </div>
         </div>
