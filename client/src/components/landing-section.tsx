@@ -42,11 +42,13 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
 
       // Animate other elements
       setTimeout(() => {
+        const badge = document.querySelector('.hero-badge');
         const typewriter = document.querySelector('.typewriter-container');
         const description = document.querySelector('.hero-description');
         const buttons = document.querySelector('.hero-buttons');
         const secondaryBtn = document.querySelector('.hero-button-secondary');
 
+        if (badge) badge.classList.add('animate');
         if (typewriter) typewriter.classList.add('animate');
         if (description) description.classList.add('animate');
         if (buttons) buttons.classList.add('animate');
