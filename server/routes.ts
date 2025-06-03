@@ -272,21 +272,23 @@ Return a JSON object with this structure:
   // Get subscription status
   app.get("/api/subscription-status/:userId", async (req, res) => {
     try {
-      // For testing purposes, return Pro access for any user
-      const testUserId = req.params.userId;
+      const userId = req.params.userId; // Firebase UID is string
       
-      // Return Pro access for testing
-      return res.json({
-        tier: 'pro_monthly',
-        status: 'active',
-        currentPeriodEnd: new Date('2025-07-03')
-      });
+      // Try to find user by Firebase UID (stored as temp email)
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
       
-      const userId = parseInt(req.params.userId);
-      const user = await storage.getUser(userId);
+      // If not found, try parsing as numeric ID for legacy users
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
       
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        // Return free tier for users not found in database
+        return res.json({
+          tier: 'free',
+          status: 'free',
+          currentPeriodEnd: null
+        });
       }
 
       let subscriptionData = {
@@ -300,9 +302,9 @@ Return a JSON object with this structure:
         try {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           subscriptionData = {
-            tier: subscription.metadata.plan || user.subscriptionTier || 'free',
+            tier: subscription.metadata?.plan || user.subscriptionTier || 'free',
             status: subscription.status,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+            currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
           };
         } catch (stripeError) {
           console.error('Error fetching Stripe subscription:', stripeError);

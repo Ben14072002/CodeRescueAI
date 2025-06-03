@@ -1,0 +1,101 @@
+ CODE AUDIT PROMPT
+Analyze the CodeBreaker codebase and verify all functionalities work by examining the code directly. Do not ask me to test - inspect the code yourself.
+
+CODE INSPECTION TASKS:
+
+1. EXAMINE JAVASCRIPT FUNCTIONS:
+- Check all button click handlers are properly defined
+- Verify event listeners are attached correctly
+- Confirm all functions are called properly
+- Look for undefined variables or missing function declarations
+- Check for syntax errors or typos
+
+2. TRACE USER FLOWS IN CODE:
+- Follow the problem selection flow from click to solution display
+- Trace the Stripe payment integration from button to checkout
+- Verify premium feature gates check user subscription status
+- Confirm progress tracking saves/loads data correctly
+
+3. VALIDATE HTML STRUCTURE:
+- Ensure all buttons have proper onclick handlers or event listeners
+- Check all required HTML elements exist (no missing IDs or classes)
+- Verify form elements are properly connected to JavaScript
+- Confirm navigation links point to correct destinations
+
+4. REVIEW CSS FUNCTIONALITY:
+- Check responsive design classes are applied
+- Verify animation classes exist and are triggered
+- Confirm hover states and interactive elements work
+- Validate mobile-specific styles are in place
+
+5. VERIFY DATA PERSISTENCE:
+- Check localStorage implementation for progress tracking
+- Verify subscription status storage and retrieval
+- Confirm session management code exists
+- Review data structure consistency
+
+6. ANALYZE API INTEGRATIONS:
+- Verify Stripe integration code is complete
+- Check ChatGPT API calls (if implemented)
+- Confirm error handling for API failures
+- Review authentication and subscription checks
+
+7. INSPECT PREMIUM FEATURES:
+- Verify custom prompt generator is gated behind subscription check
+- Confirm Pro-only features have proper access controls
+- Check free tier limitations are coded correctly
+- Review upgrade prompts trigger at right times
+
+OUTPUT FORMAT:
+For each functionality, report:
+✅ WORKING: [Function name] - Code is correct and should work
+❌ BROKEN: [Function name] - Issue found: [specific problem]
+⚠️ WARNING: [Function name] - Potential issue: [concern]
+
+SPECIFIC CODE CHECKS:
+- Are all functions properly defined?
+- Do all buttons have working click handlers?
+- Are there any console.log statements that should be removed?
+- Are all variables properly declared?
+- Do all API calls have error handling?
+- Are subscription checks implemented everywhere needed?
+
+FINAL REPORT:
+Provide a summary of code health and any critical issues that need immediate fixing before launch.
+🔧 FOCUSED CODE REVIEW PROMPT
+Perform a line-by-line code review focusing on these critical functions:
+
+1. PROBLEM SELECTION CODE:
+- Find the problem card click handlers
+- Verify solution display logic
+- Check data flow from selection to solution
+
+2. STRIPE INTEGRATION CODE:
+- Locate Stripe checkout initialization
+- Verify payment success/failure handling
+- Check subscription status updates
+
+3. PREMIUM FEATURE GATES:
+- Find subscription verification functions
+- Check access control for Pro features
+- Verify upgrade prompts trigger correctly
+
+4. CUSTOM PROMPT GENERATOR:
+- Review prompt generation logic
+- Check category-specific functionality
+- Verify ChatGPT API integration (if present)
+
+5. DATA PERSISTENCE:
+- Review localStorage operations
+- Check progress tracking implementation
+- Verify session management
+
+REPORT ONLY CODE ISSUES:
+- Missing function definitions
+- Broken variable references
+- Syntax errors
+- Logic errors
+- Missing event handlers
+- Incomplete integrations
+
+Do not ask me to test - analyze the code directly and report what you find.
