@@ -47,7 +47,9 @@ export function UserSettings({ onBack }: UserSettingsProps) {
   const handleCancelSubscription = async () => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/cancel-subscription");
+      const response = await apiRequest("POST", "/api/cancel-subscription", {
+        userId: user?.uid
+      });
       if (response.ok) {
         setShowCancelConfirm(false);
         setSubscriptionData(prev => ({ ...prev, cancelAtPeriodEnd: true }));
@@ -70,7 +72,9 @@ export function UserSettings({ onBack }: UserSettingsProps) {
   const handleReactivateSubscription = async () => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/reactivate-subscription");
+      const response = await apiRequest("POST", "/api/reactivate-subscription", {
+        userId: user?.uid
+      });
       if (response.ok) {
         setSubscriptionData(prev => ({ ...prev, cancelAtPeriodEnd: false }));
         toast({

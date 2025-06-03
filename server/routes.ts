@@ -115,13 +115,41 @@ Return a JSON object with this structure:
   // Cancel Subscription
   app.post("/api/cancel-subscription", async (req, res) => {
     try {
-      // For authenticated users with active subscriptions
-      // This would cancel the subscription at period end
-      
-      // Simulated response for now
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Find user
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (!user.stripeSubscriptionId) {
+        return res.status(400).json({ error: "No active subscription found" });
+      }
+
+      // Cancel subscription at period end using Stripe
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+
+      // Update user record
+      await storage.updateUserSubscription(user.id, {
+        subscriptionStatus: 'cancel_at_period_end'
+      });
+
       res.json({ 
         success: true,
-        message: "Subscription will be cancelled at the end of the current period"
+        message: "Subscription will be cancelled at the end of the current period",
+        cancelAtPeriodEnd: true,
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null
       });
     } catch (error) {
       console.error("Error cancelling subscription:", error);
@@ -135,13 +163,40 @@ Return a JSON object with this structure:
   // Reactivate Subscription
   app.post("/api/reactivate-subscription", async (req, res) => {
     try {
-      // For authenticated users with cancelled subscriptions
-      // This would reactivate the subscription
-      
-      // Simulated response for now
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Find user
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (!user.stripeSubscriptionId) {
+        return res.status(400).json({ error: "No subscription found" });
+      }
+
+      // Reactivate subscription using Stripe
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: false,
+      });
+
+      // Update user record
+      await storage.updateUserSubscription(user.id, {
+        subscriptionStatus: 'active'
+      });
+
       res.json({ 
         success: true,
-        message: "Subscription has been reactivated"
+        message: "Subscription has been reactivated",
+        cancelAtPeriodEnd: false
       });
     } catch (error) {
       console.error("Error reactivating subscription:", error);
