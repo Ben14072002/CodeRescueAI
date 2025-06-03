@@ -130,6 +130,13 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
 
       if (!response.ok) {
         const error = await response.json();
+        
+        if (response.status === 403) {
+          // User needs Pro subscription
+          setShowProUpgrade(true);
+          return;
+        }
+        
         throw new Error(error.message || "Failed to generate prompts");
       }
 

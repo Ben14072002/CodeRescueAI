@@ -301,10 +301,11 @@ Return a JSON object with this structure:
       if (user.stripeSubscriptionId) {
         try {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          const stripeSubscription = subscription as any; // Type assertion for current_period_end
           subscriptionData = {
             tier: subscription.metadata?.plan || user.subscriptionTier || 'free',
             status: subscription.status,
-            currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null
+            currentPeriodEnd: stripeSubscription.current_period_end ? new Date(stripeSubscription.current_period_end * 1000) : null
           };
         } catch (stripeError) {
           console.error('Error fetching Stripe subscription:', stripeError);
@@ -465,12 +466,15 @@ Generate 3 specialized prompts for this exact situation.`
 
   // Stripe Webhook Handler
   app.post("/api/stripe-webhook", async (req, res) => {
+    const sig = req.headers['stripe-signature'];
     let event;
     
     try {
+      // For now, accept webhooks without signature verification for testing
+      // In production, proper webhook secret verification should be implemented
       event = req.body;
     } catch (err: any) {
-      console.error('Webhook signature verification failed:', err.message);
+      console.error('Webhook processing failed:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -547,18 +551,23 @@ Generate 3 specialized prompts for this exact situation.`
         }
       }
 
-      // Create session
-      const session = await storage.createSession({
-        problemType,
-        projectDescription,
-        customProblem,
-        selectedStrategy,
+      // Create session using the InsertSession schema
+      const sessionData = {
+        problemType: problemType || "",
+        projectDescription: projectDescription || "",
+        customProblem: customProblem || null,
+        selectedStrategy: selectedStrategy || "",
         startTime: new Date(),
-        actionSteps: [],
-        prompts: [],
+        actionSteps: [] as any[],
+        prompts: [] as any[],
+        notes: "",
+        progress: 0,
+        stepsCompleted: 0,
         totalTimeSpent: 0,
         success: false
-      });
+      };
+
+      const session = await storage.createSession(sessionData);
 
       res.json(session);
     } catch (error: any) {
