@@ -240,24 +240,8 @@ Return a JSON object with this structure:
 
       let customerId = user.stripeCustomerId;
       
-      // Create Stripe customer if doesn't exist
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: user.email,
-          metadata: {
-            userId: userId.toString()
-          }
-        });
-        customerId = customer.id;
-        
-        await storage.updateUserSubscription(user.id, {
-          stripeCustomerId: customerId
-        });
-      }
-
-      // Create checkout session - more reliable than payment links
+      // Create checkout session without pre-filled customer to allow email editing
       const session = await stripe.checkout.sessions.create({
-        customer: customerId,
         payment_method_types: ['card'],
         line_items: [
           {
@@ -270,6 +254,7 @@ Return a JSON object with this structure:
         cancel_url: `http://localhost:5000/?upgrade=cancelled`,
         allow_promotion_codes: true,
         billing_address_collection: 'required',
+
         metadata: {
           userId: user.id.toString(),
           firebaseUid: userId.toString(),
