@@ -447,6 +447,21 @@
   background-size: 40px 40px;
 }
 
+/* Essential Layout Fixes */
+html, body {
+  background-color: black !important;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  background-color: black !important;
+}
+
 :root {
   --background: 222 84% 5%; /* #0F172A */
   --foreground: 210 40% 98%; /* #F8FAFC */
