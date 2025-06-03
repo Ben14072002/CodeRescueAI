@@ -74,7 +74,7 @@ export default function Home() {
               <img 
                 src={codeBreakeLogo} 
                 alt="CodeBreaker Logo" 
-                className="w-20 md:w-32 h-auto object-contain transition-all duration-300"
+                className="w-32 md:w-48 h-auto object-contain transition-all duration-300"
               />
             </div>
             <div className="flex items-center space-x-4">
