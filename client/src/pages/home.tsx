@@ -10,7 +10,7 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { UserDashboard } from "@/components/user-dashboard";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
-import codeBreakeLogo from "@assets/Design sans titre (22).png";
+import codeBreakeLogo from "@assets/Design sans titre (25).png";
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "settings";
 
@@ -75,7 +75,6 @@ export default function Home() {
                 src={codeBreakeLogo} 
                 alt="CodeBreaker Logo" 
                 className="w-20 md:w-32 h-auto object-contain transition-all duration-300"
-                style={{ backgroundColor: 'transparent', mixBlendMode: 'screen' }}
               />
             </div>
             <div className="flex items-center space-x-4">
