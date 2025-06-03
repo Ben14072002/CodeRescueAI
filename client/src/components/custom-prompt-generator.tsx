@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Sparkles, Crown, Copy, CheckCircle, Brain, Zap, Star, Target } from "lucide-react";
+import { Loader2, Sparkles, Crown, Copy, CheckCircle, Brain, Zap, Star, Target, Code, Database, Bug, Server, Gauge, Shield, TestTube, Building } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -100,10 +100,19 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
   const isProUser = userTier === 'pro' || userTier === 'pro_monthly' || userTier === 'pro_yearly';
 
   const generateCustomPrompts = async () => {
+    if (!selectedCategory) {
+      toast({
+        title: "Missing Category",
+        description: "Please select a problem category first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!problemDescription.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please describe your problem first.",
+        title: "Missing Description",
+        description: "Please describe your specific problem.",
         variant: "destructive"
       });
       return;
@@ -111,7 +120,9 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
 
     setIsGenerating(true);
     try {
-      const response = await apiRequest("POST", "/api/generate-custom-prompts", {
+      const response = await apiRequest("POST", "/api/generate-category-prompts", {
+        userId: user?.uid,
+        category: selectedCategory,
         problemDescription,
         codeContext,
         errorMessages
@@ -126,8 +137,8 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
       setGeneratedPrompts(data.prompts);
       
       toast({
-        title: "Custom Prompts Generated",
-        description: "AI has analyzed your problem and created tailored prompts."
+        title: "Category-Specific Prompts Generated",
+        description: `Generated ${data.prompts.length} specialized prompts for ${PROBLEM_CATEGORIES.find(c => c.id === selectedCategory)?.name}.`
       });
     } catch (error) {
       console.error("Error generating prompts:", error);
@@ -184,16 +195,42 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
           <CardContent className="p-8 text-center">
             <Crown className="w-16 h-16 text-amber-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-slate-100 mb-4">
-              Custom Prompt Generator
+              Category-Specific Prompt Generator
             </h2>
             <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
-              Get AI-powered analysis of your specific coding problems and receive tailored prompts 
-              designed to break through your exact situation. This advanced feature uses OpenAI to 
-              understand your context and generate personalized rescue strategies.
+              Advanced AI-powered prompt generation with specialized strategies for each problem type. 
+              Uses OpenAI to analyze your specific situation and generate tailored prompts with proven 
+              techniques like context reset, contract-first development, and architecture reset.
             </p>
+
+            <div className="grid md:grid-cols-2 gap-4 mb-6 text-left">
+              <div className="space-y-2">
+                <h4 className="font-semibold text-slate-200 flex items-center">
+                  <Star className="w-4 h-4 mr-2 text-amber-400" />
+                  Premium Features
+                </h4>
+                <ul className="text-sm text-slate-400 space-y-1">
+                  <li>• Category-specific strategies</li>
+                  <li>• OpenAI-powered analysis</li>
+                  <li>• 3 prompt variations per request</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold text-slate-200 flex items-center">
+                  <Zap className="w-4 h-4 mr-2 text-blue-400" />
+                  Problem Categories
+                </h4>
+                <ul className="text-sm text-slate-400 space-y-1">
+                  <li>• Complexity Overwhelm</li>
+                  <li>• Integration Issues</li>
+                  <li>• Lost Direction & More</li>
+                </ul>
+              </div>
+            </div>
+
             <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 mb-6">
               <Crown className="w-4 h-4 mr-2" />
-              Pro Feature
+              Pro Feature - $9.99/month
             </Badge>
             <div className="space-y-2">
               <Button 
@@ -204,7 +241,7 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
                 Upgrade to Pro
               </Button>
               <p className="text-sm text-slate-400">
-                Unlimited rescues + Custom prompt generation
+                Unlimited rescues + Category-specific prompt generation
               </p>
             </div>
           </CardContent>
@@ -237,6 +274,42 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div>
+                <Label className="text-slate-300 text-base mb-3 block flex items-center">
+                  <Target className="w-4 h-4 mr-2 text-blue-400" />
+                  Problem Category *
+                  <Badge className="ml-2 bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Pro
+                  </Badge>
+                </Label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-slate-100">
+                    <SelectValue placeholder="Select your problem category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-600">
+                    {PROBLEM_CATEGORIES.map((category) => (
+                      <SelectItem key={category.id} value={category.id} className="text-slate-100 focus:bg-slate-700">
+                        <div className="flex items-center">
+                          <category.icon className="w-4 h-4 mr-2 text-blue-400" />
+                          <div>
+                            <div className="font-medium">{category.name}</div>
+                            <div className="text-xs text-slate-400">{category.description}</div>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedCategory && (
+                  <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                    <div className="text-sm text-blue-300">
+                      <strong>Specialized Techniques:</strong> {PROBLEM_CATEGORIES.find(c => c.id === selectedCategory)?.strategies.join(', ')}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <Label className="text-slate-300 text-base mb-3 block">
                   Problem Description *
