@@ -10,7 +10,7 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { UserDashboard } from "@/components/user-dashboard";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
-import codeBreakeLogo from "@assets/Design sans titre (24).png";
+import codeBreakeLogo from "@assets/Design sans titre (22).png";
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "settings";
 
