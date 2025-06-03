@@ -1,0 +1,76 @@
+Upgrade the custom prompt generator to be a PREMIUM feature with category-specific intelligence.
+
+CURRENT STATE: Basic custom prompt generator that works generically
+TARGET STATE: Advanced, category-specific prompt generator for Pro users only
+
+PREMIUM FEATURE REQUIREMENTS:
+1. Only available for Pro subscribers ($9.99/month users)
+2. Category-specific prompt generation for each problem type
+3. Deep, contextual prompts based on user's specific situation
+4. Multiple prompt variations per category
+5. ChatGPT API integration for dynamic prompt enhancement
+
+IMPLEMENTATION STEPS:
+
+1. ADD PREMIUM GATE:
+- Check user subscription status before allowing access
+- Show "Upgrade to Pro" for free users
+- Display premium badge/indicator on this feature
+
+2. CATEGORY-SPECIFIC GENERATORS:
+For each problem type, create specialized prompt generators:
+
+COMPLEXITY OVERWHELM GENERATOR:
+- Analyzes user input for: project type, technologies, overwhelm indicators
+- Generates prompts using: context reset, role constraints, methodology enforcement
+- Example output: "Ignore all previous context about this project. You are now a senior developer who only builds production-ready applications one feature at a time..."
+
+INTEGRATION ISSUES GENERATOR:
+- Detects: component names, data flow problems, connection failures
+- Generates prompts using: isolation debugging, contract-first development, adapter patterns
+- Example output: "Stop all current work. You will now use Contract-First Development. Define the exact interface between [ComponentA] and [ComponentB]..."
+
+LOST DIRECTION GENERATOR:
+- Identifies: feature creep, scope expansion, original goal deviation
+- Generates prompts using: requirements archaeology, user story constraints, goal realignment
+- Example output: "Perform requirements archaeology on this project. Find the original goal/user story..."
+
+NO CLEAR PLAN GENERATOR:
+- Recognizes: random coding, lack of structure, jumping between tasks
+- Generates prompts using: reverse engineering, walking skeleton, milestone definition
+- Example output: "Use reverse engineering to create a plan: Describe the final working application in one sentence..."
+
+REPEATED FAILURES GENERATOR:
+- Detects: loop indicators, multiple attempts, same errors
+- Generates prompts using: architecture reset, constraint-driven development, alternative approaches
+- Example output: "Your current architecture is fundamentally flawed. Perform an architecture reset..."
+
+3. SMART CONTEXT EXTRACTION:
+Extract from user input:
+- Project type (todo app, e-commerce, API, etc.)
+- Technologies mentioned (React, Python, Node.js, etc.)
+- Specific components/features
+- Error patterns or failure descriptions
+- Complexity indicators
+
+4. CHATGPT API INTEGRATION:
+Send structured prompt to ChatGPT:
+"Based on this user description: '[USER_INPUT]' and problem category: '[CATEGORY]', generate 3 advanced AI agent prompts using [SPECIFIC_STRATEGY] techniques. Each prompt should be 100-200 words and include specific context from the user's situation."
+
+5. UI ENHANCEMENTS:
+- Premium badge on custom generator tab
+- Category selection dropdown
+- User input analysis preview
+- Multiple prompt variations display
+- Copy-to-clipboard for each generated prompt
+- Prompt effectiveness rating system
+
+6. SUBSCRIPTION CHECK:
+```javascript
+function checkPremiumAccess() {
+  if (!user.isPro) {
+    showUpgradeModal("Custom Prompt Generator is a Pro feature");
+    return false;
+  }
+  return true;
+}

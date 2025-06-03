@@ -306,6 +306,129 @@ Return a JSON object with this structure:
     }
   });
 
+  // Enhanced Custom Prompt Generator (Pro Feature)
+  app.post("/api/generate-category-prompts", async (req, res) => {
+    if (!req.body.userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    try {
+      const { category, problemDescription, codeContext, errorMessages } = req.body;
+      
+      // Check if user has Pro subscription
+      const user = await storage.getUser(parseInt(req.body.userId));
+      if (!user || !['pro', 'pro_monthly', 'pro_yearly'].includes(user.subscriptionTier || '')) {
+        return res.status(403).json({ error: "Pro subscription required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ error: "OpenAI integration not configured" });
+      }
+
+      // Category-specific prompt strategies
+      const categoryStrategies = {
+        'complexity-overwhelm': {
+          systemPrompt: "You are an expert AI prompt engineer specializing in complexity reduction. Generate prompts that use context reset, role constraints, and methodology enforcement.",
+          techniques: ["Ignore all previous context", "You are now a senior developer who only builds one feature at a time", "Use strict methodology constraints"]
+        },
+        'integration-issues': {
+          systemPrompt: "You are an expert in debugging integration problems. Generate prompts using isolation debugging, contract-first development, and adapter patterns.",
+          techniques: ["Stop all current work", "Define exact interfaces between components", "Use Contract-First Development"]
+        },
+        'lost-direction': {
+          systemPrompt: "You are an expert in project management and requirements archaeology. Generate prompts that realign with original goals.",
+          techniques: ["Perform requirements archaeology", "Find the original user story", "Enforce strict scope constraints"]
+        },
+        'no-clear-plan': {
+          systemPrompt: "You are an expert in software architecture planning. Generate prompts using reverse engineering and walking skeleton approaches.",
+          techniques: ["Use reverse engineering to create a plan", "Build a walking skeleton first", "Define clear milestones"]
+        },
+        'repeated-failures': {
+          systemPrompt: "You are an expert in breaking coding loops and architectural resets. Generate prompts that force alternative approaches.",
+          techniques: ["Your current architecture is fundamentally flawed", "Perform an architecture reset", "Try a completely different approach"]
+        }
+      };
+
+      const strategy = categoryStrategies[category as keyof typeof categoryStrategies];
+      if (!strategy) {
+        return res.status(400).json({ error: "Invalid category" });
+      }
+
+      // Generate category-specific prompts using OpenAI
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `${strategy.systemPrompt} 
+
+Based on the user's problem description and context, generate 3 advanced AI agent prompts that use these specific techniques: ${strategy.techniques.join(', ')}.
+
+Each prompt should:
+- Be 100-200 words
+- Include specific context from the user's situation
+- Use the mentioned techniques effectively
+- Be immediately actionable for the user
+- Have a clear title and explanation
+
+Return as JSON with this structure:
+{
+  "prompts": [
+    {
+      "title": "Clear, actionable title",
+      "prompt": "The actual prompt text to copy-paste to AI",
+      "explanation": "Why this prompt works for this specific situation",
+      "difficulty": "beginner|intermediate|advanced"
+    }
+  ]
+}`
+            },
+            {
+              role: 'user',
+              content: `Problem Category: ${category}
+
+User Description: ${problemDescription}
+
+Code Context: ${codeContext || 'No code context provided'}
+
+Error Messages: ${errorMessages || 'No error messages provided'}
+
+Generate 3 specialized prompts for this exact situation.`
+            }
+          ],
+          response_format: { type: "json_object" },
+          max_tokens: 1500,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
+
+      const aiResponse = await response.json();
+      const generatedData = JSON.parse(aiResponse.choices[0].message.content);
+      
+      // Add category to each prompt
+      const prompts = generatedData.prompts.map((prompt: any) => ({
+        ...prompt,
+        category: category
+      }));
+
+      res.json({ prompts });
+
+    } catch (error: any) {
+      console.error('Custom prompt generation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Stripe Webhook Handler
   app.post("/api/stripe-webhook", async (req, res) => {
     let event;

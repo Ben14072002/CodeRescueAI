@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Sparkles, Crown, Copy, CheckCircle, Brain } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Sparkles, Crown, Copy, CheckCircle, Brain, Zap, Star, Target } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -15,13 +16,62 @@ interface CustomPrompt {
   prompt: string;
   explanation: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
+  category: string;
+  rating?: number;
+}
+
+interface ProblemCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: any;
+  strategies: string[];
 }
 
 interface CustomPromptGeneratorProps {
   onBack: () => void;
 }
 
+const PROBLEM_CATEGORIES: ProblemCategory[] = [
+  {
+    id: 'complexity-overwhelm',
+    name: 'Complexity Overwhelm',
+    description: 'AI builds everything at once, creating chaos',
+    icon: Brain,
+    strategies: ['context reset', 'role constraints', 'methodology enforcement']
+  },
+  {
+    id: 'integration-issues',
+    name: 'Integration Issues',
+    description: 'Cannot connect components or features together',
+    icon: Zap,
+    strategies: ['isolation debugging', 'contract-first development', 'adapter patterns']
+  },
+  {
+    id: 'lost-direction',
+    name: 'Lost Direction',
+    description: 'Feature creep and scope expansion',
+    icon: Target,
+    strategies: ['requirements archaeology', 'user story constraints', 'goal realignment']
+  },
+  {
+    id: 'no-clear-plan',
+    name: 'No Clear Plan',
+    description: 'Random coding without structure',
+    icon: CheckCircle,
+    strategies: ['reverse engineering', 'walking skeleton', 'milestone definition']
+  },
+  {
+    id: 'repeated-failures',
+    name: 'Repeated Failures',
+    description: 'Stuck in endless debug loops',
+    icon: Copy,
+    strategies: ['architecture reset', 'constraint-driven development', 'alternative approaches']
+  }
+];
+
 export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [problemDescription, setProblemDescription] = useState("");
   const [codeContext, setCodeContext] = useState("");
   const [errorMessages, setErrorMessages] = useState("");
