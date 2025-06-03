@@ -64,7 +64,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Header */}
-      <header className="surface-800 border-b border-slate-700">
+      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div 
