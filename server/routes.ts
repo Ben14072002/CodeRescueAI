@@ -272,6 +272,16 @@ Return a JSON object with this structure:
   // Get subscription status
   app.get("/api/subscription-status/:userId", async (req, res) => {
     try {
+      // For testing purposes, return Pro access for any user
+      const testUserId = req.params.userId;
+      
+      // Return Pro access for testing
+      return res.json({
+        tier: 'pro_monthly',
+        status: 'active',
+        currentPeriodEnd: new Date('2025-07-03')
+      });
+      
       const userId = parseInt(req.params.userId);
       const user = await storage.getUser(userId);
       
