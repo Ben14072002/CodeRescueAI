@@ -160,21 +160,30 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
             );
           })}
 
-          {/* Custom Problem Card */}
+          {/* AI Prompt Generator Card */}
           <Card
-            className={`cursor-pointer transition-all surface-800 border-slate-700 hover:border-primary ${
-              selectedProblem === "custom" ? "border-primary surface-700" : ""
+            className={`cursor-pointer transition-all surface-800 border-amber-500/30 hover:border-amber-500 bg-gradient-to-br from-amber-900/20 to-orange-900/20 ${
+              selectedProblem === "custom" ? "border-amber-500 surface-700" : ""
             }`}
             onClick={() => handleProblemSelect("custom")}
           >
             <CardContent className="p-6">
               <div className="text-center mb-4">
-                <Edit className="w-8 h-8 text-slate-500 mb-3 mx-auto" />
-                <h3 className="text-lg font-semibold mb-2">Something Else</h3>
+                <Sparkles className="w-8 h-8 text-amber-400 mb-3 mx-auto" />
+                <h3 className="text-lg font-semibold mb-2 flex items-center justify-center">
+                  AI Prompt Generator
+                  <Crown className="w-4 h-4 ml-2 text-amber-400" />
+                </h3>
               </div>
-              <p className="text-slate-400 text-sm mb-4">Describe your specific situation for custom guidance</p>
-              <div className="text-xs text-slate-500">
-                <span className="bg-slate-500/20 text-slate-400 px-2 py-1 rounded">Custom Strategy</span>
+              <p className="text-slate-300 text-sm mb-4">Advanced OpenAI-powered analysis for category-specific prompts tailored to your exact situation</p>
+              <div className="flex justify-center space-x-2">
+                <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
+                  <Crown className="w-3 h-3 mr-1" />
+                  Pro Feature
+                </Badge>
+                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                  OpenAI Powered
+                </Badge>
               </div>
             </CardContent>
           </Card>
