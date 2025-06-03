@@ -10,6 +10,7 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { UserDashboard } from "@/components/user-dashboard";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
+import codeBreakeLogo from "@assets/image_1748940114693.png";
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "settings";
 
@@ -71,7 +72,7 @@ export default function Home() {
               onClick={navigateToLanding}
             >
               <img 
-                src="/attached_assets/image_1748940114693.png" 
+                src={codeBreakeLogo} 
                 alt="CodeBreaker Logo" 
                 className="w-10 h-10 object-contain"
               />
