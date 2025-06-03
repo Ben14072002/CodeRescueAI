@@ -304,7 +304,7 @@ Return a JSON object with this structure:
           subscriptionData = {
             tier: subscription.metadata?.plan || user.subscriptionTier || 'free',
             status: subscription.status,
-            currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
+            currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null
           };
         } catch (stripeError) {
           console.error('Error fetching Stripe subscription:', stripeError);
@@ -321,14 +321,38 @@ Return a JSON object with this structure:
   // Enhanced Custom Prompt Generator (Pro Feature)
   app.post("/api/generate-category-prompts", async (req, res) => {
     try {
-      const { category, problemDescription, codeContext, errorMessages } = req.body;
+      const { userId, category, problemDescription, codeContext, errorMessages } = req.body;
       
-      // For testing purposes, bypass user authentication
-      // TODO: Re-enable proper authentication after testing
-
       // Validate required inputs
       if (!category || !problemDescription?.trim()) {
         return res.status(400).json({ error: "Category and problem description are required" });
+      }
+
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify user has Pro subscription
+      try {
+        let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+        if (!user && !isNaN(parseInt(userId))) {
+          user = await storage.getUser(parseInt(userId));
+        }
+
+        if (!user) {
+          return res.status(401).json({ error: "User not found" });
+        }
+
+        // Check subscription status
+        const userTier = user.subscriptionTier || 'free';
+        const isProUser = userTier === 'pro' || userTier === 'pro_monthly' || userTier === 'pro_yearly';
+        
+        if (!isProUser) {
+          return res.status(403).json({ error: "Pro subscription required for custom prompt generation" });
+        }
+      } catch (authError) {
+        console.error('Authentication error:', authError);
+        return res.status(401).json({ error: "Authentication failed" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
@@ -490,8 +514,101 @@ Generate 3 specialized prompts for this exact situation.`
     res.json({ received: true });
   });
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // Session creation with proper validation
+  app.post("/api/sessions", async (req, res) => {
+    try {
+      const { userId, problemType, projectDescription, customProblem, selectedStrategy } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Find user
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      // Check session limits for free users
+      const userTier = user.subscriptionTier || 'free';
+      const isProUser = userTier === 'pro' || userTier === 'pro_monthly' || userTier === 'pro_yearly';
+
+      if (!isProUser) {
+        const monthlySessionCount = await storage.getUserSessionsThisMonth(user.id);
+        if (monthlySessionCount.length >= 3) {
+          return res.status(403).json({ 
+            error: "Monthly session limit reached. Upgrade to Pro for unlimited sessions.",
+            code: "SESSION_LIMIT_REACHED"
+          });
+        }
+      }
+
+      // Create session
+      const session = await storage.createSession({
+        problemType,
+        projectDescription,
+        customProblem,
+        selectedStrategy,
+        startTime: new Date(),
+        actionSteps: [],
+        prompts: [],
+        totalTimeSpent: 0,
+        success: false
+      });
+
+      res.json(session);
+    } catch (error: any) {
+      console.error('Session creation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user session count for current month
+  app.get("/api/user/sessions/count/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.json({
+          monthlyCount: 0,
+          remainingFree: 3,
+          canCreateSession: true
+        });
+      }
+
+      const userTier = user.subscriptionTier || 'free';
+      const isProUser = userTier === 'pro' || userTier === 'pro_monthly' || userTier === 'pro_yearly';
+      
+      if (isProUser) {
+        return res.json({
+          monthlyCount: 0,
+          remainingFree: -1, // Unlimited
+          canCreateSession: true
+        });
+      }
+
+      const monthlySessionCount = await storage.getUserSessionsThisMonth(user.id);
+      const remaining = Math.max(0, 3 - monthlySessionCount.length);
+
+      res.json({
+        monthlyCount: monthlySessionCount.length,
+        remainingFree: remaining,
+        canCreateSession: remaining > 0
+      });
+    } catch (error: any) {
+      console.error('Session count error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   const httpServer = createServer(app);
 

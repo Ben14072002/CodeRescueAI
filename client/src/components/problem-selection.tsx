@@ -179,7 +179,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
               <div className="text-center mb-4">
                 <div className="relative">
                   <Sparkles className="w-8 h-8 text-purple-400 mb-3 mx-auto" />
-                  {userTier !== 'pro' && (
+                  {!isProUser && (
                     <Crown className="w-4 h-4 text-amber-400 absolute -top-1 -right-1" />
                   )}
                 </div>
