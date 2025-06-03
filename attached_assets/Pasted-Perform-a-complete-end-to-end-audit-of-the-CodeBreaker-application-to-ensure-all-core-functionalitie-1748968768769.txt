@@ -1,0 +1,113 @@
+Perform a complete end-to-end audit of the CodeBreaker application to ensure all core functionalities work perfectly before launch.
+
+SYSTEMATIC TESTING CHECKLIST:
+
+1. LANDING PAGE & NAVIGATION:
+✅ Check: Logo displays correctly and links to homepage
+✅ Check: All navigation links work (no 404 errors)
+✅ Check: Hero section displays properly
+✅ Check: Problem selection cards are visible and clickable
+✅ Check: Mobile responsiveness on all screens
+✅ Check: Page load speed is acceptable
+
+2. PROBLEM SELECTION FLOW:
+✅ Check: All 6 problem cards are clickable
+✅ Check: Selected state visual feedback works
+✅ Check: "Get Solution Strategy" button appears after selection
+✅ Check: Button leads to correct solution display
+✅ Check: Back navigation works properly
+
+3. SOLUTION DISPLAY SYSTEM:
+✅ Check: Correct solution loads for each problem type
+✅ Check: Ready-to-use prompts display properly
+✅ Check: Copy-to-clipboard works on all prompts
+✅ Check: Action steps display as checkboxes
+✅ Check: Progress tracking saves and loads correctly
+✅ Check: All tabs (Smart Prompts, Action Steps, Progress) function
+
+4. PREMIUM CUSTOM PROMPT GENERATOR:
+✅ Check: Premium gate works (free users see upgrade prompt)
+✅ Check: Pro users can access the feature
+✅ Check: Category-specific generation works for each problem type
+✅ Check: User input analysis extracts context correctly
+✅ Check: Generated prompts are relevant and detailed
+✅ Check: Multiple prompt variations display
+✅ Check: ChatGPT API integration works (if implemented)
+
+5. USER SUBSCRIPTION SYSTEM:
+✅ Check: "Upgrade to Pro" buttons work
+✅ Check: Stripe Checkout opens correctly
+✅ Check: Payment flow completes successfully
+✅ Check: User status updates after payment
+✅ Check: Pro features unlock after subscription
+✅ Check: Free tier limitations are enforced (3 rescues/month)
+
+6. DATA PERSISTENCE:
+✅ Check: User progress saves between sessions
+✅ Check: Subscription status persists
+✅ Check: Session history works
+✅ Check: LocalStorage/database functions properly
+
+7. ERROR HANDLING:
+✅ Check: No JavaScript console errors
+✅ Check: Broken links or missing resources
+✅ Check: API failures are handled gracefully
+✅ Check: Form validation works correctly
+✅ Check: Loading states display during processing
+
+8. MOBILE OPTIMIZATION:
+✅ Check: All features work on mobile devices
+✅ Check: Touch interactions function properly
+✅ Check: Text is readable without zooming
+✅ Check: Buttons are finger-friendly size
+✅ Check: No horizontal scrolling issues
+
+9. PERFORMANCE:
+✅ Check: Page loads within 3 seconds
+✅ Check: Animations are smooth (60fps)
+✅ Check: No memory leaks or excessive resource usage
+✅ Check: Images and assets are optimized
+
+10. BUSINESS LOGIC:
+✅ Check: Free users can use 3 rescues maximum
+✅ Check: Pro users have unlimited access
+✅ Check: Upgrade prompts appear at correct times
+✅ Check: Success tracking works correctly
+
+TESTING PROCEDURE:
+1. Test as a new free user (complete signup flow)
+2. Use all 3 free rescues
+3. Verify upgrade prompt appears
+4. Complete payment process
+5. Test all Pro features
+6. Test on multiple devices/browsers
+
+OUTPUT REQUIRED:
+- List of any bugs or issues found
+- Confirmation that each checklist item passes
+- Priority level for any issues (Critical, High, Medium, Low)
+- Specific steps to reproduce any problems
+
+If everything passes, confirm: "CodeBreaker application is ready for launch - all core functionalities verified and working."
+🚨 CRITICAL AREAS TO DOUBLE-CHECK
+Priority focus areas for the final audit:
+
+REVENUE-CRITICAL ITEMS (Must work perfectly):
+1. Stripe payment integration
+2. Premium feature gates
+3. Subscription status tracking
+4. Free tier limitations
+
+CORE VALUE DELIVERY (Must work smoothly):
+1. Problem selection and solution display
+2. Prompt copy-to-clipboard functionality
+3. Custom prompt generator for Pro users
+4. Progress tracking and session management
+
+USER EXPERIENCE (Should work well):
+1. Mobile responsiveness
+2. Loading states and animations
+3. Error messages and guidance
+4. Navigation flow
+
+Test these in order of priority. Fix any critical issues before launch!
