@@ -6,6 +6,7 @@ import { CostCalculator } from "@/components/cost-calculator";
 import { FAQSection } from "@/components/faq-section";
 import { Footer } from "@/components/footer";
 import { HoverMazeEffect } from "./background-effects";
+import { initializeScrollAnimations } from "@/lib/scroll-animations";
 import { 
   Play, 
   Bot, 
@@ -69,16 +70,23 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
 
     // Small delay to ensure DOM is ready
     setTimeout(animateHero, 100);
+
+    // Initialize scroll animations
+    initializeScrollAnimations();
   }, []);
 
   return (
     <div className="min-h-screen relative bg-slate-950">
-      {/* Geometric Background Elements */}
+      {/* Parallax Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="geometric-bg absolute top-20 left-10 w-16 h-16 border border-blue-500/20 rotate-45"></div>
-        <div className="geometric-bg absolute top-40 right-20 w-12 h-12 border border-emerald-500/20"></div>
-        <div className="geometric-bg absolute bottom-40 left-20 w-20 h-20 border border-cyan-500/20 rotate-12"></div>
-        <div className="geometric-bg absolute bottom-20 right-10 w-14 h-14 border border-purple-500/20 -rotate-12"></div>
+        <div className="parallax-element geometric-bg absolute top-20 left-10 w-16 h-16 border border-blue-500/20 rotate-45" data-speed="0.3" data-offset="0"></div>
+        <div className="parallax-element geometric-bg absolute top-40 right-20 w-12 h-12 border border-emerald-500/20" data-speed="0.5" data-offset="20"></div>
+        <div className="parallax-element geometric-bg absolute bottom-40 left-20 w-20 h-20 border border-cyan-500/20 rotate-12" data-speed="0.2" data-offset="10"></div>
+        <div className="parallax-element geometric-bg absolute bottom-20 right-10 w-14 h-14 border border-purple-500/20 -rotate-12" data-speed="0.4" data-offset="-10"></div>
+        
+        {/* Additional parallax elements */}
+        <div className="parallax-element absolute top-1/3 left-1/2 w-8 h-8 border border-blue-400/10 rounded-full" data-speed="0.6" data-offset="30"></div>
+        <div className="parallax-element absolute top-2/3 right-1/3 w-6 h-6 border border-green-400/10" data-speed="0.25" data-offset="-20"></div>
       </div>
       {/* Hero Section */}
       <section className="text-center mb-20 pt-20 pb-10">
@@ -154,9 +162,9 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
       </section>
 
       {/* Problem/Solution Section */}
-      <section className="mb-20">
+      <section className="section-reveal mb-20">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 scroll-animate">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
               Every Developer's Nightmare
             </h2>
@@ -167,10 +175,11 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
 
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             {/* Problem Side */}
-            <HoverMazeEffect>
-              <Card className="bg-red-500/10 border-red-500/20 transition-all duration-300 hover:bg-red-500/15 hover:border-red-500/30">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-red-400 mb-6">Before CodeBreaker</h3>
+            <div className="scroll-animate-left">
+              <HoverMazeEffect>
+                <Card className="bg-red-500/10 border-red-500/20 transition-all duration-300 hover:bg-red-500/15 hover:border-red-500/30">
+                  <CardContent className="p-8">
+                    <h3 className="text-2xl font-bold text-red-400 mb-6">Before CodeBreaker</h3>
                 <ul className="space-y-4">
                   {[
                     "AI builds everything at once, creating chaos",
@@ -187,11 +196,13 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                 </ul>
               </CardContent>
             </Card>
-            </HoverMazeEffect>
+              </HoverMazeEffect>
+            </div>
 
             {/* Solution Side */}
-            <HoverMazeEffect>
-            <Card className="bg-emerald-500/10 border-emerald-500/20 transition-all duration-300 hover:bg-emerald-500/15 hover:border-emerald-500/30">
+            <div className="scroll-animate-right">
+              <HoverMazeEffect>
+                <Card className="bg-emerald-500/10 border-emerald-500/20 transition-all duration-300 hover:bg-emerald-500/15 hover:border-emerald-500/30">
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold text-emerald-400 mb-6">With CodeBreaker</h3>
                 <ul className="space-y-4">
@@ -210,15 +221,16 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                 </ul>
               </CardContent>
             </Card>
-            </HoverMazeEffect>
+              </HoverMazeEffect>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="mb-20">
+      <section className="section-reveal mb-20">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 scroll-animate">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
               Everything You Need to Get Unstuck
             </h2>
@@ -227,7 +239,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="feature-grid grid md:grid-cols-3 gap-8">
             {[
               {
                 icon: Target,
@@ -248,15 +260,17 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                 color: "text-emerald-500"
               }
             ].map((feature, index) => (
-              <HoverMazeEffect key={index}>
-                <Card className="surface-800 border-slate-700 hover:border-primary/50 transition-all duration-300 hover:bg-slate-800/50">
-                  <CardContent className="p-8 text-center">
-                    <feature.icon className={`w-12 h-12 ${feature.color} mx-auto mb-4 animate-pulse-slow`} />
-                    <h3 className="text-xl font-semibold mb-4 text-slate-100">{feature.title}</h3>
-                    <p className="text-slate-400">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              </HoverMazeEffect>
+              <div key={index} className="feature-item">
+                <HoverMazeEffect>
+                  <Card className="surface-800 border-slate-700 hover:border-primary/50 transition-all duration-300 hover:bg-slate-800/50">
+                    <CardContent className="p-8 text-center">
+                      <feature.icon className={`w-12 h-12 ${feature.color} mx-auto mb-4 animate-pulse-slow`} />
+                      <h3 className="text-xl font-semibold mb-4 text-slate-100">{feature.title}</h3>
+                      <p className="text-slate-400">{feature.description}</p>
+                    </CardContent>
+                  </Card>
+                </HoverMazeEffect>
+              </div>
             ))}
           </div>
         </div>
