@@ -144,18 +144,18 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-slate-400 text-sm">
+          <div className="stagger-children flex flex-wrap items-center justify-center gap-8 text-slate-400 text-sm">
             <div className="flex items-center">
               <Clock className="w-4 h-4 mr-2 text-emerald-500" />
-              Average rescue time: 8 minutes
+              Average rescue time: <span className="counter-animate ml-1 text-emerald-400 font-semibold" data-target="8" data-duration="1500">0</span> minutes
             </div>
             <div className="flex items-center">
               <CheckCircle className="w-4 h-4 mr-2 text-emerald-500" />
-              94% success rate
+              <span className="counter-animate text-emerald-400 font-semibold" data-target="94" data-duration="2000">0</span>% success rate
             </div>
             <div className="flex items-center">
               <Users className="w-4 h-4 mr-2 text-emerald-500" />
-              500+ developers rescued
+              <span className="counter-animate text-emerald-400 font-semibold" data-target="500" data-duration="2500">0</span>+ developers rescued
             </div>
           </div>
         </div>
