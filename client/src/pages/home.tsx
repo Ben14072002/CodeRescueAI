@@ -10,7 +10,7 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { UserDashboard } from "@/components/user-dashboard";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
-import codeBreakeLogo from "@assets/image_1748940114693.png";
+import codeBreakeLogo from "@assets/Design sans titre (24).png";
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "settings";
 
@@ -68,18 +68,14 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div 
-              className="flex items-center space-x-3 cursor-pointer"
+              className="logo-container cursor-pointer transition-transform duration-300 ease-out hover:scale-105"
               onClick={navigateToLanding}
             >
               <img 
                 src={codeBreakeLogo} 
                 alt="CodeBreaker Logo" 
-                className="w-10 h-10 object-contain"
+                className="w-20 md:w-32 h-auto object-contain transition-all duration-300"
               />
-              <div>
-                <h1 className="text-xl font-bold text-white">CodeBreaker</h1>
-                <p className="text-sm text-slate-400">AI Assistant Rescue Tool</p>
-              </div>
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
