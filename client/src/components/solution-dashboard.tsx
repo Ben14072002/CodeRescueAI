@@ -478,6 +478,72 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: S
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Pro Upgrade Modal */}
+      <Dialog open={showProUpgrade} onOpenChange={setShowProUpgrade}>
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-slate-100">
+              <Crown className="w-5 h-5 mr-2 text-amber-400" />
+              Unlock Custom Prompt Generator
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="text-center">
+              <Crown className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-100 mb-2">
+                Premium AI-Powered Prompts
+              </h3>
+              <p className="text-slate-300 text-sm mb-4">
+                Generate category-specific prompts with OpenAI analysis and expert techniques tailored to your exact coding situation.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-center text-slate-300">
+                <Zap className="w-4 h-4 mr-2 text-blue-400" />
+                OpenAI Integration
+              </div>
+              <div className="flex items-center text-slate-300">
+                <Star className="w-4 h-4 mr-2 text-amber-400" />
+                3 Prompt Variations
+              </div>
+              <div className="flex items-center text-slate-300">
+                <Crown className="w-4 h-4 mr-2 text-amber-400" />
+                Expert Techniques
+              </div>
+              <div className="flex items-center text-slate-300">
+                <Lightbulb className="w-4 h-4 mr-2 text-green-400" />
+                Context Analysis
+              </div>
+            </div>
+
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-center">
+              <div className="text-amber-300 font-semibold mb-1">Pro Plan - $9.99/month</div>
+              <div className="text-xs text-slate-400">
+                Unlimited rescues + Custom prompt generation + Priority support
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowProUpgrade(false)}
+                className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+              >
+                Maybe Later
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
+                className="flex-1 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
