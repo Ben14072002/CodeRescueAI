@@ -74,8 +74,12 @@ export default function Home() {
               <img 
                 src={codeBreakeLogo} 
                 alt="CodeBreaker Logo" 
-                className="w-48 h-48 object-contain"
+                className="w-10 h-10 object-contain"
               />
+              <div>
+                <h1 className="text-xl font-bold text-white">CodeBreaker</h1>
+                <p className="text-sm text-slate-400">AI Assistant Rescue Tool</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
