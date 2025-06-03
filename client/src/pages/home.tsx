@@ -70,9 +70,11 @@ export default function Home() {
               className="flex items-center space-x-3 cursor-pointer"
               onClick={navigateToLanding}
             >
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <i className="fas fa-code text-white text-lg" />
-              </div>
+              <img 
+                src="/attached_assets/image_1748940114693.png" 
+                alt="CodeBreaker Logo" 
+                className="w-10 h-10 object-contain"
+              />
               <div>
                 <h1 className="text-xl font-bold text-white">CodeBreaker</h1>
                 <p className="text-sm text-slate-400">AI Assistant Rescue Tool</p>
