@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Header } from "@/components/header";
 import { LandingSection } from "@/components/landing-section";
 import { ProblemSelection } from "@/components/problem-selection";
 import { SolutionDashboard } from "@/components/solution-dashboard";
+import { UserDashboard } from "@/components/user-dashboard";
 import { CustomPromptGenerator } from "@/components/custom-prompt-generator";
 import { UserSettings } from "@/components/user-settings";
 import { SuccessModal } from "@/components/success-modal";
 import { CopyToast } from "@/components/copy-toast";
-import { AuthModal } from "@/components/auth/auth-modal";
-import { UserDashboard } from "@/components/user-dashboard";
+import { PricingSection } from "@/components/pricing/pricing-section";
+import { FAQSection } from "@/components/faq-section";
+import { Footer } from "@/components/footer";
 import { useSession } from "@/hooks/use-session";
-import { useAuth } from "@/hooks/use-auth";
+import { initializeScrollAnimations } from "@/lib/scroll-animations";
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "settings";
 
@@ -17,26 +20,34 @@ export default function Home() {
   const [currentSection, setCurrentSection] = useState<Section>("landing");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authDefaultView, setAuthDefaultView] = useState<"login" | "register">("login");
-  
   const { currentSession } = useSession();
-  const { user, loading } = useAuth();
 
-  const navigateToProblems = () => {
-    if (!user) {
-      setAuthDefaultView("login");
-      setShowAuthModal(true);
-      return;
-    }
+  useEffect(() => {
+    // Initialize scroll animations after component mounts
+    const cleanup = initializeScrollAnimations();
+    return cleanup;
+  }, []);
+
+  const handleGetStarted = () => {
     setCurrentSection("problems");
   };
-  
-  const navigateToSolution = () => setCurrentSection("solution");
-  const navigateToLanding = () => setCurrentSection("landing");
-  const navigateToDashboard = () => setCurrentSection("dashboard");
-  const navigateToCustomPrompts = () => setCurrentSection("custom-prompts");
-  const navigateToSettings = () => setCurrentSection("settings");
+
+  const handleAnalyze = () => {
+    setCurrentSection("solution");
+  };
+
+  const handleBack = () => {
+    setCurrentSection("landing");
+  };
+
+  const handleBackToProblems = () => {
+    setCurrentSection("problems");
+  };
+
+  const handleNewSession = () => {
+    setCurrentSection("problems");
+    setShowSuccessModal(false);
+  };
 
   const handleSuccess = () => {
     setShowSuccessModal(true);
@@ -44,135 +55,93 @@ export default function Home() {
 
   const handleCopy = () => {
     setShowCopyToast(true);
-    setTimeout(() => setShowCopyToast(false), 2000);
+    setTimeout(() => setShowCopyToast(false), 3000);
   };
 
-  const handleNewSession = () => {
-    setShowSuccessModal(false);
-    setCurrentSection("problems");
+  const handleSelectPlan = (plan: any) => {
+    // Handle plan selection - could redirect to checkout
+    console.log("Selected plan:", plan);
   };
 
-  if (loading) {
+  if (currentSection === "dashboard") {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
+      <UserDashboard
+        onClose={() => setCurrentSection("landing")}
+        onSettings={() => setCurrentSection("settings")}
+      />
+    );
+  }
+
+  if (currentSection === "settings") {
+    return (
+      <UserSettings
+        onBack={() => setCurrentSection("dashboard")}
+      />
+    );
+  }
+
+  if (currentSection === "custom-prompts") {
+    return (
+      <CustomPromptGenerator
+        onBack={() => setCurrentSection("problems")}
+      />
+    );
+  }
+
+  if (currentSection === "solution") {
+    return (
+      <>
+        <SolutionDashboard
+          onBack={handleBackToProblems}
+          onNewSession={handleNewSession}
+          onSuccess={handleSuccess}
+          onCopy={handleCopy}
+        />
+        <SuccessModal
+          show={showSuccessModal}
+          session={currentSession}
+          onClose={() => setShowSuccessModal(false)}
+          onNewSession={handleNewSession}
+        />
+        <CopyToast show={showCopyToast} />
+      </>
+    );
+  }
+
+  if (currentSection === "problems") {
+    return (
+      <ProblemSelection
+        onAnalyze={handleAnalyze}
+        onBack={handleBack}
+        onCustomPrompts={() => setCurrentSection("custom-prompts")}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
-      {/* Header */}
-      <header className="surface-800 border-b border-slate-700">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div 
-              className="flex items-center space-x-3 cursor-pointer"
-              onClick={navigateToLanding}
-            >
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <i className="fas fa-code text-white text-lg" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white">CodeBreaker</h1>
-                <p className="text-sm text-slate-400">AI Assistant Rescue Tool</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <>
-                  <button 
-                    onClick={navigateToDashboard}
-                    className="text-slate-400 hover:text-white transition-colors flex items-center space-x-2"
-                  >
-                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-xs font-bold text-white">
-                        {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
-                      </span>
-                    </div>
-                    <span className="hidden md:block">{user.displayName || "Dashboard"}</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => {
-                      setAuthDefaultView("login");
-                      setShowAuthModal(true);
-                    }}
-                    className="text-slate-400 hover:text-white transition-colors"
-                  >
-                    Sign In
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setAuthDefaultView("register");
-                      setShowAuthModal(true);
-                    }}
-                    className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Sign Up
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {currentSection === "landing" && (
-          <LandingSection onGetStarted={navigateToProblems} />
-        )}
+    <div className="min-h-screen bg-black">
+      <Header onGetStarted={handleGetStarted} />
+      
+      <main>
+        <LandingSection onGetStarted={handleGetStarted} />
         
-        {currentSection === "problems" && (
-          <ProblemSelection
-            onAnalyze={navigateToSolution}
-            onBack={navigateToLanding}
-            onCustomPrompts={navigateToCustomPrompts}
-          />
-        )}
+        <section id="pricing" className="py-20 bg-slate-900/80">
+          <PricingSection onSelectPlan={handleSelectPlan} />
+        </section>
         
-        {currentSection === "solution" && (
-          <SolutionDashboard
-            onBack={navigateToProblems}
-            onNewSession={navigateToProblems}
-            onSuccess={handleSuccess}
-            onCopy={handleCopy}
-          />
-        )}
-
-        {currentSection === "custom-prompts" && (
-          <CustomPromptGenerator onBack={navigateToProblems} />
-        )}
-
-        {currentSection === "settings" && (
-          <UserSettings onBack={navigateToDashboard} />
-        )}
-
-        {currentSection === "dashboard" && (
-          <UserDashboard 
-            onClose={navigateToLanding} 
-            onSettings={navigateToSettings}
-          />
-        )}
+        <section id="faq" className="py-20 bg-black">
+          <FAQSection />
+        </section>
       </main>
-
-      {/* Modals and Toasts */}
+      
+      <Footer />
+      
       <SuccessModal
         show={showSuccessModal}
         session={currentSession}
         onClose={() => setShowSuccessModal(false)}
         onNewSession={handleNewSession}
       />
-      
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        defaultView={authDefaultView}
-      />
-      
       <CopyToast show={showCopyToast} />
     </div>
   );
