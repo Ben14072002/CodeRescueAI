@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   ArrowLeft, 
   Plus, 
@@ -24,11 +25,14 @@ import {
   Clock,
   CheckCircle,
   Circle,
-  Star
+  Star,
+  Crown,
+  Zap
 } from "lucide-react";
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useTimer } from "@/hooks/use-timer";
+import { useAuth } from "@/hooks/use-auth";
 
 interface SolutionDashboardProps {
   onBack: () => void;
@@ -39,11 +43,14 @@ interface SolutionDashboardProps {
 
 export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: SolutionDashboardProps) {
   const { currentSession, updateSession } = useSession();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("prompts");
   const [projectGoal, setProjectGoal] = useState("");
   const [promptStyle, setPromptStyle] = useState("direct");
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [showGeneratedPrompt, setShowGeneratedPrompt] = useState(false);
+  const [showProUpgrade, setShowProUpgrade] = useState(false);
+  const [userTier, setUserTier] = useState<string>('free');
   const { timers, startTimer, stopTimer, getElapsedTime } = useTimer();
 
   if (!currentSession) return null;
@@ -97,24 +104,9 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: S
     }
   };
 
-  const generateCustomPrompt = () => {
-    if (!projectGoal.trim()) return;
-
-    let promptText = "";
-    switch (promptStyle) {
-      case "direct":
-        promptText = `Pause what you're doing. I'm building ${projectGoal} and you're overcomplicating it. Focus ONLY on the core functionality first. What's the absolute minimum version that would work?`;
-        break;
-      case "collaborative":
-        promptText = `Let's step back and simplify our approach to ${projectGoal}. I think we're trying to do too much at once. Can we break this down and focus on just the essential feature first?`;
-        break;
-      case "questioning":
-        promptText = `For my project (${projectGoal}), what's the single most important feature that users absolutely need? What can we temporarily remove to make progress on that core feature?`;
-        break;
-    }
-
-    setGeneratedPrompt(promptText);
-    setShowGeneratedPrompt(true);
+  const handleCustomPromptClick = () => {
+    // Always show Pro upgrade modal for the custom prompt generator
+    setShowProUpgrade(true);
   };
 
   const formatTime = (seconds: number) => {
@@ -241,60 +233,49 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: S
                 ))}
               </div>
 
-              {/* Custom Prompt Generator */}
+              {/* Custom Prompt Generator - Pro Feature */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Custom Prompt Generator</h3>
-                <Card className="surface-800 border-slate-700">
-                  <CardContent className="p-6 space-y-4">
-                    <div>
-                      <Label htmlFor="projectGoal">Your Project Goal</Label>
-                      <Input
-                        id="projectGoal"
-                        value={projectGoal}
-                        onChange={(e) => setProjectGoal(e.target.value)}
-                        placeholder="e.g., Building a todo app with user auth"
-                        className="bg-slate-700 border-slate-600 mt-2"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="promptStyle">Prompt Style</Label>
-                      <Select value={promptStyle} onValueChange={setPromptStyle}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 mt-2">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-700 border-slate-600">
-                          <SelectItem value="direct">Direct & Firm</SelectItem>
-                          <SelectItem value="collaborative">Collaborative</SelectItem>
-                          <SelectItem value="questioning">Question-Based</SelectItem>
-                        </SelectContent>
-                      </Select>
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  Custom Prompt Generator
+                  <Badge className="ml-2 bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Pro
+                  </Badge>
+                </h3>
+                <Card className="bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-amber-500/30">
+                  <CardContent className="p-6 text-center">
+                    <Crown className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-slate-100 mb-2">
+                      AI-Powered Custom Prompts
+                    </h4>
+                    <p className="text-slate-300 mb-4 text-sm">
+                      Generate category-specific prompts tailored to your exact situation using advanced AI analysis.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 mb-4 text-xs text-slate-400">
+                      <div className="flex items-center">
+                        <Zap className="w-3 h-3 mr-1 text-blue-400" />
+                        OpenAI Integration
+                      </div>
+                      <div className="flex items-center">
+                        <Star className="w-3 h-3 mr-1 text-amber-400" />
+                        3 Prompt Variations
+                      </div>
+                      <div className="flex items-center">
+                        <Crown className="w-3 h-3 mr-1 text-amber-400" />
+                        Expert Techniques
+                      </div>
+                      <div className="flex items-center">
+                        <Lightbulb className="w-3 h-3 mr-1 text-green-400" />
+                        Context Analysis
+                      </div>
                     </div>
                     <Button
-                      onClick={generateCustomPrompt}
-                      className="w-full bg-primary hover:bg-primary/90"
+                      onClick={handleCustomPromptClick}
+                      className="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white"
                     >
-                      <Wand2 className="w-4 h-4 mr-2" />
-                      Generate Custom Prompt
+                      <Crown className="w-4 h-4 mr-2" />
+                      Unlock Custom Prompts
                     </Button>
-
-                    {showGeneratedPrompt && (
-                      <div className="mt-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold">Generated Prompt</h4>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopyToClipboard(generatedPrompt)}
-                            className="text-slate-400 hover:text-white"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <div className="bg-slate-700 rounded-lg p-4 font-mono text-sm">
-                          <p className="text-slate-200">{generatedPrompt}</p>
-                        </div>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               </div>
