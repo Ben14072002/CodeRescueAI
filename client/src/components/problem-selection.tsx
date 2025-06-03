@@ -22,6 +22,8 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [sessionCount, setSessionCount] = useState({ monthlyCount: 0, remainingFree: 3, canCreateSession: true });
+  const [loadingCard, setLoadingCard] = useState<string | null>(null);
+  const [successCard, setSuccessCard] = useState<string | null>(null);
   const { createSession } = useSession();
   const { user } = useAuth();
 
@@ -71,8 +73,19 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
     custom: "text-slate-500",
   };
 
-  const handleProblemSelect = (problemType: string) => {
+  const handleProblemSelect = async (problemType: string) => {
+    // Show loading state
+    setLoadingCard(problemType);
+    
+    // Simulate selection processing (in real app, this might validate or prepare data)
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     setSelectedProblem(problemType);
+    setLoadingCard(null);
+    setSuccessCard(problemType);
+    
+    // Clear success state after animation
+    setTimeout(() => setSuccessCard(null), 600);
   };
 
   const handleAnalyze = () => {
@@ -130,8 +143,8 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {Object.entries(problemData).map(([key, problem]) => {
+        <div className="problem-cards-grid grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {Object.entries(problemData).map(([key, problem], index) => {
             const Icon = problemIcons[key as keyof typeof problemIcons];
             const colorClass = problemColors[key as keyof typeof problemColors];
             const isSelected = selectedProblem === key;
@@ -139,15 +152,19 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
             return (
               <Card
                 key={key}
-                className={`cursor-pointer transition-all surface-800 border-slate-700 hover:border-primary ${
-                  isSelected ? "border-primary surface-700" : ""
-                }`}
+                className={`problem-card cursor-pointer transition-all duration-300 surface-800 border-slate-700 hover:border-primary transform hover:scale-105 hover:shadow-xl ${
+                  isSelected ? "border-primary surface-700 selected-card scale-105" : ""
+                } ${loadingCard === key ? "card-loading" : ""} ${successCard === key ? "card-success" : ""}`}
+                style={{ animationDelay: `${index * 100}ms` }}
                 onClick={() => handleProblemSelect(key)}
               >
-                <CardContent className="p-6">
-                  <div className="text-center mb-4">
-                    <Icon className={`w-8 h-8 ${colorClass} mb-3 mx-auto`} />
-                    <h3 className="text-lg font-semibold mb-2">{problem.title}</h3>
+                <CardContent className="p-6 relative overflow-hidden">
+                  <div className="card-background-gradient absolute inset-0 opacity-0 transition-opacity duration-500"></div>
+                  <div className="text-center mb-4 relative z-10">
+                    <div className="icon-container mb-3">
+                      <Icon className={`problem-icon w-8 h-8 ${colorClass} mx-auto transition-all duration-300 ${loadingCard === key ? 'animate-spin' : ''}`} />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 transition-colors duration-300">{problem.title}</h3>
                   </div>
                   <p className="text-slate-400 text-sm mb-4">{problem.description}</p>
                   <div className="text-xs text-slate-500">

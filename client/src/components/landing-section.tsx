@@ -43,12 +43,14 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
       // Animate other elements
       setTimeout(() => {
         const badge = document.querySelector('.hero-badge');
+        const logo = document.querySelector('.hero-logo');
         const typewriter = document.querySelector('.typewriter-container');
         const description = document.querySelector('.hero-description');
         const buttons = document.querySelector('.hero-buttons');
         const secondaryBtn = document.querySelector('.hero-button-secondary');
 
         if (badge) badge.classList.add('animate');
+        if (logo) logo.classList.add('animate');
         if (typewriter) typewriter.classList.add('animate');
         if (description) description.classList.add('animate');
         if (buttons) buttons.classList.add('animate');
@@ -89,6 +91,15 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
             </Badge>
           </div>
           
+          {/* Logo */}
+          <div className="hero-logo mb-8 opacity-0">
+            <img 
+              src="/attached_assets/Design sans titre (22).png" 
+              alt="CodeBreaker Logo" 
+              className="mx-auto w-64 h-auto"
+            />
+          </div>
+
           {/* Main Headlines */}
           <h1 className="hero-headline text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent leading-tight opacity-0">
             <span className="word" data-delay="0">AI</span> <span className="word" data-delay="100">Assistant</span><br />
