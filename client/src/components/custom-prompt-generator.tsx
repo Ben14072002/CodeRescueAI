@@ -146,7 +146,11 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
               Pro Feature
             </Badge>
             <div className="space-y-2">
-              <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <Button 
+                size="lg" 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
+              >
                 Upgrade to Pro
               </Button>
               <p className="text-sm text-slate-400">

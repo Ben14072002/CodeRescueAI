@@ -67,6 +67,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
               variant="outline"
               size="lg"
               className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-4 text-lg w-full sm:w-auto"
+              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
             >
               <Brain className="w-5 h-5 mr-2" />
               See How It Works
@@ -150,7 +151,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
       </section>
 
       {/* Features Section */}
-      <section className="mb-20">
+      <section id="how-it-works" className="mb-20">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
