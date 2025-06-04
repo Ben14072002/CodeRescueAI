@@ -360,18 +360,18 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
               <Button 
                 onClick={generateCustomPrompts}
                 disabled={isGenerating || !problemDescription.trim()}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-purple-600 hover:bg-purple-700 min-h-[48px]"
                 size="lg"
               >
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing Problem...
+                    <span className="text-sm md:text-base">Analyzing Problem...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 mr-2" />
-                    Generate Custom Prompts
+                    <span className="text-sm md:text-base">Generate Custom Prompts</span>
                   </>
                 )}
               </Button>
