@@ -73,6 +73,13 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
 
   const handleProblemSelect = (problemType: string) => {
     setSelectedProblem(problemType);
+    
+    // Auto-advance to solution for non-custom problems
+    if (problemType !== "custom") {
+      setTimeout(() => {
+        handleAnalyze();
+      }, 500); // Small delay for better UX
+    }
   };
 
   const handleAnalyze = () => {
@@ -130,7 +137,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 px-4">
           {Object.entries(problemData).map(([key, problem]) => {
             const Icon = problemIcons[key as keyof typeof problemIcons];
             const colorClass = problemColors[key as keyof typeof problemColors];
@@ -139,19 +146,19 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
             return (
               <Card
                 key={key}
-                className={`cursor-pointer transition-all surface-800 border-slate-700 hover:border-primary ${
-                  isSelected ? "border-primary surface-700" : ""
+                className={`cursor-pointer transition-all surface-800 border-slate-700 hover:border-primary min-h-[140px] active:scale-95 ${
+                  isSelected ? "border-primary surface-700 ring-2 ring-primary/20" : ""
                 }`}
                 onClick={() => handleProblemSelect(key)}
               >
-                <CardContent className="p-6">
-                  <div className="text-center mb-4">
-                    <Icon className={`w-8 h-8 ${colorClass} mb-3 mx-auto`} />
-                    <h3 className="text-lg font-semibold mb-2">{problem.title}</h3>
+                <CardContent className="p-4 md:p-6 h-full flex flex-col">
+                  <div className="text-center mb-3 md:mb-4">
+                    <Icon className={`w-6 h-6 md:w-8 md:h-8 ${colorClass} mb-2 md:mb-3 mx-auto`} />
+                    <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2">{problem.title}</h3>
                   </div>
-                  <p className="text-slate-400 text-sm mb-4">{problem.description}</p>
+                  <p className="text-slate-400 text-xs md:text-sm mb-3 md:mb-4 flex-grow">{problem.description}</p>
                   <div className="text-xs text-slate-500">
-                    <span className={`bg-${colorClass.split('-')[1]}-500/20 ${colorClass.replace('text-', 'text-')} px-2 py-1 rounded`}>
+                    <span className={`bg-${colorClass.split('-')[1]}-500/20 ${colorClass.replace('text-', 'text-')} px-2 py-1 rounded text-xs`}>
                       {problem.strategy} Strategy
                     </span>
                   </div>
@@ -164,7 +171,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
 
           {/* Custom Prompt Generator - Pro Feature */}
           <Card
-            className={`cursor-pointer transition-all bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-500/50 hover:border-purple-400 ${
+            className={`cursor-pointer transition-all bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-500/50 hover:border-purple-400 min-h-[140px] active:scale-95 ${
               !isProUser ? 'opacity-75' : ''
             }`}
             onClick={() => {
@@ -175,29 +182,29 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
               }
             }}
           >
-            <CardContent className="p-6">
-              <div className="text-center mb-4">
+            <CardContent className="p-4 md:p-6 h-full flex flex-col">
+              <div className="text-center mb-3 md:mb-4">
                 <div className="relative">
-                  <Sparkles className="w-8 h-8 text-purple-400 mb-3 mx-auto" />
+                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400 mb-2 md:mb-3 mx-auto" />
                   {!isProUser && (
-                    <Crown className="w-4 h-4 text-amber-400 absolute -top-1 -right-1" />
+                    <Crown className="w-3 h-3 md:w-4 md:h-4 text-amber-400 absolute -top-1 -right-1" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-purple-200">
+                <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2 text-purple-200">
                   AI Prompt Generator
                 </h3>
               </div>
-              <p className="text-purple-300 text-sm mb-4">
+              <p className="text-purple-300 text-xs md:text-sm mb-3 md:mb-4 flex-grow">
                 Get custom prompts tailored to your specific problem using advanced AI analysis
               </p>
               <div className="text-xs">
                 {isProUser ? (
-                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
                     <Sparkles className="w-3 h-3 mr-1" />
                     Pro Feature
                   </Badge>
                 ) : (
-                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
                     <Crown className="w-3 h-3 mr-1" />
                     Upgrade Required
                   </Badge>
@@ -238,30 +245,35 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
           </Card>
         )}
 
+        {/* Only show button for custom problems or when session limit reached */}
         <div className="text-center">
           {!canStartSession && userTier === 'free' ? (
             <div className="space-y-4">
               <p className="text-slate-400">You've used all 3 free rescues this month</p>
               <Button
                 size="lg"
-                className="bg-primary hover:bg-primary/90"
+                className="bg-primary hover:bg-primary/90 min-h-[48px] px-6"
                 onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
               >
                 <Crown className="w-5 h-5 mr-2" />
                 Upgrade to Rescue Pro - $9.99/month
               </Button>
             </div>
-          ) : (
+          ) : selectedProblem === "custom" ? (
             <Button
               onClick={handleAnalyze}
-              disabled={!selectedProblem}
+              disabled={!customProblem.trim()}
               size="lg"
-              className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+              className="bg-primary hover:bg-primary/90 disabled:opacity-50 min-h-[48px] px-6"
             >
               <Search className="w-5 h-5 mr-2" />
-              Get Solution Strategy
+              Get Custom Solution
             </Button>
-          )}
+          ) : selectedProblem && selectedProblem !== "custom" ? (
+            <div className="text-slate-400 text-sm">
+              Loading your solution strategy...
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

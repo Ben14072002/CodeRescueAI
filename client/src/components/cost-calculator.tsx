@@ -75,25 +75,25 @@ export function CostCalculator() {
           </p>
         </div>
 
-        {/* Interactive Scenario Selector */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-slate-800/80 backdrop-blur p-3 rounded-xl border border-slate-600 shadow-2xl">
+        {/* Interactive Scenario Selector - Mobile Optimized */}
+        <div className="flex justify-center mb-12 px-4">
+          <div className="bg-slate-800/80 backdrop-blur p-3 sm:p-4 rounded-xl border border-slate-600 shadow-2xl w-full max-w-3xl">
             <p className="text-slate-300 text-sm mb-3 text-center">Which developer are you?</p>
-            <div className="flex space-x-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {(Object.keys(scenarios) as Array<keyof typeof scenarios>).map((key) => (
                 <Button
                   key={key}
                   variant={scenario === key ? "default" : "ghost"}
                   size="lg"
                   onClick={() => setScenario(key)}
-                  className={`transition-all transform hover:scale-105 ${
+                  className={`transition-all transform hover:scale-105 min-h-[60px] text-center ${
                     scenario === key 
                       ? "bg-primary text-white shadow-lg scale-105" 
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
                   }`}
                 >
-                  <div className="text-center">
-                    <div className="font-semibold">{scenarios[key].description}</div>
+                  <div className="text-center w-full">
+                    <div className="font-semibold text-sm sm:text-base">{scenarios[key].description}</div>
                     <div className="text-xs opacity-80">{scenarios[key].sessions} stuck sessions/month</div>
                   </div>
                 </Button>
@@ -102,33 +102,33 @@ export function CostCalculator() {
           </div>
         </div>
 
-        {/* Main Impact Display */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
+        {/* Main Impact Display - Mobile Optimized */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12 px-4">
           {/* Current Waste */}
           <Card className="bg-gradient-to-br from-red-900/20 to-red-800/10 border-red-500/30 border-2 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-red-600"></div>
             <CardHeader className="text-center pb-2">
-              <Badge className="bg-red-500/20 text-red-300 border-red-500/30 w-fit mx-auto mb-2">
-                <DollarSign className="w-4 h-4 mr-1" />
+              <Badge className="bg-red-500/20 text-red-300 border-red-500/30 w-fit mx-auto mb-2 text-xs">
+                <DollarSign className="w-3 h-3 mr-1" />
                 YOUR MONTHLY WASTE
               </Badge>
-              <CardTitle className="text-slate-100 text-lg">Currently Burning</CardTitle>
+              <CardTitle className="text-slate-100 text-base md:text-lg">Currently Burning</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-6xl font-bold text-red-400 mb-2">
+              <div className="text-4xl md:text-6xl font-bold text-red-400 mb-2">
                 $<AnimatedNumber value={monthlyCost} />
               </div>
-              <p className="text-slate-400 mb-4">per month on stuck AI sessions</p>
+              <p className="text-slate-400 mb-4 text-sm">per month on stuck AI sessions</p>
               <div className="bg-red-500/10 rounded-lg p-3 space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-slate-400">Per session:</span>
                   <span className="text-red-300 font-semibold">${costPerSession.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-slate-400">Sessions/month:</span>
                   <span className="text-red-300 font-semibold">{current.sessions}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-slate-400">Checkpoints wasted:</span>
                   <span className="text-red-300 font-semibold">{current.checkpoints * current.sessions}</span>
                 </div>
@@ -137,26 +137,26 @@ export function CostCalculator() {
           </Card>
 
           {/* CodeBreaker Solution */}
-          <Card className="bg-gradient-to-br from-emerald-900/20 to-green-800/10 border-emerald-500/30 border-2 relative overflow-hidden transform scale-105">
+          <Card className="bg-gradient-to-br from-emerald-900/20 to-green-800/10 border-emerald-500/30 border-2 relative overflow-hidden md:transform md:scale-105">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-green-500"></div>
             <CardHeader className="text-center pb-2">
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 w-fit mx-auto mb-2">
-                <Zap className="w-4 h-4 mr-1" />
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 w-fit mx-auto mb-2 text-xs">
+                <Zap className="w-3 h-3 mr-1" />
                 CODEBREAKER PRO
               </Badge>
-              <CardTitle className="text-slate-100 text-lg">Fixed Monthly Cost</CardTitle>
+              <CardTitle className="text-slate-100 text-base md:text-lg">Fixed Monthly Cost</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-6xl font-bold text-emerald-400 mb-2">
+              <div className="text-4xl md:text-6xl font-bold text-emerald-400 mb-2">
                 $9.99
               </div>
-              <p className="text-slate-400 mb-4">unlimited AI rescues</p>
+              <p className="text-slate-400 mb-4 text-sm">unlimited AI rescues</p>
               {savings > 0 ? (
                 <div className="bg-emerald-500/20 rounded-lg p-3">
-                  <div className="text-emerald-300 font-bold text-lg mb-2">
+                  <div className="text-emerald-300 font-bold text-base md:text-lg mb-2">
                     You Save: ${savings.toFixed(2)}/month
                   </div>
-                  <div className="text-emerald-400 text-sm">
+                  <div className="text-emerald-400 text-xs md:text-sm">
                     That's <span className="font-bold">{roiPercentage}% ROI</span> instantly!
                   </div>
                   <div className="text-emerald-400 text-xs mt-2">
@@ -165,7 +165,7 @@ export function CostCalculator() {
                 </div>
               ) : (
                 <div className="bg-yellow-500/20 rounded-lg p-3">
-                  <div className="text-yellow-300 font-semibold text-sm mb-1">
+                  <div className="text-yellow-300 font-semibold text-xs md:text-sm mb-1">
                     Pays for itself after {breakEvenSessions} stuck sessions
                   </div>
                   <div className="text-yellow-400 text-xs">
@@ -177,23 +177,23 @@ export function CostCalculator() {
           </Card>
 
           {/* Time Impact */}
-          <Card className="bg-gradient-to-br from-orange-900/20 to-amber-800/10 border-orange-500/30 border-2 relative overflow-hidden">
+          <Card className="bg-gradient-to-br from-orange-900/20 to-amber-800/10 border-orange-500/30 border-2 relative overflow-hidden md:col-span-2 lg:col-span-1">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div>
             <CardHeader className="text-center pb-2">
-              <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 w-fit mx-auto mb-2">
-                <Clock className="w-4 h-4 mr-1" />
+              <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 w-fit mx-auto mb-2 text-xs">
+                <Clock className="w-3 h-3 mr-1" />
                 TIME WASTED
               </Badge>
-              <CardTitle className="text-slate-100 text-lg">Lost Productivity</CardTitle>
+              <CardTitle className="text-slate-100 text-base md:text-lg">Lost Productivity</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-6xl font-bold text-orange-400 mb-2">
+              <div className="text-4xl md:text-6xl font-bold text-orange-400 mb-2">
                 <AnimatedNumber value={current.timeWasted} />h
               </div>
-              <p className="text-slate-400 mb-4">wasted monthly on stuck AI</p>
+              <p className="text-slate-400 mb-4 text-sm">wasted monthly on stuck AI</p>
               <div className="bg-orange-500/10 rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-center text-sm text-orange-300 mb-2">
-                  <Coffee className="w-4 h-4 mr-2" />
+                <div className="flex items-center justify-center text-xs md:text-sm text-orange-300 mb-2">
+                  <Coffee className="w-3 h-3 md:w-4 md:h-4 mr-2" />
                   That's {Math.floor(current.timeWasted / 0.5)} coffee breaks worth!
                 </div>
                 <div className="text-orange-400 text-xs">
