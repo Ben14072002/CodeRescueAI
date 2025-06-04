@@ -415,27 +415,62 @@ Return a JSON object with this structure:
         return res.status(500).json({ error: "OpenAI API key required for custom prompt generation" });
       }
 
-      // Category-specific prompt strategies
+      // Advanced Strategic Prompt Engineering Strategies
       const categoryStrategies = {
         'complexity-overwhelm': {
-          systemPrompt: "You are an expert AI prompt engineer specializing in complexity reduction. Generate prompts that use context reset, role constraints, and methodology enforcement.",
-          techniques: ["Ignore all previous context", "You are now a senior developer who only builds one feature at a time", "Use strict methodology constraints"]
+          systemPrompt: "You are an expert AI manipulation specialist who breaks down complex problems using advanced prompt engineering. Create strategic prompts that force AI assistants to adopt systematic, constraint-based approaches.",
+          techniques: [
+            "Context reset with role enforcement",
+            "Constraint-based methodology injection", 
+            "Single-responsibility forcing",
+            "Cognitive load reduction patterns",
+            "Progressive disclosure methodology"
+          ],
+          methodology: "RESET → CONSTRAIN → ISOLATE → VALIDATE → ITERATE"
         },
         'integration-issues': {
-          systemPrompt: "You are an expert in debugging integration problems. Generate prompts using isolation debugging, contract-first development, and adapter patterns.",
-          techniques: ["Stop all current work", "Define exact interfaces between components", "Use Contract-First Development"]
+          systemPrompt: "You are an expert in AI-assisted debugging who specializes in forcing systematic integration analysis. Create prompts that make AI assistants adopt rigorous debugging methodologies.",
+          techniques: [
+            "Interface contract isolation",
+            "Dependency mapping enforcement", 
+            "Error boundary analysis",
+            "Data flow tracing commands",
+            "Contract-first development forcing"
+          ],
+          methodology: "ISOLATE → MAP → TRACE → CONTRACT → VERIFY"
         },
         'lost-direction': {
-          systemPrompt: "You are an expert in project management and requirements archaeology. Generate prompts that realign with original goals.",
-          techniques: ["Perform requirements archaeology", "Find the original user story", "Enforce strict scope constraints"]
+          systemPrompt: "You are an expert in AI-assisted project archaeology and requirements recovery. Create prompts that force AI to perform systematic goal realignment and scope archaeology.",
+          techniques: [
+            "Requirements archaeology protocols",
+            "Goal hierarchy reconstruction",
+            "Scope constraint enforcement",
+            "Priority matrix forcing",
+            "Stakeholder value extraction"
+          ],
+          methodology: "EXCAVATE → PRIORITIZE → CONSTRAIN → ALIGN → VALIDATE"
         },
         'no-clear-plan': {
-          systemPrompt: "You are an expert in software architecture planning. Generate prompts using reverse engineering and walking skeleton approaches.",
-          techniques: ["Use reverse engineering to create a plan", "Build a walking skeleton first", "Define clear milestones"]
+          systemPrompt: "You are an expert in AI-assisted architecture planning who forces systematic design thinking. Create prompts that make AI adopt rigorous planning methodologies.",
+          techniques: [
+            "Reverse engineering protocols",
+            "Walking skeleton methodology",
+            "Architecture decision forcing",
+            "Risk assessment injection",
+            "Milestone-driven planning"
+          ],
+          methodology: "REVERSE → SKELETON → DECIDE → ASSESS → PLAN"
         },
         'repeated-failures': {
-          systemPrompt: "You are an expert in breaking coding loops and architectural resets. Generate prompts that force alternative approaches.",
-          techniques: ["Your current architecture is fundamentally flawed", "Perform an architecture reset", "Try a completely different approach"]
+          systemPrompt: "You are an expert in AI-assisted architectural resets who breaks infinite loops. Create prompts that force AI to abandon failed approaches and adopt systematic alternatives.",
+          techniques: [
+            "Architecture reset protocols",
+            "Alternative approach forcing",
+            "Assumption challenging",
+            "Pattern breaking injection",
+            "Fresh perspective enforcement"
+          ],
+          methodology: "RESET → CHALLENGE → BREAK → ALTERNATIVE → REBUILD"
         }
       };
 
@@ -456,45 +491,66 @@ Return a JSON object with this structure:
           messages: [
             {
               role: 'system',
-              content: `${strategy.systemPrompt} 
+              content: `${strategy.systemPrompt}
 
-Based on the user's problem description and context, generate 3 advanced AI agent prompts that use these specific techniques: ${strategy.techniques.join(', ')}.
+MISSION: Create 3 advanced AI manipulation prompts that force systematic problem-solving using the ${strategy.methodology} methodology.
 
-Each prompt should:
-- Be 100-200 words
-- Include specific context from the user's situation
-- Use the mentioned techniques effectively
-- Be immediately actionable for the user
-- Have a clear title and explanation
+REQUIREMENTS FOR EACH PROMPT:
+1. **Strategic Analysis**: Deep technical analysis of user's specific setup
+2. **Step-by-Step Methodology**: Clear sequential approach using ${strategy.methodology}
+3. **AI Manipulation Techniques**: Apply these advanced techniques: ${strategy.techniques.join(', ')}
+4. **Context Integration**: Reference specific code, errors, and technical details provided
+5. **Actionable Commands**: Direct, copy-pasteable instructions for immediate use
 
-Return as JSON with this structure:
+PROMPT STRUCTURE:
+- **Opening**: Context reset + role injection
+- **Analysis Phase**: Technical setup analysis commands  
+- **Methodology**: Step-by-step ${strategy.methodology} implementation
+- **Constraints**: Specific limitations and focus areas
+- **Deliverables**: Exact outputs required
+
+Each prompt must be 200-400 words, technically sophisticated, and immediately actionable.
+
+Return as JSON:
 {
   "prompts": [
     {
-      "title": "Clear, actionable title",
-      "prompt": "The actual prompt text to copy-paste to AI",
-      "explanation": "Why this prompt works for this specific situation",
-      "difficulty": "beginner|intermediate|advanced"
+      "title": "Strategic prompt title",
+      "prompt": "Complete copy-paste prompt with methodology steps",
+      "explanation": "Technical analysis of why this approach works",
+      "difficulty": "beginner|intermediate|advanced",
+      "methodology_steps": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"]
     }
   ]
 }`
             },
             {
               role: 'user',
-              content: `Problem Category: ${category}
+              content: `TECHNICAL CONTEXT ANALYSIS:
 
-User Description: ${problemDescription}
+Problem Category: ${category.toUpperCase()}
+Methodology Required: ${strategy.methodology}
 
-Code Context: ${codeContext || 'No code context provided'}
+DETAILED PROBLEM DESCRIPTION:
+${problemDescription}
 
-Error Messages: ${errorMessages || 'No error messages provided'}
+TECHNICAL SETUP ANALYSIS:
+Code Context: ${codeContext || 'No specific code context provided - generate prompts that request technical details'}
+Error Messages: ${errorMessages || 'No error messages provided - include diagnostic commands in prompts'}
 
-Generate 3 specialized prompts for this exact situation.`
+PROMPT GENERATION REQUIREMENTS:
+1. Analyze the technical stack and architecture patterns from the provided context
+2. Create prompts that force the AI to perform deep technical analysis of the user's specific setup
+3. Include commands that extract missing technical details if context is incomplete
+4. Apply ${strategy.methodology} methodology systematically
+5. Generate copy-paste ready prompts that manipulate AI behavior for this exact technical situation
+
+Generate 3 strategic AI manipulation prompts that solve this specific problem.`
             }
           ],
           response_format: { type: "json_object" },
-          max_tokens: 1500,
-          temperature: 0.7
+          max_tokens: 3000,
+          temperature: 0.8
         })
       });
 

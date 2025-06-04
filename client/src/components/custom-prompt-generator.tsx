@@ -416,11 +416,48 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
                       </div>
                     </div>
                     
-                    <div className="bg-slate-900/50 rounded p-3 mb-3">
-                      <p className="text-slate-200 text-sm whitespace-pre-wrap">{prompt.prompt}</p>
+                    {prompt.methodology_steps && (
+                      <div className="mb-3">
+                        <h4 className="text-slate-300 text-sm font-medium mb-2">Strategic Methodology:</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {prompt.methodology_steps.map((step, stepIndex) => (
+                            <Badge key={stepIndex} variant="outline" className="text-xs border-slate-600 text-slate-400">
+                              {step}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="bg-slate-900/50 rounded p-4 mb-3 border border-slate-700">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-slate-400 text-xs uppercase tracking-wide">Copy-Paste Prompt</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyPrompt(prompt.prompt, index)}
+                          className="text-slate-400 hover:text-slate-200 h-6 px-2"
+                        >
+                          {copiedIndex === index ? (
+                            <>
+                              <CheckCircle className="w-3 h-3 mr-1 text-green-400" />
+                              <span className="text-xs text-green-400">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3 mr-1" />
+                              <span className="text-xs">Copy</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-slate-200 text-sm whitespace-pre-wrap font-mono leading-relaxed">{prompt.prompt}</p>
                     </div>
                     
-                    <p className="text-slate-400 text-xs">{prompt.explanation}</p>
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded p-3">
+                      <h4 className="text-blue-300 text-sm font-medium mb-1">Why This Works:</h4>
+                      <p className="text-slate-400 text-xs">{prompt.explanation}</p>
+                    </div>
                   </div>
                 ))}
               </CardContent>
