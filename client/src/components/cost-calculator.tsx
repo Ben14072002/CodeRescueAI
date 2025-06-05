@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Clock, TrendingUp, Zap, AlertTriangle, Target, Coffee, ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export function CostCalculator() {
+  const { user } = useAuth();
+  const { isPro } = useSubscription();
+  const [, setLocation] = useLocation();
   const [scenario, setScenario] = useState<'light' | 'normal' | 'heavy'>('normal');
   const [animateCounter, setAnimateCounter] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
@@ -48,6 +54,23 @@ export function CostCalculator() {
     const timer = setTimeout(() => setAnimateCounter(false), 600);
     return () => clearTimeout(timer);
   }, [scenario]);
+
+  const handleGetPro = () => {
+    if (!user) {
+      // User not logged in - redirect to home and show auth modal
+      setLocation('/');
+      return;
+    }
+    
+    if (isPro) {
+      // User already has Pro - redirect to dashboard
+      setLocation('/');
+      return;
+    }
+    
+    // User logged in but not Pro - redirect to checkout
+    setLocation('/checkout?plan=pro_monthly');
+  };
 
   const AnimatedNumber = ({ value, prefix = "", suffix = "" }: { value: number; prefix?: string; suffix?: string }) => (
     <span className={`transition-all duration-500 ${animateCounter ? 'scale-110 text-primary' : ''}`}>
@@ -246,8 +269,12 @@ export function CostCalculator() {
             <p className="text-slate-300 mb-6 text-lg">
               Break free from expensive AI loops today
             </p>
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold px-8 py-4 text-lg">
-              Get CodeBreaker Pro
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-primary/90 text-white font-bold px-8 py-4 text-lg"
+              onClick={handleGetPro}
+            >
+              {isPro ? "Already Pro" : "Get CodeBreaker Pro"}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <p className="text-slate-400 text-sm mt-4">
