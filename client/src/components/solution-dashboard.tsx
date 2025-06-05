@@ -33,17 +33,20 @@ import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useTimer } from "@/hooks/use-timer";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 
 interface SolutionDashboardProps {
   onBack: () => void;
   onNewSession: () => void;
   onSuccess: () => void;
   onCopy: () => void;
+  onCustomPrompts?: () => void;
 }
 
-export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: SolutionDashboardProps) {
+export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onCustomPrompts }: SolutionDashboardProps) {
   const { currentSession, updateSession } = useSession();
   const { user } = useAuth();
+  const { isPro } = useSubscription();
   const [activeTab, setActiveTab] = useState("prompts");
   const [projectGoal, setProjectGoal] = useState("");
   const [promptStyle, setPromptStyle] = useState("direct");
@@ -105,8 +108,15 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: S
   };
 
   const handleCustomPromptClick = () => {
-    // Always show Pro upgrade modal for the custom prompt generator
-    setShowProUpgrade(true);
+    // Check if user has Pro subscription
+    if (isPro) {
+      // Navigate to custom prompt generator if callback is provided
+      if (onCustomPrompts) {
+        onCustomPrompts();
+      }
+    } else {
+      setShowProUpgrade(true);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -271,10 +281,23 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy }: S
                     </div>
                     <Button
                       onClick={handleCustomPromptClick}
-                      className="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white"
+                      className={`w-full ${
+                        isPro 
+                          ? "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600" 
+                          : "bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600"
+                      } text-white`}
                     >
-                      <Crown className="w-4 h-4 mr-2" />
-                      Unlock Custom Prompts
+                      {isPro ? (
+                        <>
+                          <Wand2 className="w-4 h-4 mr-2" />
+                          Generate Custom Prompts
+                        </>
+                      ) : (
+                        <>
+                          <Crown className="w-4 h-4 mr-2" />
+                          Unlock Custom Prompts
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
