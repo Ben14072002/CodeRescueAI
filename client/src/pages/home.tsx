@@ -139,6 +139,7 @@ export default function Home() {
             onNewSession={navigateToProblems}
             onSuccess={handleSuccess}
             onCopy={handleCopy}
+            onCustomPrompts={navigateToCustomPrompts}
           />
         )}
 
