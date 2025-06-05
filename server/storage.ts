@@ -23,11 +23,15 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private sessions: Map<number, Session>;
   currentId: number;
+  currentSessionId: number;
 
   constructor() {
     this.users = new Map();
+    this.sessions = new Map();
     this.currentId = 1;
+    this.currentSessionId = 1;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -84,6 +88,37 @@ export class MemStorage implements IStorage {
     
     this.users.set(userId, updatedUser);
     return updatedUser;
+  }
+
+  async getUserSessionsThisMonth(userId: number): Promise<Session[]> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    return Array.from(this.sessions.values()).filter(session => 
+      session.userId === userId && 
+      session.startTime >= startOfMonth
+    );
+  }
+
+  async createSession(session: InsertSession): Promise<Session> {
+    const newSession: Session = {
+      id: this.currentSessionId++,
+      userId: session.userId,
+      problemType: session.problemType,
+      projectDescription: session.projectDescription,
+      customProblem: session.customProblem,
+      selectedStrategy: session.selectedStrategy,
+      startTime: session.startTime,
+      actionSteps: session.actionSteps || [],
+      prompts: session.prompts || [],
+      aiResponse: session.aiResponse,
+      isCompleted: session.isCompleted || false,
+      totalTimeSpent: session.totalTimeSpent || 0,
+      completedAt: session.completedAt,
+    };
+    
+    this.sessions.set(newSession.id, newSession);
+    return newSession;
   }
 }
 

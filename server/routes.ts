@@ -305,8 +305,8 @@ Return a JSON object with this structure:
           },
         ],
         mode: 'subscription',
-        success_url: `http://localhost:5000/?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `http://localhost:5000/?upgrade=cancelled`,
+        success_url: `${req.headers.origin || 'https://code-breaker.org'}/?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.origin || 'https://code-breaker.org'}/?upgrade=cancelled`,
         allow_promotion_codes: true,
         billing_address_collection: 'required',
 
