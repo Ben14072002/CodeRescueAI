@@ -25,7 +25,7 @@ interface UserDashboardProps {
 
 export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
   const { user, logout } = useAuth();
-  const { isProUser, subscriptionData } = useSubscription();
+  const { isPro, tier, status } = useSubscription();
   const { sessions, getSessionStats } = useSession();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -108,37 +108,70 @@ export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-slate-100 mb-2">Free Plan</h3>
+              <h3 className="text-lg font-semibold text-slate-100 mb-2">
+                {isPro ? "Pro Plan" : "Free Plan"}
+              </h3>
               <p className="text-slate-400">
-                {currentMonthSessions} of {FREE_SESSIONS_LIMIT} rescue sessions used this month
+                {isPro 
+                  ? "Unlimited rescue sessions and custom prompt generation"
+                  : `${currentMonthSessions} of ${FREE_SESSIONS_LIMIT} rescue sessions used this month`
+                }
               </p>
             </div>
-            <Badge variant="outline" className="bg-slate-700 text-slate-300">
-              Free Tier
+            <Badge 
+              variant="outline" 
+              className={`${isPro 
+                ? "bg-amber-500/20 text-amber-300 border-amber-500/30" 
+                : "bg-slate-700 text-slate-300"
+              }`}
+            >
+              {isPro ? (
+                <>
+                  <Crown className="w-3 h-3 mr-1" />
+                  Pro Monthly
+                </>
+              ) : (
+                "Free Tier"
+              )}
             </Badge>
           </div>
-          <div className="mt-4">
-            <div className="flex justify-between text-sm text-slate-400 mb-2">
-              <span>Usage</span>
-              <span>{currentMonthSessions}/{FREE_SESSIONS_LIMIT}</span>
-            </div>
-            <Progress value={usagePercentage} className="h-2" />
-          </div>
-          {usagePercentage > 80 && (
-            <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-amber-400 font-medium">Almost at your limit</p>
-                  <p className="text-sm text-slate-400">Upgrade to Pro for unlimited sessions</p>
+          {!isPro && (
+            <>
+              <div className="mt-4">
+                <div className="flex justify-between text-sm text-slate-400 mb-2">
+                  <span>Usage</span>
+                  <span>{currentMonthSessions}/{FREE_SESSIONS_LIMIT}</span>
                 </div>
-                <Button 
-                  size="sm" 
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Upgrade
-                </Button>
+                <Progress value={usagePercentage} className="h-2" />
+              </div>
+              {usagePercentage > 80 && (
+                <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-amber-400 font-medium">Almost at your limit</p>
+                      <p className="text-sm text-slate-400">Upgrade to Pro for unlimited sessions</p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="bg-primary hover:bg-primary/90"
+                      onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Upgrade
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          {isPro && (
+            <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <div className="flex items-center">
+                <Crown className="w-5 h-5 text-amber-400 mr-3" />
+                <div>
+                  <p className="text-green-400 font-medium">Pro Subscription Active</p>
+                  <p className="text-sm text-slate-400">Access to unlimited sessions and custom prompts</p>
+                </div>
               </div>
             </div>
           )}
