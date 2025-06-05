@@ -121,6 +121,18 @@ Return a JSON object with this structure:
         return res.status(401).json({ error: "Authentication required" });
       }
 
+      // Special handling for hardcoded Pro user
+      if (userId === "PYVvgDLO2RQYuFx4OVK1UMz7qVG3") {
+        // For the hardcoded Pro user, simulate subscription cancellation
+        res.json({ 
+          success: true,
+          message: "Please contact support@digitalduo.org to cancel your subscription",
+          cancelAtPeriodEnd: false,
+          currentPeriodEnd: null
+        });
+        return;
+      }
+
       // Find user
       let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
       if (!user && !isNaN(parseInt(userId))) {
@@ -131,8 +143,8 @@ Return a JSON object with this structure:
         return res.status(404).json({ error: "User not found" });
       }
 
-      if (!user.stripeSubscriptionId) {
-        return res.status(400).json({ error: "No active subscription found" });
+      if (!user.stripeSubscriptionId || user.stripeSubscriptionId === "sub_pro_monthly") {
+        return res.status(400).json({ error: "Please contact support@digitalduo.org to cancel your subscription" });
       }
 
       // Cancel subscription at period end using Stripe

@@ -46,11 +46,13 @@ export function UserSettings({ onBack }: UserSettingsProps) {
       const response = await apiRequest("POST", "/api/cancel-subscription", {
         userId: user?.uid
       });
+      
       if (response.ok) {
+        const data = await response.json();
         setShowCancelConfirm(false);
         toast({
-          title: "Subscription Cancelled",
-          description: "Your subscription will end at the current billing period.",
+          title: "Subscription Information",
+          description: data.message || "Your subscription will end at the current billing period.",
         });
       }
     } catch (error) {
