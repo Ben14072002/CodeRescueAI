@@ -20,6 +20,7 @@ import {
   Key
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -29,16 +30,11 @@ interface UserSettingsProps {
 
 export function UserSettings({ onBack }: UserSettingsProps) {
   const { user, logout } = useAuth();
+  const { isPro, tier, status } = useSubscription();
   const { toast } = useToast();
   
   const [isLoading, setIsLoading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [subscriptionData, setSubscriptionData] = useState({
-    tier: 'free',
-    status: 'active',
-    currentPeriodEnd: null,
-    cancelAtPeriodEnd: false
-  });
 
   // Profile settings state
   const [displayName, setDisplayName] = useState(user?.displayName || '');
@@ -52,7 +48,6 @@ export function UserSettings({ onBack }: UserSettingsProps) {
       });
       if (response.ok) {
         setShowCancelConfirm(false);
-        setSubscriptionData(prev => ({ ...prev, cancelAtPeriodEnd: true }));
         toast({
           title: "Subscription Cancelled",
           description: "Your subscription will end at the current billing period.",
@@ -76,7 +71,6 @@ export function UserSettings({ onBack }: UserSettingsProps) {
         userId: user?.uid
       });
       if (response.ok) {
-        setSubscriptionData(prev => ({ ...prev, cancelAtPeriodEnd: false }));
         toast({
           title: "Subscription Reactivated",
           description: "Your subscription will continue as normal.",
@@ -91,6 +85,14 @@ export function UserSettings({ onBack }: UserSettingsProps) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDeleteAccount = async () => {
+    // Placeholder for delete account functionality
+    toast({
+      title: "Feature Coming Soon",
+      description: "Account deletion will be available in a future update.",
+    });
   };
 
   const handleUpdateProfile = async () => {
@@ -113,14 +115,6 @@ export function UserSettings({ onBack }: UserSettingsProps) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleDeleteAccount = async () => {
-    // This would handle account deletion
-    toast({
-      title: "Contact Support",
-      description: "Please contact support@digitalduo.org to delete your account.",
-    });
   };
 
   return (
@@ -210,71 +204,76 @@ export function UserSettings({ onBack }: UserSettingsProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-200 font-medium">Current Plan</p>
-                  <p className="text-sm text-slate-400">Free Plan - 3 rescues per month</p>
+                  <p className="text-sm text-slate-400">
+                    {isPro 
+                      ? "Pro Plan - Unlimited rescues and custom prompts" 
+                      : "Free Plan - 3 rescues per month"
+                    }
+                  </p>
                 </div>
-                <Badge variant="outline" className="bg-slate-700 text-slate-300">
-                  Free Tier
+                <Badge 
+                  variant="outline" 
+                  className={`${isPro 
+                    ? "bg-amber-500/20 text-amber-300 border-amber-500/30" 
+                    : "bg-slate-700 text-slate-300"
+                  }`}
+                >
+                  {isPro ? (
+                    <>
+                      <Crown className="w-3 h-3 mr-1" />
+                      Pro Monthly
+                    </>
+                  ) : (
+                    "Free Tier"
+                  )}
                 </Badge>
               </div>
 
               <Separator className="bg-slate-600" />
 
-              <div className="space-y-3">
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Upgrade to Pro - $9.99/month
-                </Button>
-                
-                <div className="text-sm text-slate-400">
-                  <p>Pro benefits:</p>
-                  <ul className="list-disc list-inside mt-1 space-y-1">
-                    <li>Unlimited rescue sessions</li>
-                    <li>Custom AI prompt generator</li>
-                    <li>Priority support</li>
-                    <li>Advanced analytics</li>
-                  </ul>
+              {!isPro && (
+                <div className="space-y-3">
+                  <Button 
+                    className="w-full bg-primary hover:bg-primary/90"
+                    onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    Upgrade to Pro - $9.99/month
+                  </Button>
+                  
+                  <div className="text-sm text-slate-400">
+                    <p>Pro benefits:</p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Unlimited rescue sessions</li>
+                      <li>Custom AI prompt generator</li>
+                      <li>Priority support</li>
+                      <li>Advanced analytics</li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {subscriptionData.tier === 'pro' && (
+              {isPro && (
                 <div className="space-y-3">
                   <Separator className="bg-slate-600" />
                   
-                  {subscriptionData.cancelAtPeriodEnd ? (
-                    <Alert className="border-amber-500/20 bg-amber-500/10">
-                      <AlertTriangle className="h-4 w-4 text-amber-500" />
-                      <AlertDescription className="text-amber-200">
-                        Your subscription will end on{' '}
-                        {subscriptionData.currentPeriodEnd 
-                          ? new Date(subscriptionData.currentPeriodEnd).toLocaleDateString()
-                          : 'the current billing period'}
-                      </AlertDescription>
-                    </Alert>
-                  ) : null}
+                  <Alert className="border-green-500/20 bg-green-500/10">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <AlertDescription className="text-green-200">
+                      Your Pro subscription is active. You have unlimited access to all features.
+                    </AlertDescription>
+                  </Alert>
 
                   <div className="flex gap-2">
-                    {subscriptionData.cancelAtPeriodEnd ? (
-                      <Button
-                        variant="outline"
-                        onClick={handleReactivateSubscription}
-                        disabled={isLoading}
-                        className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/10"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Reactivate Subscription
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="destructive"
-                        onClick={() => setShowCancelConfirm(true)}
-                        disabled={isLoading}
-                      >
-                        Cancel Subscription
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      onClick={handleCancelSubscription}
+                      disabled={isLoading}
+                      className="border-red-500 text-red-400 hover:bg-red-500/10"
+                    >
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      {isLoading ? "Cancelling..." : "Cancel Subscription"}
+                    </Button>
                   </div>
                 </div>
               )}
