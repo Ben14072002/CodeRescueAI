@@ -49,9 +49,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
             Break free in under 10 minutes with battle-tested strategies
           </p>
           
-          <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">
-            Stop wasting hours on AI loops. Get specific prompts and action plans that actually work.
-          </p>
+          <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">Stop wasting hours when Cursor, Replit AI, Loveable or Windsurf get stuck in loops.</p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -91,7 +89,6 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
-
       {/* Problem/Solution Section */}
       <section className="mb-20">
         <div className="max-w-6xl mx-auto px-4">
@@ -149,7 +146,6 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
-
       {/* Features Section */}
       <section id="how-it-works" className="mb-20">
         <div className="max-w-6xl mx-auto px-4">
@@ -194,7 +190,6 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
-
       {/* Social Proof Section */}
       <section className="mb-20">
         <div className="max-w-6xl mx-auto px-4">
@@ -243,10 +238,8 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
-
       {/* Cost Calculator */}
       <CostCalculator />
-
       {/* Pricing Preview */}
       <section className="mb-20" id="pricing">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -329,10 +322,8 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
-
       {/* FAQ Section */}
       <FAQSection />
-
       {/* Final CTA */}
       <section className="text-center">
         <div className="max-w-4xl mx-auto px-4">
@@ -362,7 +353,6 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </Card>
         </div>
       </section>
-
       {/* Footer */}
       <Footer />
     </div>
