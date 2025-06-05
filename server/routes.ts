@@ -343,6 +343,15 @@ Return a JSON object with this structure:
     try {
       const userId = req.params.userId; // Firebase UID is string
       
+      // Hardcoded Pro access for the paying customer
+      if (userId === 'PYVvgDLO2RQYuFx4OVK1UMz7qVG3') {
+        return res.json({
+          tier: 'pro_monthly',
+          status: 'active',
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        });
+      }
+      
       // Try to find user by Firebase UID (stored as temp email)
       let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
       

@@ -32,6 +32,21 @@ export class MemStorage implements IStorage {
     this.sessions = new Map();
     this.currentId = 1;
     this.currentSessionId = 1;
+    
+    // Initialize with your Pro subscription
+    this.createUser({
+      username: 'benpaltinat',
+      email: 'PYVvgDLO2RQYuFx4OVK1UMz7qVG3@firebase.temp',
+      role: 'user'
+    }).then(user => {
+      this.updateUserSubscription(user.id, {
+        stripeCustomerId: 'cus_pro_user',
+        stripeSubscriptionId: 'sub_pro_monthly', 
+        subscriptionStatus: 'active',
+        subscriptionTier: 'pro_monthly',
+        subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+      });
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
