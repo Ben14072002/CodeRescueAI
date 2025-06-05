@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Crown, Users } from "lucide-react";
 import { PRICING_PLANS, type PricingPlan } from "@/lib/stripe";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 
 interface PricingSectionProps {
   onSelectPlan: (plan: PricingPlan) => void;
@@ -13,6 +14,7 @@ interface PricingSectionProps {
 
 export function PricingSection({ onSelectPlan }: PricingSectionProps) {
   const { user } = useAuth();
+  const { isPro } = useSubscription();
   const [, setLocation] = useLocation();
   const [isYearly, setIsYearly] = useState(false);
 
@@ -94,11 +96,32 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        {/* Pro Subscription Active Message */}
+        {isPro && (
+          <div className="max-w-2xl mx-auto mb-8">
+            <Card className="surface-800 border-green-500/20 bg-green-500/5">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-4">
+                  <Crown className="w-8 h-8 text-amber-400 mr-3" />
+                  <h3 className="text-xl font-bold text-slate-100">Pro Subscription Active</h3>
+                </div>
+                <p className="text-slate-300 mb-4">
+                  You already have an active Pro subscription with unlimited access to all features.
+                </p>
+                <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+                  <Crown className="w-3 h-3 mr-1" />
+                  Pro Monthly
+                </Badge>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className={`grid md:grid-cols-2 gap-8 max-w-4xl mx-auto ${isPro ? 'opacity-50 pointer-events-none' : ''}`}>
           {getDisplayPlans().map((planKey) => {
             const plan = PRICING_PLANS[planKey];
             const isPopular = planKey.includes("pro");
-            const isCurrentPlan = user?.subscriptionTier === planKey;
+            const isCurrentPlan = isPro && planKey.includes("pro");
             
             return (
               <Card 
@@ -160,7 +183,7 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
 
                   <Button
                     onClick={() => handleSelectPlan(planKey)}
-                    disabled={isCurrentPlan}
+                    disabled={isCurrentPlan || (isPro && planKey.includes("pro"))}
                     className={`w-full ${
                       planKey === "free"
                         ? "bg-slate-700 hover:bg-slate-600"
@@ -169,6 +192,8 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
                   >
                     {isCurrentPlan 
                       ? "Current Plan" 
+                      : (isPro && planKey.includes("pro"))
+                      ? "Already Subscribed"
                       : planKey === "free" 
                       ? "Get Started" 
                       : isYearly ? "Subscribe Yearly" : "Subscribe Monthly"
