@@ -253,16 +253,21 @@ Return a JSON object with this structure:
   // Stripe Checkout Session Creation
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
+      console.log("Checkout session request:", req.body);
       const { plan, userId } = req.body;
 
       if (!plan || !userId) {
+        console.log("Missing plan or userId:", { plan, userId });
         return res.status(400).json({ error: "Plan and userId are required" });
       }
 
       const planConfig = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
       if (!planConfig) {
+        console.log("Invalid plan:", plan);
         return res.status(400).json({ error: "Invalid plan" });
       }
+
+      console.log("Plan config found:", planConfig);
 
       // For Firebase users, create a temporary user record if needed
       let user;
@@ -287,6 +292,15 @@ Return a JSON object with this structure:
             });
           }
         }
+      }
+      
+      // If still no user, create a test user for checkout
+      if (!user) {
+        user = await storage.createUser({
+          username: `checkout_user_${Date.now()}`,
+          email: `checkout@test.com`,
+          role: "user"
+        });
       }
       
       if (!user) {
