@@ -81,24 +81,8 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   
   const { user } = useAuth();
+  const { isProUser, checkPremiumAccess } = useSubscription();
   const { toast } = useToast();
-  
-  // Check if user has Pro subscription
-  const [userTier, setUserTier] = useState<string>('free');
-  
-  useEffect(() => {
-    if (user) {
-      // Fetch user subscription status
-      fetch(`/api/subscription-status/${user.uid}`)
-        .then(res => res.json())
-        .then(data => {
-          setUserTier(data.tier || 'free');
-        })
-        .catch(() => setUserTier('free'));
-    }
-  }, [user]);
-  
-  const isProUser = userTier === 'pro' || userTier === 'pro_monthly' || userTier === 'pro_yearly';
 
   const generateCustomPrompts = async () => {
     if (!selectedCategory) {

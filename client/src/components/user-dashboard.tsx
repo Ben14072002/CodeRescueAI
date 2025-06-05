@@ -15,6 +15,7 @@ import {
   Mail
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 import { useSession } from "@/hooks/use-session";
 
 interface UserDashboardProps {
@@ -24,6 +25,7 @@ interface UserDashboardProps {
 
 export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
   const { user, logout } = useAuth();
+  const { isProUser, subscriptionData } = useSubscription();
   const { sessions, getSessionStats } = useSession();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 

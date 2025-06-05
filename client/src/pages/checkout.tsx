@@ -104,8 +104,10 @@ export default function Checkout() {
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log('Checkout session response:', data);
         if (data.url) {
           // Redirect to Stripe Checkout
+          console.log('Redirecting to Stripe checkout:', data.url);
           window.location.href = data.url;
         } else {
           setClientSecret(data.clientSecret);

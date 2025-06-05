@@ -621,14 +621,34 @@ Generate 3 strategic AI manipulation prompts that solve this specific problem.`
           
           if (user) {
             console.log('Updating subscription for user:', user.id);
-            await storage.updateUserSubscription(user.id, {
+            const updateData = {
               stripeSubscriptionId: subscriptionId,
               subscriptionStatus: 'active',
               subscriptionTier: plan.includes('yearly') ? 'pro_yearly' : 'pro_monthly'
-            });
-            console.log('Subscription updated successfully');
+            };
+            
+            await storage.updateUserSubscription(user.id, updateData);
+            console.log('Subscription updated successfully:', updateData);
+            console.log('User now has Pro access');
           } else {
             console.error('User not found for Firebase UID:', firebaseUid);
+            // Try to create user if not found
+            try {
+              user = await storage.createUser({
+                username: `user_${firebaseUid.substring(0, 8)}`,
+                email: `${firebaseUid}@firebase.temp`,
+                role: "user"
+              });
+              
+              await storage.updateUserSubscription(user.id, {
+                stripeSubscriptionId: subscriptionId,
+                subscriptionStatus: 'active',
+                subscriptionTier: plan.includes('yearly') ? 'pro_yearly' : 'pro_monthly'
+              });
+              console.log('Created new user and updated subscription:', user.id);
+            } catch (createError) {
+              console.error('Failed to create user for subscription:', createError);
+            }
           }
         }
         break;
