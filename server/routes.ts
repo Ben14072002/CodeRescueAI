@@ -606,18 +606,30 @@ Generate 3 strategic AI manipulation prompts that solve this specific problem.`
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed':
+        console.log('Webhook: checkout.session.completed received', event.data.object);
         const session = event.data.object;
-        const userId = parseInt(session.metadata.userId);
-        const plan = session.metadata.plan || 'pro';
+        const firebaseUid = session.metadata.firebaseUid;
+        const plan = session.metadata.plan || 'pro_monthly';
+        
+        console.log('Processing subscription for Firebase UID:', firebaseUid, 'Plan:', plan);
         
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription as string;
           
-          await storage.updateUserSubscription(userId, {
-            stripeSubscriptionId: subscriptionId,
-            subscriptionStatus: 'active',
-            subscriptionTier: plan
-          });
+          // Find user by Firebase UID
+          let user = await storage.getUserByEmail(`${firebaseUid}@firebase.temp`);
+          
+          if (user) {
+            console.log('Updating subscription for user:', user.id);
+            await storage.updateUserSubscription(user.id, {
+              stripeSubscriptionId: subscriptionId,
+              subscriptionStatus: 'active',
+              subscriptionTier: plan.includes('yearly') ? 'pro_yearly' : 'pro_monthly'
+            });
+            console.log('Subscription updated successfully');
+          } else {
+            console.error('User not found for Firebase UID:', firebaseUid);
+          }
         }
         break;
 
