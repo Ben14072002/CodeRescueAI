@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, Crown, Shield } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, UserPlus, Crown, Shield, AlertTriangle } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
 import { useAuth } from "@/hooks/use-auth";
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';

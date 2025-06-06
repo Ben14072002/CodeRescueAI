@@ -1,0 +1,106 @@
+Perform detailed testing of the entire 3-day trial system. Test each scenario systematically.
+
+TESTING CHECKLIST:
+
+1. SIGNUP FLOW TESTING:
+[ ] Test "Start 3-Day Trial" option
+   - Collects email, password, payment info correctly
+   - Creates user with trial_active status
+   - Sets trial dates correctly (now + 3 days)
+   - Redirects to dashboard with trial banner
+
+[ ] Test "Use Free Plan" option  
+   - Creates user without payment info
+   - Sets free plan status correctly
+   - Shows free limitations immediately
+
+2. TRIAL USER DASHBOARD TESTING:
+[ ] Trial countdown displays correctly
+   - Shows "X days Y hours remaining"
+   - Updates in real-time
+   - Shows correct trial end date
+
+[ ] Pro feature access during trial
+   - Custom prompt generator works (no upgrade blocks)
+   - Unlimited rescues available
+   - No "Upgrade to Pro" buttons show
+   - All premium features accessible
+
+[ ] Trial status indicators
+   - "Trial Active" banner visible
+   - User profile shows trial status
+   - Settings page shows trial info
+
+3. USAGE COUNTER TESTING:
+[ ] Trial users show unlimited usage
+   - No rescue limits during trial
+   - Usage counter shows "unlimited" or similar
+   - Can perform 10+ rescues without blocks
+
+[ ] Free users show correct limits
+   - Shows "X of 1 rescue used this month"
+   - Blocks access after 1 rescue
+   - Shows upgrade prompts after limit
+
+4. PAYMENT & CONVERSION TESTING:
+[ ] Test successful payment scenario
+   - Trial expires → auto-charges card
+   - User converts to Pro status
+   - Continues unlimited access
+   - No disruption in service
+
+[ ] Test failed payment scenario
+   - Trial expires → payment fails
+   - User reverts to free plan (1 rescue/month)
+   - Shows appropriate error message
+   - Offers to update payment method
+
+5. EDGE CASE TESTING:
+[ ] User cancels during trial
+   - Can cancel subscription
+   - Continues trial access until expiry
+   - Reverts to free after trial ends
+
+[ ] Multiple account creation attempts
+   - Same email can't create multiple trials
+   - Proper error handling for duplicate accounts
+
+[ ] Browser/session testing
+   - Trial status persists across browser sessions
+   - Countdown continues correctly after reload
+   - No trial reset bugs
+
+6. MANUAL DATE TESTING:
+[ ] Artificially expire trial (for testing)
+   - Manually set trial end date to yesterday
+   - Verify user loses Pro access immediately
+   - Check payment processing triggers
+   - Confirm reversion to free plan if payment fails
+
+TESTING SCENARIOS TO RUN:
+
+SCENARIO 1: Happy Path Trial User
+1. Sign up for trial
+2. Use custom prompt generator 5+ times
+3. Let trial expire with valid payment
+4. Verify seamless Pro conversion
+
+SCENARIO 2: Trial to Free User  
+1. Sign up for trial with invalid card
+2. Use Pro features during trial
+3. Let trial expire
+4. Verify reversion to free limitations
+
+SCENARIO 3: Free User Journey
+1. Sign up for free plan
+2. Use 1 rescue
+3. Hit limit and see upgrade prompts
+4. Verify can't access Pro features
+
+REPORT REQUIRED:
+For each test, document:
+- ✅ PASS: Feature works as expected
+- ❌ FAIL: Specific issue found + details
+- ⚠️ ISSUE: Minor problem that needs fixing
+
+Test systematically and report all findings before proceeding with other v2.0 features.
