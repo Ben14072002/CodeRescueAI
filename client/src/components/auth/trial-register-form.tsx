@@ -47,31 +47,6 @@ function PaymentForm({ onComplete, onBack, clientSecret }: {
 
       if (error) {
         console.error("Payment setup failed:", error);
-        
-        // Show user-friendly error message
-        let errorMessage = "Payment setup failed. Please try again.";
-        if (error.code === 'card_declined' && error.decline_code === 'live_mode_test_card') {
-          errorMessage = "Your Stripe account is in live mode but you're using test cards. Switch to test mode in your Stripe dashboard or use a real payment method.";
-          
-          // For development: Allow bypassing payment method collection
-          if (confirm("Development mode: Skip payment method collection and activate trial anyway?")) {
-            // Directly activate trial without payment method
-            try {
-              await apiRequest("POST", "/api/confirm-trial-setup", {
-                userId: user?.uid,
-                setupIntentId: "dev_bypass"
-              });
-              onComplete();
-              return;
-            } catch (devError) {
-              console.error("Dev bypass failed:", devError);
-            }
-          }
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-        
-        alert(errorMessage);
       } else if (setupIntent && setupIntent.status === 'succeeded') {
         // Confirm trial setup on backend
         await apiRequest("POST", "/api/confirm-trial-setup", {
@@ -83,7 +58,6 @@ function PaymentForm({ onComplete, onBack, clientSecret }: {
       }
     } catch (err) {
       console.error("Payment error:", err);
-      alert("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }

@@ -300,24 +300,11 @@ Return a JSON object with this structure:
         return res.status(400).json({ error: "User ID and setup intent ID required" });
       }
 
-      let paymentMethodValid = false;
+      // Retrieve the setup intent to verify it was successful
+      const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
 
-      // Handle development bypass
-      if (setupIntentId === "dev_bypass") {
-        console.log("Development bypass: Skipping payment method verification");
-        paymentMethodValid = true;
-      } else {
-        // Retrieve the setup intent to verify it was successful
-        const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
-
-        if (setupIntent.status !== 'succeeded') {
-          return res.status(400).json({ error: "Payment method setup failed" });
-        }
-        paymentMethodValid = true;
-      }
-
-      if (!paymentMethodValid) {
-        return res.status(400).json({ error: "Payment method validation failed" });
+      if (setupIntent.status !== 'succeeded') {
+        return res.status(400).json({ error: "Payment method setup failed" });
       }
 
       // Find user and update trial status
