@@ -16,6 +16,7 @@ interface ProblemSelectionProps {
   onAnalyze: () => void;
   onBack: () => void;
   onCustomPrompts?: () => void;
+  onTemplates?: () => void;
 }
 
 export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: ProblemSelectionProps) {

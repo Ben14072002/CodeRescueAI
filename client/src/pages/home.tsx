@@ -3,6 +3,7 @@ import { LandingSection } from "@/components/landing-section";
 import { ProblemSelection } from "@/components/problem-selection";
 import { SolutionDashboard } from "@/components/solution-dashboard";
 import { CustomPromptGenerator } from "@/components/custom-prompt-generator";
+import { PromptTemplatesLibrary } from "@/components/prompt-templates-library";
 import { UserSettings } from "@/components/user-settings";
 import { SuccessModal } from "@/components/success-modal";
 import { CopyToast } from "@/components/copy-toast";
@@ -15,7 +16,7 @@ import { useTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/use-subscription";
 import codeBreakeLogo from "@assets/Design sans titre (25).png";
 
-type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "settings";
+type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "templates" | "settings";
 
 export default function Home() {
   const [currentSection, setCurrentSection] = useState<Section>("landing");
@@ -42,6 +43,7 @@ export default function Home() {
   const navigateToLanding = () => setCurrentSection("landing");
   const navigateToDashboard = () => setCurrentSection("dashboard");
   const navigateToCustomPrompts = () => setCurrentSection("custom-prompts");
+  const navigateToTemplates = () => setCurrentSection("templates");
   const navigateToSettings = () => setCurrentSection("settings");
 
   const handleSuccess = () => {
@@ -144,6 +146,7 @@ export default function Home() {
             onAnalyze={navigateToSolution}
             onBack={navigateToLanding}
             onCustomPrompts={navigateToCustomPrompts}
+            onTemplates={navigateToTemplates}
           />
         )}
         
@@ -159,6 +162,10 @@ export default function Home() {
 
         {currentSection === "custom-prompts" && (
           <CustomPromptGenerator onBack={navigateToProblems} />
+        )}
+
+        {currentSection === "templates" && (
+          <PromptTemplatesLibrary onBack={navigateToProblems} />
         )}
 
         {currentSection === "settings" && (
