@@ -45,23 +45,47 @@ export const userPreferences = pgTable("user_preferences", {
   lastProblemType: varchar("last_problem_type", { length: 100 }),
 });
 
+export const promptRatings = pgTable("prompt_ratings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  sessionId: integer("session_id").references(() => sessions.id).notNull(),
+  promptIndex: integer("prompt_index").notNull(),
+  rating: varchar("rating", { length: 10 }).notNull(), // 'positive', 'negative'
+  promptText: text("prompt_text").notNull(),
+  problemType: varchar("problem_type", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   sessions: many(sessions),
   preferences: one(userPreferences),
+  promptRatings: many(promptRatings),
 }));
 
-export const sessionsRelations = relations(sessions, ({ one }) => ({
+export const sessionsRelations = relations(sessions, ({ one, many }) => ({
   user: one(users, {
     fields: [sessions.userId],
     references: [users.id],
   }),
+  promptRatings: many(promptRatings),
 }));
 
 export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
   user: one(users, {
     fields: [userPreferences.userId],
     references: [users.id],
+  }),
+}));
+
+export const promptRatingsRelations = relations(promptRatings, ({ one }) => ({
+  user: one(users, {
+    fields: [promptRatings.userId],
+    references: [users.id],
+  }),
+  session: one(sessions, {
+    fields: [promptRatings.sessionId],
+    references: [sessions.id],
   }),
 }));
 
@@ -100,11 +124,24 @@ export const userPreferencesSchema = z.object({
   lastProblemType: z.string().optional(),
 });
 
+export const promptRatingSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  sessionId: z.number(),
+  promptIndex: z.number(),
+  rating: z.enum(["positive", "negative"]),
+  promptText: z.string(),
+  problemType: z.string(),
+  createdAt: z.date(),
+});
+
 // Types from database tables
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Session = z.infer<typeof sessionSchema>;
 export type UserPreferences = z.infer<typeof userPreferencesSchema>;
+export type PromptRating = z.infer<typeof promptRatingSchema>;
+export type InsertPromptRating = typeof promptRatings.$inferInsert;
 
 // Insert schemas
 export const insertSessionSchema = sessionSchema.omit({ id: true });

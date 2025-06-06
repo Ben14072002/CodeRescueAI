@@ -1,4 +1,4 @@
-import { users, sessions, type User, type InsertUser, type Session, type InsertSession } from "@shared/schema";
+import { users, sessions, promptRatings, type User, type InsertUser, type Session, type InsertSession, type PromptRating, type InsertPromptRating } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte } from "drizzle-orm";
 
@@ -21,19 +21,26 @@ export interface IStorage {
   expireTrial(userId: number): Promise<User>;
   getUserSessionsThisMonth(userId: number): Promise<Session[]>;
   createSession(session: InsertSession): Promise<Session>;
+  ratePrompt(rating: InsertPromptRating): Promise<PromptRating>;
+  getPromptSuccessRate(problemType: string): Promise<{ positiveCount: number; totalCount: number; }>;
+  getUserRecentSessions(userId: number, limit?: number): Promise<Session[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private sessions: Map<number, Session>;
+  private promptRatings: Map<number, PromptRating>;
   currentId: number;
   currentSessionId: number;
+  currentRatingId: number;
 
   constructor() {
     this.users = new Map();
     this.sessions = new Map();
+    this.promptRatings = new Map();
     this.currentId = 1;
     this.currentSessionId = 1;
+    this.currentRatingId = 1;
     
     // Initialize with your Pro subscription
     this.createUser({
@@ -172,6 +179,42 @@ export class MemStorage implements IStorage {
     
     this.sessions.set(newSession.id, newSession);
     return newSession;
+  }
+
+  async ratePrompt(rating: InsertPromptRating): Promise<PromptRating> {
+    const newRating: PromptRating = {
+      id: this.currentRatingId++,
+      userId: rating.userId,
+      sessionId: rating.sessionId,
+      promptIndex: rating.promptIndex,
+      rating: rating.rating,
+      promptText: rating.promptText,
+      problemType: rating.problemType,
+      createdAt: new Date(),
+    };
+    
+    this.promptRatings.set(newRating.id, newRating);
+    return newRating;
+  }
+
+  async getPromptSuccessRate(problemType: string): Promise<{ positiveCount: number; totalCount: number; }> {
+    const ratings = Array.from(this.promptRatings.values()).filter(
+      rating => rating.problemType === problemType
+    );
+    
+    const positiveCount = ratings.filter(rating => rating.rating === 'positive').length;
+    const totalCount = ratings.length;
+    
+    return { positiveCount, totalCount };
+  }
+
+  async getUserRecentSessions(userId: number, limit: number = 5): Promise<Session[]> {
+    const userSessions = Array.from(this.sessions.values())
+      .filter(session => session.userId === userId)
+      .sort((a, b) => b.startTime.getTime() - a.startTime.getTime())
+      .slice(0, limit);
+    
+    return userSessions;
   }
 }
 
