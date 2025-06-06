@@ -8,8 +8,11 @@ import { SuccessModal } from "@/components/success-modal";
 import { CopyToast } from "@/components/copy-toast";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { UserDashboard } from "@/components/user-dashboard";
+import { TrialCountdown } from "@/components/trial-countdown";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
+import { useTrial } from "@/hooks/use-trial";
+import { useSubscription } from "@/hooks/use-subscription";
 import codeBreakeLogo from "@assets/Design sans titre (25).png";
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "settings";
@@ -23,6 +26,8 @@ export default function Home() {
   
   const { currentSession } = useSession();
   const { user, loading } = useAuth();
+  const { isTrialActive, daysRemaining } = useTrial();
+  const { isPro } = useSubscription();
 
   const navigateToProblems = () => {
     if (!user) {
@@ -121,6 +126,15 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Trial Countdown - Show only for authenticated users on non-landing pages */}
+        {user && currentSection !== "landing" && !isPro && (
+          <TrialCountdown 
+            daysRemaining={daysRemaining} 
+            isTrialActive={isTrialActive}
+            onUpgrade={() => setShowAuthModal(true)}
+          />
+        )}
+
         {currentSection === "landing" && (
           <LandingSection onGetStarted={navigateToProblems} />
         )}
