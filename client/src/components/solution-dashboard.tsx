@@ -38,6 +38,74 @@ import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+
+// Recent Sessions Widget Component
+function RecentSessionsWidget({ userId }: { userId?: string }) {
+  const { data: recentSessions, isLoading } = useQuery({
+    queryKey: ['recent-sessions', userId],
+    queryFn: async () => {
+      if (!userId) return { sessions: [] };
+      const response = await apiRequest('GET', `/api/user/recent-sessions/${userId}?limit=3`);
+      return await response.json();
+    },
+    enabled: !!userId
+  });
+
+  if (isLoading) {
+    return (
+      <Card className="surface-800 border-slate-700">
+        <CardContent className="p-4">
+          <div className="text-center text-slate-400">Loading recent sessions...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const sessions = recentSessions?.sessions || [];
+
+  if (sessions.length === 0) {
+    return (
+      <Card className="surface-800 border-slate-700">
+        <CardContent className="p-4">
+          <div className="text-center text-slate-400">
+            <Clock className="w-8 h-8 mx-auto mb-2 text-slate-500" />
+            <p className="text-sm">No recent rescue sessions yet</p>
+            <p className="text-xs text-slate-500">Your rescue history will appear here</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="surface-800 border-slate-700">
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {sessions.map((session: any, index: number) => {
+            const problemInfo = problemData[session.problemType] || { title: 'Custom Problem', color: 'slate' };
+            return (
+              <div key={session.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-2 h-2 rounded-full bg-${problemInfo.color}-500`}></div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-200">{problemInfo.title}</p>
+                    <p className="text-xs text-slate-400">
+                      {new Date(session.startTime).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {session.progress}% complete
+                </Badge>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 interface SolutionDashboardProps {
   onBack: () => void;
@@ -80,6 +148,40 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onC
       onCopy();
     } catch (err) {
       console.error("Failed to copy text: ", err);
+    }
+  };
+
+  const handlePromptRating = async (promptIndex: number, rating: 'positive' | 'negative') => {
+    if (!user?.uid || !currentSession?.id) return;
+    
+    try {
+      const promptText = problemInfo.prompts[promptIndex]?.text || '';
+      
+      await apiRequest('POST', '/api/rate-prompt', {
+        userId: user.uid,
+        sessionId: currentSession.id,
+        promptIndex,
+        rating,
+        promptText,
+        problemType: currentSession.problemType
+      });
+
+      setPromptRatings(prev => ({
+        ...prev,
+        [promptIndex]: rating
+      }));
+
+      toast({
+        title: "Feedback Recorded",
+        description: `Thanks for rating this prompt ${rating === 'positive' ? 'helpful' : 'not helpful'}!`,
+      });
+    } catch (error) {
+      console.error('Error rating prompt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to record your feedback. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -240,13 +342,56 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onC
                       <div className="bg-slate-700 rounded-lg p-4 font-mono text-sm mb-3">
                         <p className="text-slate-200">{prompt.text}</p>
                       </div>
-                      <div className="text-xs text-slate-500 flex items-center">
+                      <div className="text-xs text-slate-500 flex items-center mb-3">
                         <Lightbulb className="w-3 h-3 mr-1" />
                         {prompt.explanation}
+                      </div>
+                      
+                      {/* Success Tracking - Thumbs Up/Down Rating */}
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-600">
+                        <span className="text-xs text-slate-500">Was this prompt helpful?</span>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePromptRating(index, 'positive')}
+                            className={`p-2 h-8 w-8 ${
+                              promptRatings[index] === 'positive' 
+                                ? 'bg-green-600 text-white' 
+                                : 'text-slate-400 hover:text-green-400 hover:bg-green-600/20'
+                            }`}
+                          >
+                            <ThumbsUp className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePromptRating(index, 'negative')}
+                            className={`p-2 h-8 w-8 ${
+                              promptRatings[index] === 'negative' 
+                                ? 'bg-red-600 text-white' 
+                                : 'text-slate-400 hover:text-red-400 hover:bg-red-600/20'
+                            }`}
+                          >
+                            <ThumbsDown className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+
+              {/* Recent Sessions - Prompt History */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  Recent Rescues
+                  <Badge className="ml-2 bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                    <Clock className="w-3 h-3 mr-1" />
+                    History
+                  </Badge>
+                </h3>
+                <RecentSessionsWidget userId={user?.uid} />
               </div>
 
               {/* Custom Prompt Generator - Pro Feature */}
