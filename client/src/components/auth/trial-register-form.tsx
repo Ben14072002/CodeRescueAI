@@ -19,35 +19,15 @@ interface TrialRegisterFormProps {
 }
 
 // Payment Form Component for Stripe Integration
-function PaymentForm({ onComplete, onBack, userEmail, userName }: { 
+function PaymentForm({ onComplete, onBack, clientSecret }: { 
   onComplete: () => void; 
   onBack: () => void;
-  userEmail: string;
-  userName: string;
+  clientSecret: string;
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
-  const [clientSecret, setClientSecret] = useState("");
   const { user } = useAuth();
-
-  // Initialize Stripe Setup Intent
-  React.useEffect(() => {
-    if (user) {
-      apiRequest("POST", "/api/create-trial-setup-intent", {
-        userId: user.uid,
-        email: userEmail,
-        name: userName
-      })
-      .then(response => response.json())
-      .then(data => {
-        setClientSecret(data.clientSecret);
-      })
-      .catch(error => {
-        console.error("Error creating setup intent:", error);
-      });
-    }
-  }, [user, userEmail, userName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,14 +63,6 @@ function PaymentForm({ onComplete, onBack, userEmail, userName }: {
     }
   };
 
-  if (!clientSecret) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" />
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement />
@@ -116,6 +88,112 @@ function PaymentForm({ onComplete, onBack, userEmail, userName }: {
   );
 }
 
+// Trial Payment Wrapper with proper Stripe Elements setup
+function TrialPaymentWrapper({ onComplete, onBack, userEmail, userName }: {
+  onComplete: () => void;
+  onBack: () => void;
+  userEmail: string;
+  userName: string;
+}) {
+  const [clientSecret, setClientSecret] = useState("");
+  const { user } = useAuth();
+
+  // Initialize Stripe Setup Intent
+  React.useEffect(() => {
+    if (user) {
+      apiRequest("POST", "/api/create-trial-setup-intent", {
+        userId: user.uid,
+        email: userEmail,
+        name: userName
+      })
+      .then(response => response.json())
+      .then(data => {
+        setClientSecret(data.clientSecret);
+      })
+      .catch(error => {
+        console.error("Error creating setup intent:", error);
+      });
+    }
+  }, [user, userEmail, userName]);
+
+  if (!clientSecret) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Crown className="w-8 h-8 text-purple-400 mr-2" />
+            <Badge className="bg-purple-500 text-white">Step 2 of 2</Badge>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-100 mb-2">Add Payment Method</h2>
+          <p className="text-slate-400">Required for trial - you won't be charged during the 3-day trial period</p>
+        </div>
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" />
+        </div>
+      </div>
+    );
+  }
+
+  const options = {
+    clientSecret,
+    appearance: {
+      theme: 'night' as const,
+      variables: {
+        colorPrimary: '#8b5cf6',
+        colorBackground: '#1e293b',
+        colorText: '#f1f5f9',
+        colorDanger: '#ef4444',
+        fontFamily: 'system-ui, sans-serif',
+        spacingUnit: '4px',
+        borderRadius: '6px'
+      }
+    }
+  };
+
+  return (
+    <Elements stripe={stripePromise} options={options}>
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Crown className="w-8 h-8 text-purple-400 mr-2" />
+            <Badge className="bg-purple-500 text-white">Step 2 of 2</Badge>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-100 mb-2">Add Payment Method</h2>
+          <p className="text-slate-400">Required for trial - you won't be charged during the 3-day trial period</p>
+        </div>
+
+        <Card className="border-purple-500/30 bg-purple-500/10">
+          <CardContent className="p-4">
+            <div className="flex items-center text-sm text-purple-200 mb-2">
+              <Shield className="w-4 h-4 mr-2" />
+              <span className="font-medium">Trial Protection:</span>
+            </div>
+            <div className="text-xs text-purple-300 space-y-1">
+              <div>• No charge for 3 days</div>
+              <div>• Cancel anytime before trial ends</div>
+              <div>• Automatic conversion to Pro after trial ($9.99/month)</div>
+              <div>• Secure payment processing by Stripe</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="surface-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-slate-100">Payment Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <PaymentForm 
+              onComplete={onComplete}
+              onBack={onBack}
+              clientSecret={clientSecret}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </Elements>
+  );
+}
+
 export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps) {
   const [step, setStep] = useState<"account" | "payment">("account");
   const [formData, setFormData] = useState({
@@ -128,7 +206,26 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState("");
-  const { register, loginWithGoogle, error } = useAuth();
+  const [clientSecret, setClientSecret] = useState("");
+  const { register, loginWithGoogle, error, user } = useAuth();
+
+  // Initialize Stripe Setup Intent when moving to payment step
+  React.useEffect(() => {
+    if (step === "payment" && user && !clientSecret) {
+      apiRequest("POST", "/api/create-trial-setup-intent", {
+        userId: user.uid,
+        email: formData.email,
+        name: formData.displayName
+      })
+      .then(response => response.json())
+      .then(data => {
+        setClientSecret(data.clientSecret);
+      })
+      .catch(error => {
+        console.error("Error creating setup intent:", error);
+      });
+    }
+  }, [step, user, formData.email, formData.displayName, clientSecret]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -184,8 +281,42 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
 
   // Render payment collection step
   if (step === "payment") {
+    if (!clientSecret) {
+      return (
+        <div className="space-y-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Crown className="w-8 h-8 text-purple-400 mr-2" />
+              <Badge className="bg-purple-500 text-white">Step 2 of 2</Badge>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-100 mb-2">Add Payment Method</h2>
+            <p className="text-slate-400">Required for trial - you won't be charged during the 3-day trial period</p>
+          </div>
+          <div className="flex items-center justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" />
+          </div>
+        </div>
+      );
+    }
+
+    const options = {
+      clientSecret,
+      appearance: {
+        theme: 'night' as const,
+        variables: {
+          colorPrimary: '#8b5cf6',
+          colorBackground: '#1e293b',
+          colorText: '#f1f5f9',
+          colorDanger: '#ef4444',
+          fontFamily: 'system-ui, sans-serif',
+          spacingUnit: '4px',
+          borderRadius: '6px'
+        }
+      }
+    };
+
     return (
-      <Elements stripe={stripePromise}>
+      <Elements stripe={stripePromise} options={options}>
         <div className="space-y-6">
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
@@ -219,8 +350,7 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
               <PaymentForm 
                 onComplete={handlePaymentComplete}
                 onBack={onBack}
-                userEmail={formData.email}
-                userName={formData.displayName}
+                clientSecret={clientSecret}
               />
             </CardContent>
           </Card>
