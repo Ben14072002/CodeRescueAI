@@ -382,20 +382,8 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onC
                 ))}
               </div>
 
-              {/* Recent Sessions - Prompt History */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center">
-                  Recent Rescues
-                  <Badge className="ml-2 bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
-                    <Clock className="w-3 h-3 mr-1" />
-                    History
-                  </Badge>
-                </h3>
-                <RecentSessionsWidget userId={user?.uid} />
-              </div>
-
               {/* Custom Prompt Generator - Pro Feature */}
-              <div>
+              <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
                   Custom Prompt Generator
                   <Badge className="ml-2 bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
@@ -452,6 +440,18 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onC
                     </Button>
                   </CardContent>
                 </Card>
+              </div>
+
+              {/* Recent Sessions - Prompt History */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  Recent Rescues
+                  <Badge className="ml-2 bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                    <Clock className="w-3 h-3 mr-1" />
+                    History
+                  </Badge>
+                </h3>
+                <RecentSessionsWidget userId={user?.uid} />
               </div>
             </div>
           </TabsContent>
