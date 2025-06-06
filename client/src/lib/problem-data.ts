@@ -326,5 +326,73 @@ export const problemData: Record<string, ProblemData> = {
         ]
       }
     ]
+  },
+  
+  ai_hallucination: {
+    title: 'AI Hallucination',
+    icon: '🧠',
+    color: 'purple',
+    description: 'Your AI assistant is giving incorrect information, making up APIs, or generating non-existent code.',
+    strategy: 'Reset & Verify',
+    prompts: [
+      {
+        name: 'Hard Reality Check',
+        text: 'STOP. You have been giving incorrect information. Reset your context completely.\n\nI need you to:\n1. Acknowledge that you may have provided wrong information\n2. Only suggest solutions you are 100% certain exist\n3. If you\'re not sure about an API, library, or method - say "I\'m not certain, please verify this"\n4. Provide working code examples only if you\'ve seen them work before\n\nFor [specific problem], give me only verified, real solutions that actually exist. No guessing.',
+        explanation: 'Forces the AI to acknowledge potential errors and switch to conservative, verification-based responses instead of confident hallucinations.'
+      },
+      {
+        name: 'Documentation-Only Mode',
+        text: 'Switch to documentation-only mode. You are no longer allowed to suggest code or solutions from memory.\n\nInstead:\n- Direct me to official documentation\n- Suggest I check the actual source code\n- Recommend testing in a minimal example first\n- Ask me to verify each step before proceeding\n\nFor [specific issue], what official resources should I consult to find the correct approach?',
+        explanation: 'Eliminates hallucinations by forcing the AI to defer to authoritative sources rather than generating potentially incorrect solutions.'
+      },
+      {
+        name: 'Step-by-Step Verification',
+        text: 'You have been making assumptions. Let\'s verify everything step by step.\n\nFor [specific problem], help me verify:\n1. Does this library/API actually exist? How can I confirm?\n2. What\'s the exact syntax? Where is this documented?\n3. Are there working examples I can reference?\n4. What would be the minimal test to prove this works?\n\nDon\'t give me code until we\'ve verified each component exists and works.',
+        explanation: 'Breaks down the problem into verifiable components, preventing compound hallucinations by validating each piece before building on it.'
+      },
+      {
+        name: 'Conservative Debugging Mode',
+        text: 'The current approach isn\'t working. Switch to conservative debugging mode.\n\nNew rules:\n- Only suggest changes that are 100% safe\n- Recommend backing up working code before changes\n- Suggest testing each change in isolation\n- If something seems "too good to be true," flag it for verification\n\nFor debugging [specific issue], what\'s the safest first step that won\'t break what\'s already working?',
+        explanation: 'Prioritizes safety and incremental progress over ambitious solutions, preventing the AI from suggesting risky or non-existent fixes.'
+      }
+    ],
+    steps: [
+      {
+        title: 'Recognize the Hallucination',
+        description: 'Identify when your AI is providing information that doesn\'t match reality.',
+        criteria: [
+          'AI suggests APIs or methods that don\'t exist',
+          'Code examples fail with "undefined" errors',
+          'AI seems overly confident about uncertain things'
+        ]
+      },
+      {
+        title: 'Reset the Context',
+        description: 'Use reality-check prompts to reset the AI\'s approach.',
+        criteria: [
+          'AI acknowledges potential errors',
+          'AI switches to conservative mode',
+          'AI starts asking for verification'
+        ]
+      },
+      {
+        title: 'Verify Each Component',
+        description: 'Check that each suggested solution actually exists.',
+        criteria: [
+          'Official documentation confirms the approach',
+          'Working examples can be found',
+          'Minimal tests prove the concept works'
+        ]
+      },
+      {
+        title: 'Build on Verified Foundation',
+        description: 'Only add complexity once the basic approach is confirmed.',
+        criteria: [
+          'Core functionality is working',
+          'Each addition is tested separately',
+          'Progress is incremental and safe'
+        ]
+      }
+    ]
   }
 };
