@@ -30,6 +30,27 @@ const PRICING_PLANS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Trial system API routes
+  app.get("/api/trial-status/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const trialStatus = await storage.checkTrialStatus(userId);
+      res.json(trialStatus);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to check trial status" });
+    }
+  });
+
+  app.post("/api/expire-trial/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.expireTrial(userId);
+      res.json({ success: true, user });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to expire trial" });
+    }
+  });
+
   // Session management routes - simplified to work without passport authentication
   app.get("/api/user/sessions/count", async (req, res) => {
     // For now, return default values for new users

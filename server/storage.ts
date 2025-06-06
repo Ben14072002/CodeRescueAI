@@ -17,6 +17,8 @@ export interface IStorage {
     subscriptionTier?: string;
     subscriptionCurrentPeriodEnd?: Date;
   }): Promise<User>;
+  checkTrialStatus(userId: number): Promise<{ isTrialActive: boolean; daysRemaining: number; }>;
+  expireTrial(userId: number): Promise<User>;
   getUserSessionsThisMonth(userId: number): Promise<Session[]>;
   createSession(session: InsertSession): Promise<Session>;
 }
@@ -70,15 +72,20 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
+    const now = new Date();
+    const trialEndDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
+    
     const user: User = { 
       ...insertUser, 
       id, 
-      createdAt: new Date(),
+      createdAt: now,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
-      subscriptionStatus: "free",
-      subscriptionTier: "free",
-      subscriptionCurrentPeriodEnd: null
+      subscriptionStatus: "trial",
+      subscriptionTier: "trial",
+      subscriptionCurrentPeriodEnd: null,
+      trialStartDate: now,
+      trialEndDate: trialEndDate
     };
     this.users.set(id, user);
     return user;
@@ -101,6 +108,37 @@ export class MemStorage implements IStorage {
       ...subscriptionData
     };
     
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async checkTrialStatus(userId: number): Promise<{ isTrialActive: boolean; daysRemaining: number; }> {
+    const user = this.users.get(userId);
+    if (!user || !user.trialEndDate) {
+      return { isTrialActive: false, daysRemaining: 0 };
+    }
+
+    const now = new Date();
+    const trialEnd = new Date(user.trialEndDate);
+    const isTrialActive = now < trialEnd && user.subscriptionTier === 'trial';
+    const timeRemaining = trialEnd.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(timeRemaining / (1000 * 60 * 60 * 24)));
+
+    return { isTrialActive, daysRemaining };
+  }
+
+  async expireTrial(userId: number): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const updatedUser = {
+      ...user,
+      subscriptionStatus: "free",
+      subscriptionTier: "free"
+    };
+
     this.users.set(userId, updatedUser);
     return updatedUser;
   }
@@ -171,6 +209,33 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set(subscriptionData)
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async checkTrialStatus(userId: number): Promise<{ isTrialActive: boolean; daysRemaining: number; }> {
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user || !user.trialEndDate) {
+      return { isTrialActive: false, daysRemaining: 0 };
+    }
+
+    const now = new Date();
+    const trialEnd = new Date(user.trialEndDate);
+    const isTrialActive = now < trialEnd && user.subscriptionTier === 'trial';
+    const timeRemaining = trialEnd.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(timeRemaining / (1000 * 60 * 60 * 24)));
+
+    return { isTrialActive, daysRemaining };
+  }
+
+  async expireTrial(userId: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        subscriptionStatus: "free",
+        subscriptionTier: "free"
+      })
       .where(eq(users.id, userId))
       .returning();
     return user;
