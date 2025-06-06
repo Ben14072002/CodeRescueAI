@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,10 +9,111 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Crown, Shield } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
 import { useAuth } from "@/hooks/use-auth";
+import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { stripePromise } from "@/lib/stripe";
+import { apiRequest } from "@/lib/queryClient";
 
 interface TrialRegisterFormProps {
   onBack: () => void;
   onSuccess: () => void;
+}
+
+// Payment Form Component for Stripe Integration
+function PaymentForm({ onComplete, onBack, userEmail, userName }: { 
+  onComplete: () => void; 
+  onBack: () => void;
+  userEmail: string;
+  userName: string;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isLoading, setIsLoading] = useState(false);
+  const [clientSecret, setClientSecret] = useState("");
+  const { user } = useAuth();
+
+  // Initialize Stripe Setup Intent
+  React.useEffect(() => {
+    if (user) {
+      apiRequest("POST", "/api/create-trial-setup-intent", {
+        userId: user.uid,
+        email: userEmail,
+        name: userName
+      })
+      .then(response => response.json())
+      .then(data => {
+        setClientSecret(data.clientSecret);
+      })
+      .catch(error => {
+        console.error("Error creating setup intent:", error);
+      });
+    }
+  }, [user, userEmail, userName]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!stripe || !elements || !clientSecret) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const { error, setupIntent } = await stripe.confirmSetup({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin,
+        },
+        redirect: 'if_required'
+      });
+
+      if (error) {
+        console.error("Payment setup failed:", error);
+      } else if (setupIntent && setupIntent.status === 'succeeded') {
+        // Confirm trial setup on backend
+        await apiRequest("POST", "/api/confirm-trial-setup", {
+          userId: user?.uid,
+          setupIntentId: setupIntent.id
+        });
+        
+        onComplete();
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!clientSecret) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" />
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <PaymentElement />
+      <div className="flex gap-3 pt-4">
+        <Button
+          type="button"
+          onClick={onBack}
+          variant="outline"
+          className="flex-1 border-slate-600 text-slate-300"
+          disabled={isLoading}
+        >
+          Back to Signup Choice
+        </Button>
+        <Button
+          type="submit"
+          className="flex-1 bg-purple-600 hover:bg-purple-700"
+          disabled={isLoading}
+        >
+          {isLoading ? "Setting up..." : "Complete Trial Setup"}
+        </Button>
+      </div>
+    </form>
+  );
 }
 
 export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps) {
@@ -83,60 +185,47 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
   // Render payment collection step
   if (step === "payment") {
     return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Crown className="w-8 h-8 text-purple-400 mr-2" />
-            <Badge className="bg-purple-500 text-white">Step 2 of 2</Badge>
+      <Elements stripe={stripePromise}>
+        <div className="space-y-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Crown className="w-8 h-8 text-purple-400 mr-2" />
+              <Badge className="bg-purple-500 text-white">Step 2 of 2</Badge>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-100 mb-2">Add Payment Method</h2>
+            <p className="text-slate-400">Required for trial - you won't be charged during the 3-day trial period</p>
           </div>
-          <h2 className="text-2xl font-bold text-slate-100 mb-2">Add Payment Method</h2>
-          <p className="text-slate-400">Required for trial - you won't be charged during the 3-day trial period</p>
+
+          <Card className="border-purple-500/30 bg-purple-500/10">
+            <CardContent className="p-4">
+              <div className="flex items-center text-sm text-purple-200 mb-2">
+                <Shield className="w-4 h-4 mr-2" />
+                <span className="font-medium">Trial Protection:</span>
+              </div>
+              <div className="text-xs text-purple-300 space-y-1">
+                <div>• No charge for 3 days</div>
+                <div>• Cancel anytime before trial ends</div>
+                <div>• Automatic conversion to Pro after trial ($9.99/month)</div>
+                <div>• Secure payment processing by Stripe</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="surface-800 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-slate-100">Payment Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <PaymentForm 
+                onComplete={handlePaymentComplete}
+                onBack={onBack}
+                userEmail={formData.email}
+                userName={formData.displayName}
+              />
+            </CardContent>
+          </Card>
         </div>
-
-        <Card className="border-purple-500/30 bg-purple-500/10">
-          <CardContent className="p-4">
-            <div className="flex items-center text-sm text-purple-200 mb-2">
-              <Shield className="w-4 h-4 mr-2" />
-              <span className="font-medium">Trial Protection:</span>
-            </div>
-            <div className="text-xs text-purple-300 space-y-1">
-              <div>• No charge for 3 days</div>
-              <div>• Cancel anytime before trial ends</div>
-              <div>• Automatic conversion to Pro after trial ($9.99/month)</div>
-              <div>• Secure payment processing by Stripe</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="surface-800 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-slate-100">Payment Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert className="border-amber-500/30 bg-amber-500/10">
-              <AlertDescription className="text-amber-200">
-                This feature requires Stripe integration. Payment method collection will be available once Stripe is configured.
-              </AlertDescription>
-            </Alert>
-            
-            <div className="flex gap-3">
-              <Button
-                onClick={onBack}
-                variant="outline"
-                className="flex-1 border-slate-600 text-slate-300"
-              >
-                Back to Signup Choice
-              </Button>
-              <Button
-                onClick={handlePaymentComplete}
-                className="flex-1 bg-purple-600 hover:bg-purple-700"
-              >
-                Complete Trial Setup
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </Elements>
     );
   }
 

@@ -237,6 +237,105 @@ Return a JSON object with this structure:
     }
   });
 
+  // Create Trial Setup Intent
+  app.post("/api/create-trial-setup-intent", async (req, res) => {
+    try {
+      const { userId, email, name } = req.body;
+
+      if (!userId || !email) {
+        return res.status(400).json({ error: "User ID and email required" });
+      }
+
+      // Create Stripe customer
+      const customer = await stripe.customers.create({
+        email: email,
+        name: name || "Trial User",
+        metadata: {
+          userId: userId,
+          plan: "trial"
+        }
+      });
+
+      // Create Setup Intent for collecting payment method without charging
+      const setupIntent = await stripe.setupIntents.create({
+        customer: customer.id,
+        usage: 'off_session',
+        metadata: {
+          userId: userId,
+          type: 'trial_setup'
+        }
+      });
+
+      // Update user with Stripe customer ID
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (user) {
+        await storage.updateUserSubscription(user.id, {
+          stripeCustomerId: customer.id
+        });
+      }
+
+      res.json({
+        clientSecret: setupIntent.client_secret,
+        customerId: customer.id
+      });
+    } catch (error) {
+      console.error("Error creating trial setup intent:", error);
+      res.status(500).json({ 
+        error: "Failed to create trial setup",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Confirm Trial Setup
+  app.post("/api/confirm-trial-setup", async (req, res) => {
+    try {
+      const { userId, setupIntentId } = req.body;
+
+      if (!userId || !setupIntentId) {
+        return res.status(400).json({ error: "User ID and setup intent ID required" });
+      }
+
+      // Retrieve the setup intent to verify it was successful
+      const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
+
+      if (setupIntent.status !== 'succeeded') {
+        return res.status(400).json({ error: "Payment method setup failed" });
+      }
+
+      // Find user and update trial status
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Update user with trial status and payment method
+      await storage.updateUserSubscription(user.id, {
+        subscriptionStatus: "trial",
+        subscriptionTier: "trial"
+      });
+
+      res.json({ 
+        success: true,
+        message: "Trial setup completed successfully"
+      });
+    } catch (error) {
+      console.error("Error confirming trial setup:", error);
+      res.status(500).json({ 
+        error: "Failed to confirm trial setup",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Cancel Subscription
   app.post("/api/cancel-subscription", async (req, res) => {
     try {
