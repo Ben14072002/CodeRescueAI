@@ -26,107 +26,107 @@ interface PromptTemplatesLibraryProps {
 
 const TEMPLATE_CATEGORIES: PromptTemplate[] = [
   {
-    id: 'login-system-broken',
-    title: 'Login System Broken',
-    description: 'Authentication and user management issues',
+    id: 'secure-authentication-setup',
+    title: 'Secure Authentication Setup',
+    description: 'Build robust login systems with security best practices',
     category: 'Authentication',
     icon: Lock,
-    color: 'text-red-500',
-    prompts: [
-      {
-        name: 'Session Debug Reset',
-        text: 'AUTHENTICATION EMERGENCY RESET\n\nMy login system is broken. I need you to:\n\n1. IGNORE previous authentication approaches that failed\n2. Start fresh with a systematic authentication audit\n3. Check these components in order:\n   - Session management configuration\n   - Password hashing and verification\n   - Database user table structure\n   - Frontend form validation\n   - Backend route protection\n\n4. For each component, provide:\n   - Diagnostic commands to test it\n   - Common failure points to check\n   - Working code examples if issues found\n\nStart with: "Let\'s systematically audit your authentication system. First, show me your session configuration code."',
-        explanation: 'Forces a systematic authentication audit instead of random debugging attempts.'
-      },
-      {
-        name: 'Token Verification Protocol',
-        text: 'TOKEN-BASED AUTH TROUBLESHOOTING\n\nStop guessing about token issues. Follow this protocol:\n\n1. TOKEN LIFECYCLE AUDIT:\n   - How tokens are generated\n   - Where tokens are stored (localStorage, cookies, headers)\n   - How tokens are transmitted\n   - How tokens are verified\n   - When tokens expire\n\n2. VERIFICATION STEPS:\n   - Log the exact token being sent\n   - Log the token received on backend\n   - Test token manually with tools like Postman\n   - Check token format (JWT structure, etc.)\n\n3. COMMON FIXES:\n   - CORS configuration\n   - Header formatting\n   - Token encoding/decoding\n   - Secret key mismatches\n\nShow me your token handling code and let\'s trace the token journey step by step.',
-        explanation: 'Provides a systematic approach to token-based authentication debugging.'
-      },
-      {
-        name: 'Permissions & Roles Reset',
-        text: 'USER PERMISSIONS SYSTEMATIC CHECK\n\nPermission issues need methodical debugging:\n\n1. USER STATE VERIFICATION:\n   - Log current user object in frontend\n   - Log user permissions from database\n   - Check role assignment logic\n   - Verify permission checking middleware\n\n2. PERMISSION FLOW AUDIT:\n   - How permissions are assigned\n   - How permissions are stored\n   - How permissions are checked\n   - How permission changes propagate\n\n3. DEBUGGING COMMANDS:\n   ```\n   console.log("Current user:", user)\n   console.log("User permissions:", user.permissions)\n   console.log("Required permission:", requiredPermission)\n   ```\n\n4. COMMON PERMISSION BUGS:\n   - Case sensitivity in role names\n   - Async permission loading\n   - Cache invalidation\n   - Frontend/backend permission mismatch\n\nLet\'s systematically verify each step of your permission system.',
-        explanation: 'Methodical approach to debugging user permissions and role-based access control.'
-      }
-    ]
-  },
-  {
-    id: 'api-integration-failing',
-    title: 'API Integration Failing',
-    description: 'External API connections and data fetching problems',
-    category: 'Integration',
-    icon: Server,
     color: 'text-blue-500',
     prompts: [
       {
-        name: 'API Connection Diagnostic',
-        text: 'API INTEGRATION EMERGENCY PROTOCOL\n\nAPI not working? Let\'s diagnose systematically:\n\n1. CONNECTION VERIFICATION:\n   - Test API endpoint with curl/Postman first\n   - Verify API credentials/keys are correct\n   - Check API documentation for changes\n   - Confirm endpoint URLs and methods\n\n2. REQUEST INSPECTION:\n   - Log exact request being sent\n   - Check headers (Authorization, Content-Type)\n   - Verify request body format\n   - Test with minimal request first\n\n3. RESPONSE ANALYSIS:\n   - Log full response (status, headers, body)\n   - Check for CORS issues\n   - Verify response parsing logic\n   - Handle different status codes\n\n4. ERROR HANDLING:\n   - Implement proper try/catch\n   - Log network errors separately\n   - Add timeout handling\n   - Provide user-friendly error messages\n\nShow me your API call code and let\'s trace the request/response cycle.',
-        explanation: 'Systematic API debugging that covers all common integration failure points.'
+        name: 'Production-Ready Auth Architecture',
+        text: 'BUILD SECURE AUTHENTICATION SYSTEM\n\nI need to implement a production-ready authentication system. Guide me through:\n\n1. SECURITY-FIRST ARCHITECTURE:\n   - JWT vs session-based authentication pros/cons for my use case\n   - Secure password hashing with salt (bcrypt recommended settings)\n   - Token storage best practices (httpOnly cookies vs localStorage)\n   - CSRF protection implementation\n   - Rate limiting for login attempts\n\n2. DATABASE DESIGN:\n   - User table schema with security fields\n   - Password reset tokens table\n   - Session management tables if needed\n   - Proper indexing for performance\n\n3. IMPLEMENTATION CHECKLIST:\n   - Input validation and sanitization\n   - Secure password requirements\n   - Email verification flow\n   - Password reset functionality\n   - Multi-factor authentication considerations\n\n4. TESTING STRATEGY:\n   - Security test cases\n   - Authentication flow testing\n   - Edge case handling\n\nProvide code examples and explain the security reasoning behind each choice.',
+        explanation: 'Comprehensive guide for building secure authentication from the ground up with security best practices.'
       },
       {
-        name: 'Rate Limiting & Retry Logic',
-        text: 'API RATE LIMITING SOLUTION\n\nAPI failing due to rate limits or intermittent issues?\n\n1. RATE LIMIT DETECTION:\n   - Check for 429 status codes\n   - Look for rate limit headers\n   - Monitor request frequency\n   - Implement exponential backoff\n\n2. RETRY STRATEGY:\n   ```javascript\n   const retryWithBackoff = async (fn, retries = 3) => {\n     try {\n       return await fn()\n     } catch (error) {\n       if (retries > 0 && error.status === 429) {\n         await new Promise(resolve => setTimeout(resolve, 1000 * (4 - retries)))\n         return retryWithBackoff(fn, retries - 1)\n       }\n       throw error\n     }\n   }\n   ```\n\n3. REQUEST OPTIMIZATION:\n   - Batch requests when possible\n   - Cache responses appropriately\n   - Use webhooks instead of polling\n   - Implement request queuing\n\n4. MONITORING:\n   - Log request timing\n   - Track success/failure rates\n   - Monitor quota usage\n   - Set up alerts for failures\n\nImplement proper retry logic and rate limiting to make your API integration robust.',
-        explanation: 'Addresses API reliability issues with retry logic and rate limiting strategies.'
+        name: 'JWT Implementation Best Practices',
+        text: 'IMPLEMENT SECURE JWT AUTHENTICATION\n\nGuide me through implementing JWT authentication correctly:\n\n1. JWT SETUP REQUIREMENTS:\n   - Secure secret key generation and storage\n   - Appropriate token expiration times\n   - Refresh token implementation\n   - Payload structure (minimal, no sensitive data)\n\n2. SECURITY IMPLEMENTATIONS:\n   - Token signing and verification\n   - Blacklist/whitelist for token revocation\n   - Secure token transmission (Authorization header)\n   - HTTPS enforcement\n\n3. MIDDLEWARE SETUP:\n   - Authentication middleware for protected routes\n   - Token validation logic\n   - Error handling for expired/invalid tokens\n   - Request logging for security monitoring\n\n4. FRONTEND INTEGRATION:\n   - Secure token storage\n   - Automatic token refresh\n   - Request interceptors\n   - Logout functionality\n\nProvide complete working examples with security explanations for each component.',
+        explanation: 'Step-by-step JWT implementation focusing on security best practices and common pitfalls to avoid.'
+      },
+      {
+        name: 'Role-Based Access Control Setup',
+        text: 'IMPLEMENT ROBUST PERMISSION SYSTEM\n\nHelp me build a scalable role-based access control (RBAC) system:\n\n1. RBAC ARCHITECTURE DESIGN:\n   - User, Role, and Permission entities\n   - Many-to-many relationships setup\n   - Hierarchical roles if needed\n   - Resource-based permissions\n\n2. DATABASE SCHEMA:\n   - Users table with role assignments\n   - Roles table with descriptions\n   - Permissions table with resource mapping\n   - Junction tables for relationships\n\n3. MIDDLEWARE IMPLEMENTATION:\n   - Permission checking middleware\n   - Route-level access control\n   - Resource-specific permissions\n   - Dynamic permission loading\n\n4. FRONTEND INTEGRATION:\n   - Conditional rendering based on permissions\n   - Menu/navigation filtering\n   - Button/action visibility\n   - Permission state management\n\nProvide code examples for both backend and frontend implementation with scalability considerations.',
+        explanation: 'Complete RBAC system setup guide with database design and implementation patterns for scalable permission management.'
       }
     ]
   },
   {
-    id: 'css-layout-issues',
-    title: 'CSS Layout Issues',
-    description: 'Styling, responsive design, and layout problems',
+    id: 'robust-api-integration',
+    title: 'Robust API Integration',
+    description: 'Build reliable external API connections with best practices',
+    category: 'Integration',
+    icon: Server,
+    color: 'text-green-500',
+    prompts: [
+      {
+        name: 'Production-Ready API Client',
+        text: 'BUILD ENTERPRISE-GRADE API INTEGRATION\n\nHelp me create a robust API client from the ground up:\n\n1. CLIENT ARCHITECTURE:\n   - HTTP client configuration (axios/fetch setup)\n   - Base URL and environment management\n   - Request/response interceptors\n   - Authentication token management\n   - Automatic token refresh logic\n\n2. ERROR HANDLING STRATEGY:\n   - Comprehensive error type definitions\n   - Network error vs API error handling\n   - Retry logic with exponential backoff\n   - Circuit breaker pattern for failing APIs\n   - Graceful degradation strategies\n\n3. PERFORMANCE OPTIMIZATION:\n   - Request/response caching\n   - Request deduplication\n   - Concurrent request limiting\n   - Response compression handling\n   - Request timeout configuration\n\n4. MONITORING & LOGGING:\n   - Request/response logging\n   - Performance metrics tracking\n   - Error rate monitoring\n   - API usage analytics\n\nProvide complete implementation with TypeScript types and explain the architecture decisions.',
+        explanation: 'Comprehensive guide for building production-ready API clients with enterprise-level reliability and monitoring.'
+      },
+      {
+        name: 'API Rate Limiting & Caching Setup',
+        text: 'IMPLEMENT SMART API USAGE PATTERNS\n\nGuide me through setting up intelligent API usage:\n\n1. RATE LIMITING IMPLEMENTATION:\n   - Rate limit detection and handling\n   - Queue-based request management\n   - Priority-based request scheduling\n   - Backoff strategies (exponential, linear, custom)\n   - Rate limit header interpretation\n\n2. CACHING STRATEGY:\n   - Response caching layers (memory, localStorage, Redis)\n   - Cache invalidation policies\n   - TTL (Time To Live) configuration\n   - Conditional requests (ETag, Last-Modified)\n   - Cache warming strategies\n\n3. REQUEST OPTIMIZATION:\n   - Request batching when possible\n   - Pagination handling\n   - Data transformation and normalization\n   - Webhook integration for real-time updates\n   - GraphQL vs REST optimization\n\n4. RESILIENCE PATTERNS:\n   - Circuit breaker implementation\n   - Fallback data strategies\n   - Health check endpoints\n   - Graceful API versioning\n\nProvide working examples with performance metrics and explain when to use each pattern.',
+        explanation: 'Advanced API optimization patterns focusing on performance, reliability, and efficient resource usage.'
+      }
+    ]
+  },
+  {
+    id: 'scalable-frontend-architecture',
+    title: 'Scalable Frontend Architecture',
+    description: 'Build maintainable CSS and responsive design systems',
     category: 'Frontend',
     icon: Palette,
     color: 'text-purple-500',
     prompts: [
       {
-        name: 'Layout Debug Reset',
-        text: 'CSS LAYOUT EMERGENCY RESET\n\nLayout broken? Let\'s debug systematically:\n\n1. LAYOUT INSPECTION:\n   - Open browser dev tools\n   - Use "Inspect Element" on broken areas\n   - Check box model (margin, padding, border)\n   - Look for CSS conflicts and overrides\n\n2. FLEXBOX/GRID DEBUGGING:\n   - Add temporary background colors to containers\n   - Check flex/grid properties on parent and children\n   - Verify alignment and justification settings\n   - Test with simplified content first\n\n3. RESPONSIVE ISSUES:\n   - Test different screen sizes\n   - Check media query breakpoints\n   - Verify viewport meta tag\n   - Use browser responsive design mode\n\n4. CSS DEBUGGING HELPERS:\n   ```css\n   * { outline: 1px solid red; }  /* See all elements */\n   .debug { background: rgba(255,0,0,0.1); }  /* Highlight containers */\n   ```\n\n5. COMMON FIXES:\n   - Clear floats properly\n   - Check z-index stacking\n   - Verify positioning (relative/absolute)\n   - Fix overflow issues\n\nShow me your CSS and HTML structure, and let\'s identify the layout issue step by step.',
-        explanation: 'Systematic approach to CSS layout debugging using browser dev tools and proven techniques.'
+        name: 'CSS Architecture & Design System',
+        text: 'BUILD SCALABLE CSS ARCHITECTURE\n\nHelp me establish a maintainable CSS architecture from the start:\n\n1. CSS METHODOLOGY SETUP:\n   - BEM (Block Element Modifier) naming convention\n   - Component-based CSS organization\n   - CSS custom properties (variables) system\n   - Utility-first vs component-first approach decision\n   - CSS-in-JS vs traditional CSS trade-offs\n\n2. DESIGN SYSTEM FOUNDATION:\n   - Color palette and theming system\n   - Typography scale and hierarchy\n   - Spacing system (margin, padding grid)\n   - Component library structure\n   - Design tokens implementation\n\n3. RESPONSIVE DESIGN STRATEGY:\n   - Mobile-first breakpoint system\n   - Fluid typography and spacing\n   - Container queries vs media queries\n   - Responsive image and media handling\n   - Touch-friendly interaction design\n\n4. PERFORMANCE OPTIMIZATION:\n   - CSS bundle optimization\n   - Critical CSS extraction\n   - Unused CSS elimination\n   - CSS loading strategies\n   - Animation performance\n\nProvide a complete setup guide with file structure and explain the scalability benefits of each choice.',
+        explanation: 'Comprehensive guide for building scalable CSS architecture with design systems and performance optimization.'
       },
       {
-        name: 'Responsive Design Fix',
-        text: 'RESPONSIVE DESIGN TROUBLESHOOTING\n\nMobile layout broken? Follow this checklist:\n\n1. VIEWPORT SETUP:\n   ```html\n   <meta name="viewport" content="width=device-width, initial-scale=1.0">\n   ```\n\n2. BREAKPOINT STRATEGY:\n   - Mobile-first approach (min-width media queries)\n   - Standard breakpoints: 320px, 768px, 1024px, 1200px\n   - Test on actual devices, not just browser resize\n\n3. FLEXIBLE LAYOUTS:\n   - Use relative units (%, em, rem, vw, vh)\n   - Avoid fixed widths and heights\n   - Implement flexible grids (CSS Grid or Flexbox)\n   - Make images responsive: `max-width: 100%; height: auto;`\n\n4. TESTING PROTOCOL:\n   - Test on multiple screen sizes\n   - Check both portrait and landscape\n   - Verify touch targets are 44px minimum\n   - Test text readability and contrast\n\n5. COMMON RESPONSIVE BUGS:\n   - Horizontal scrolling on mobile\n   - Text too small to read\n   - Buttons too small to tap\n   - Images overflowing containers\n\nLet\'s audit your responsive design systematically and fix mobile layout issues.',
-        explanation: 'Comprehensive responsive design troubleshooting focused on mobile-first principles.'
+        name: 'Modern Layout Techniques Setup',
+        text: 'IMPLEMENT MODERN CSS LAYOUT SYSTEMS\n\nGuide me through setting up robust layout systems:\n\n1. CSS GRID MASTERY:\n   - Grid container and item setup\n   - Named grid lines and areas\n   - Implicit vs explicit grid behavior\n   - Responsive grid patterns\n   - Grid fallbacks for older browsers\n\n2. FLEXBOX BEST PRACTICES:\n   - Flex container optimization\n   - Flex item behavior control\n   - Common flexbox patterns\n   - Flexbox vs Grid decision matrix\n   - Accessibility considerations\n\n3. ADVANCED LAYOUT PATTERNS:\n   - Container queries implementation\n   - Intrinsic web design principles\n   - Subgrid for nested layouts\n   - CSS logical properties\n   - Multi-column layouts\n\n4. RESPONSIVE STRATEGY:\n   - Fluid layouts without breakpoints\n   - Component-level responsiveness\n   - Progressive enhancement approach\n   - Performance-first responsive images\n   - Accessibility-focused responsive design\n\nProvide working examples with progressive enhancement and explain when to use each technique.',
+        explanation: 'Modern CSS layout techniques focusing on flexibility, maintainability, and progressive enhancement.'
       }
     ]
   },
   {
-    id: 'database-connection-problems',
-    title: 'Database Connection Problems',
-    description: 'Database connectivity and query issues',
+    id: 'scalable-database-architecture',
+    title: 'Scalable Database Architecture',
+    description: 'Design performant database systems from the ground up',
     category: 'Backend',
     icon: Database,
-    color: 'text-green-500',
+    color: 'text-cyan-500',
     prompts: [
       {
-        name: 'Connection String Debug',
-        text: 'DATABASE CONNECTION EMERGENCY DIAGNOSIS\n\nDatabase won\'t connect? Let\'s fix it systematically:\n\n1. CONNECTION STRING VERIFICATION:\n   - Check database URL format\n   - Verify host, port, database name\n   - Confirm username and password\n   - Test connection string format\n\n2. NETWORK CONNECTIVITY:\n   - Ping database server if possible\n   - Check firewall settings\n   - Verify VPN connection if required\n   - Test from different network\n\n3. DATABASE STATUS:\n   - Confirm database server is running\n   - Check database logs for errors\n   - Verify database exists and is accessible\n   - Test with database admin tool\n\n4. APPLICATION DEBUGGING:\n   ```javascript\n   // Add detailed logging\n   console.log("Attempting connection with:", {\n     host: process.env.DB_HOST,\n     port: process.env.DB_PORT,\n     database: process.env.DB_NAME\n   })\n   ```\n\n5. COMMON CONNECTION ISSUES:\n   - SSL/TLS configuration\n   - Connection pooling settings\n   - Timeout configurations\n   - Environment variable problems\n\nShow me your connection configuration and let\'s diagnose the issue step by step.',
-        explanation: 'Systematic database connection troubleshooting covering network, configuration, and application layers.'
+        name: 'Production Database Design',
+        text: 'DESIGN SCALABLE DATABASE ARCHITECTURE\n\nHelp me architect a production-ready database system:\n\n1. DATABASE DESIGN FUNDAMENTALS:\n   - Schema design with normalization principles\n   - Primary key and foreign key strategies\n   - Index planning for query patterns\n   - Data type optimization for storage and performance\n   - Constraint design for data integrity\n\n2. PERFORMANCE ARCHITECTURE:\n   - Connection pooling configuration\n   - Read replica setup for scaling reads\n   - Partitioning strategies for large tables\n   - Caching layers (Redis, Memcached integration)\n   - Query optimization patterns\n\n3. SECURITY IMPLEMENTATION:\n   - Database user roles and permissions\n   - Row-level security policies\n   - Data encryption at rest and in transit\n   - SQL injection prevention\n   - Audit logging setup\n\n4. BACKUP & RECOVERY STRATEGY:\n   - Automated backup scheduling\n   - Point-in-time recovery setup\n   - Disaster recovery planning\n   - Database migration strategies\n   - Environment synchronization\n\nProvide complete setup instructions with performance considerations and explain the scalability benefits.',
+        explanation: 'Comprehensive database architecture guide focusing on performance, security, and scalability from the start.'
       },
       {
-        name: 'Query Performance Debug',
-        text: 'DATABASE QUERY OPTIMIZATION PROTOCOL\n\nSlow or failing queries? Let\'s optimize:\n\n1. QUERY ANALYSIS:\n   - Log the exact SQL being executed\n   - Use EXPLAIN/EXPLAIN PLAN to analyze\n   - Check query execution time\n   - Identify slow operations\n\n2. INDEX OPTIMIZATION:\n   - Check if relevant indexes exist\n   - Analyze index usage with EXPLAIN\n   - Add indexes for WHERE, JOIN, ORDER BY columns\n   - Remove unused indexes\n\n3. QUERY OPTIMIZATION:\n   - Avoid SELECT * queries\n   - Use appropriate WHERE clauses\n   - Optimize JOIN operations\n   - Consider query restructuring\n\n4. DEBUGGING TOOLS:\n   ```sql\n   -- PostgreSQL\n   EXPLAIN ANALYZE SELECT * FROM table WHERE condition;\n   \n   -- MySQL\n   EXPLAIN FORMAT=JSON SELECT * FROM table WHERE condition;\n   ```\n\n5. PERFORMANCE MONITORING:\n   - Log query execution times\n   - Monitor database connections\n   - Track slow query logs\n   - Set up performance alerts\n\nLet\'s analyze your queries and optimize database performance systematically.',
-        explanation: 'Database query optimization focusing on indexing, query analysis, and performance monitoring.'
+        name: 'Database Performance Optimization Setup',
+        text: 'IMPLEMENT HIGH-PERFORMANCE DATABASE PATTERNS\n\nGuide me through optimizing database performance from the beginning:\n\n1. INDEXING STRATEGY:\n   - Primary and secondary index design\n   - Composite index optimization\n   - Partial and functional indexes\n   - Index maintenance and monitoring\n   - Query plan analysis tools\n\n2. CONNECTION MANAGEMENT:\n   - Connection pool sizing and configuration\n   - Connection lifecycle management\n   - Prepared statement optimization\n   - Transaction isolation levels\n   - Deadlock prevention strategies\n\n3. QUERY OPTIMIZATION PATTERNS:\n   - Efficient JOIN strategies\n   - Subquery vs JOIN performance\n   - Pagination techniques for large datasets\n   - Bulk operation optimization\n   - N+1 query problem prevention\n\n4. MONITORING & METRICS:\n   - Performance monitoring setup\n   - Slow query logging\n   - Resource utilization tracking\n   - Database health checks\n   - Alerting thresholds\n\nProvide working examples with performance benchmarks and explain when to use each optimization technique.',
+        explanation: 'Advanced database performance optimization focusing on indexing, query patterns, and monitoring strategies.'
       }
     ]
   },
   {
-    id: 'deployment-errors',
-    title: 'Deployment Errors',
-    description: 'Build failures and production deployment issues',
+    id: 'production-deployment-setup',
+    title: 'Production Deployment Setup',
+    description: 'Build robust CI/CD pipelines and production infrastructure',
     category: 'DevOps',
-    icon: AlertTriangle,
+    icon: Server,
     color: 'text-orange-500',
     prompts: [
       {
-        name: 'Build Error Diagnosis',
-        text: 'DEPLOYMENT BUILD ERROR PROTOCOL\n\nBuild failing? Let\'s debug systematically:\n\n1. ERROR LOG ANALYSIS:\n   - Read the complete error message\n   - Identify the failing step (install, build, test)\n   - Check for specific error codes\n   - Look for stack traces\n\n2. DEPENDENCY ISSUES:\n   - Check package.json for version conflicts\n   - Clear node_modules and reinstall\n   - Verify Node.js version compatibility\n   - Check for missing dependencies\n\n3. ENVIRONMENT DIFFERENCES:\n   - Compare local vs production Node versions\n   - Check environment variables\n   - Verify build scripts\n   - Test build locally first\n\n4. COMMON BUILD FIXES:\n   ```bash\n   # Clear caches\n   npm cache clean --force\n   rm -rf node_modules package-lock.json\n   npm install\n   \n   # Test build locally\n   npm run build\n   ```\n\n5. DEBUGGING STEPS:\n   - Enable verbose logging\n   - Check build output size limits\n   - Verify static asset paths\n   - Test production configuration\n\nShow me your build error logs and let\'s identify and fix the deployment issue.',
-        explanation: 'Systematic approach to debugging build and deployment failures with focus on environment differences.'
+        name: 'CI/CD Pipeline Architecture',
+        text: 'BUILD PRODUCTION-READY DEPLOYMENT PIPELINE\n\nHelp me establish a robust CI/CD pipeline from scratch:\n\n1. PIPELINE ARCHITECTURE:\n   - Git workflow strategy (GitFlow, GitHub Flow)\n   - Branch protection and review policies\n   - Automated testing stages (unit, integration, e2e)\n   - Build and artifact management\n   - Deployment environments (staging, production)\n\n2. BUILD OPTIMIZATION:\n   - Multi-stage Docker builds\n   - Build caching strategies\n   - Asset optimization and bundling\n   - Environment-specific configurations\n   - Security scanning integration\n\n3. DEPLOYMENT STRATEGIES:\n   - Blue-green deployment setup\n   - Rolling deployment configuration\n   - Canary release implementation\n   - Database migration handling\n   - Zero-downtime deployment patterns\n\n4. MONITORING & OBSERVABILITY:\n   - Health check endpoints\n   - Application monitoring setup\n   - Error tracking and alerting\n   - Performance metrics collection\n   - Log aggregation and analysis\n\nProvide complete pipeline configuration with security best practices and explain the reliability benefits.',
+        explanation: 'Comprehensive CI/CD pipeline setup focusing on reliability, security, and automated deployment strategies.'
       },
       {
-        name: 'Production Environment Debug',
-        text: 'PRODUCTION DEPLOYMENT TROUBLESHOOTING\n\nApp works locally but fails in production?\n\n1. ENVIRONMENT VARIABLE AUDIT:\n   - Check all required env vars are set\n   - Verify sensitive values are not exposed\n   - Compare development vs production configs\n   - Test with production-like environment locally\n\n2. LOGGING SETUP:\n   ```javascript\n   // Add comprehensive logging\n   console.log("Environment:", process.env.NODE_ENV)\n   console.log("Database URL:", process.env.DATABASE_URL ? "Set" : "Missing")\n   console.log("API Keys:", process.env.API_KEY ? "Set" : "Missing")\n   ```\n\n3. PRODUCTION DEBUGGING:\n   - Check server logs for errors\n   - Monitor resource usage (CPU, memory)\n   - Verify database connections\n   - Test API endpoints individually\n\n4. COMMON PRODUCTION ISSUES:\n   - CORS configuration\n   - HTTPS vs HTTP problems\n   - File path case sensitivity\n   - Missing production dependencies\n   - Port binding issues\n\n5. ROLLBACK STRATEGY:\n   - Keep previous working version\n   - Document deployment steps\n   - Test rollback procedure\n   - Monitor after deployment\n\nLet\'s systematically verify your production configuration and identify the deployment issue.',
-        explanation: 'Production-specific debugging focusing on environment configuration and deployment differences.'
+        name: 'Production Infrastructure Best Practices',
+        text: 'IMPLEMENT SCALABLE PRODUCTION INFRASTRUCTURE\n\nGuide me through setting up production-ready infrastructure:\n\n1. INFRASTRUCTURE AS CODE:\n   - Terraform or CloudFormation setup\n   - Environment configuration management\n   - Resource provisioning automation\n   - Infrastructure versioning and rollback\n   - Cost optimization strategies\n\n2. SECURITY IMPLEMENTATION:\n   - SSL/TLS certificate management\n   - Environment variable and secret management\n   - Network security groups and firewalls\n   - Access control and IAM policies\n   - Security monitoring and compliance\n\n3. SCALABILITY ARCHITECTURE:\n   - Load balancer configuration\n   - Auto-scaling policies\n   - Database scaling strategies\n   - CDN setup for static assets\n   - Microservices deployment patterns\n\n4. RELIABILITY PATTERNS:\n   - Backup and disaster recovery\n   - Multi-region deployment\n   - Circuit breaker implementation\n   - Rate limiting and DDoS protection\n   - Monitoring and alerting systems\n\nProvide infrastructure setup guides with cost considerations and explain the scalability trade-offs.',
+        explanation: 'Production infrastructure setup focusing on security, scalability, and reliability patterns for enterprise applications.'
       }
     ]
   }
