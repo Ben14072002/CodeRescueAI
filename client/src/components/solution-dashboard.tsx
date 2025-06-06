@@ -27,13 +27,17 @@ import {
   Circle,
   Star,
   Crown,
-  Zap
+  Zap,
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react";
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useTimer } from "@/hooks/use-timer";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface SolutionDashboardProps {
   onBack: () => void;
@@ -47,6 +51,7 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onC
   const { currentSession, updateSession } = useSession();
   const { user } = useAuth();
   const { isPro } = useSubscription();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("prompts");
   const [projectGoal, setProjectGoal] = useState("");
   const [promptStyle, setPromptStyle] = useState("direct");
@@ -54,6 +59,7 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onC
   const [showGeneratedPrompt, setShowGeneratedPrompt] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [userTier, setUserTier] = useState<string>('free');
+  const [promptRatings, setPromptRatings] = useState<{ [key: number]: 'positive' | 'negative' | null }>({});
   const { timers, startTimer, stopTimer, getElapsedTime } = useTimer();
 
   if (!currentSession) return null;

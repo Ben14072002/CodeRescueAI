@@ -308,6 +308,37 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return newSession;
   }
+
+  async ratePrompt(rating: InsertPromptRating): Promise<PromptRating> {
+    const [newRating] = await db
+      .insert(promptRatings)
+      .values(rating)
+      .returning();
+    return newRating;
+  }
+
+  async getPromptSuccessRate(problemType: string): Promise<{ positiveCount: number; totalCount: number; }> {
+    const ratings = await db
+      .select()
+      .from(promptRatings)
+      .where(eq(promptRatings.problemType, problemType));
+    
+    const positiveCount = ratings.filter(rating => rating.rating === 'positive').length;
+    const totalCount = ratings.length;
+    
+    return { positiveCount, totalCount };
+  }
+
+  async getUserRecentSessions(userId: number, limit: number = 5): Promise<Session[]> {
+    const userSessions = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.userId, userId))
+      .orderBy(sessions.startTime)
+      .limit(limit);
+    
+    return userSessions;
+  }
 }
 
 export const storage = new MemStorage();

@@ -1052,6 +1052,88 @@ Generate 3 strategic AI manipulation prompts that solve this specific problem wi
     }
   });
 
+  // Prompt Rating API - Success Tracking System
+  app.post("/api/rate-prompt", async (req, res) => {
+    try {
+      const { userId, sessionId, promptIndex, rating, promptText, problemType } = req.body;
+
+      if (!userId || !sessionId || promptIndex === undefined || !rating || !promptText || !problemType) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      if (!['positive', 'negative'].includes(rating)) {
+        return res.status(400).json({ error: "Rating must be 'positive' or 'negative'" });
+      }
+
+      // Find user
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      const promptRating = await storage.ratePrompt({
+        userId: user.id,
+        sessionId: parseInt(sessionId),
+        promptIndex: parseInt(promptIndex),
+        rating: rating as 'positive' | 'negative',
+        promptText,
+        problemType
+      });
+
+      res.json({ success: true, rating: promptRating });
+    } catch (error: any) {
+      console.error('Prompt rating error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get prompt success rate for a problem type
+  app.get("/api/prompt-success-rate/:problemType", async (req, res) => {
+    try {
+      const { problemType } = req.params;
+      
+      const successRate = await storage.getPromptSuccessRate(problemType);
+      const percentage = successRate.totalCount > 0 
+        ? Math.round((successRate.positiveCount / successRate.totalCount) * 100)
+        : 0;
+
+      res.json({
+        ...successRate,
+        successPercentage: percentage
+      });
+    } catch (error: any) {
+      console.error('Success rate error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user's recent sessions for prompt history
+  app.get("/api/user/recent-sessions/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const limit = parseInt(req.query.limit as string) || 5;
+
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.json({ sessions: [] });
+      }
+
+      const recentSessions = await storage.getUserRecentSessions(user.id, limit);
+      res.json({ sessions: recentSessions });
+    } catch (error: any) {
+      console.error('Recent sessions error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
