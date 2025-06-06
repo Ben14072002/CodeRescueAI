@@ -19,7 +19,7 @@ interface ProblemSelectionProps {
   onTemplates?: () => void;
 }
 
-export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: ProblemSelectionProps) {
+export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplates }: ProblemSelectionProps) {
   const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -212,6 +212,32 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
                     Upgrade Required
                   </Badge>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Free Templates Library */}
+          <Card
+            className="cursor-pointer transition-all bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-green-500/50 hover:border-green-400 min-h-[140px] active:scale-95"
+            onClick={() => onTemplates && onTemplates()}
+          >
+            <CardContent className="p-4 md:p-6 h-full flex flex-col">
+              <div className="text-center mb-3 md:mb-4">
+                <div className="relative">
+                  <Search className="w-6 h-6 md:w-8 md:h-8 text-green-400 mb-2 md:mb-3 mx-auto" />
+                </div>
+                <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2 text-green-200">
+                  Ready-to-Use Templates
+                </h3>
+              </div>
+              <p className="text-green-300 text-xs md:text-sm mb-3 md:mb-4 flex-grow">
+                Battle-tested prompt templates for common coding problems. Copy & paste ready!
+              </p>
+              <div className="text-xs">
+                <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                  <Search className="w-3 h-3 mr-1" />
+                  Free for Everyone
+                </Badge>
               </div>
             </CardContent>
           </Card>
