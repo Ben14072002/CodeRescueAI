@@ -4,6 +4,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
@@ -21,6 +23,18 @@ export function useAuth() {
       setUser(user);
       setLoading(false);
     });
+
+    // Check for redirect result on page load
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log('Google sign-in successful via redirect');
+        }
+      })
+      .catch((error) => {
+        console.error('Google sign-in redirect error:', error);
+        setError(error.message);
+      });
 
     return unsubscribe;
   }, []);
@@ -51,8 +65,21 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     try {
       setError(null);
-      const result = await signInWithPopup(auth, googleProvider);
-      return result;
+      // Try popup first, fallback to redirect if popup fails
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        return result;
+      } catch (popupError: any) {
+        // If popup is blocked or unauthorized domain, use redirect
+        if (popupError.code === 'auth/unauthorized-domain' || 
+            popupError.code === 'auth/popup-blocked') {
+          console.log('Popup blocked or unauthorized domain, using redirect...');
+          await signInWithRedirect(auth, googleProvider);
+          // signInWithRedirect doesn't return a result, user will be redirected
+          return null;
+        }
+        throw popupError;
+      }
     } catch (error: any) {
       setError(error.message);
       throw error;
