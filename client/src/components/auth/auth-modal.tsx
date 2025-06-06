@@ -4,6 +4,8 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { LoginForm } from "./login-form";
 import { RegisterForm } from "./register-form";
 import { ForgotPasswordForm } from "./forgot-password-form";
+import { SignupChoice } from "./signup-choice";
+import { TrialRegisterForm } from "./trial-register-form";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,7 +13,7 @@ interface AuthModalProps {
   defaultView?: "login" | "register";
 }
 
-type AuthView = "login" | "register" | "forgot-password";
+type AuthView = "login" | "register" | "forgot-password" | "signup-choice" | "trial-register";
 
 export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalProps) {
   const [currentView, setCurrentView] = useState<AuthView>(defaultView);
@@ -25,7 +27,7 @@ export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalP
       case "login":
         return (
           <LoginForm
-            onSwitchToRegister={() => setCurrentView("register")}
+            onSwitchToRegister={() => setCurrentView("signup-choice")}
             onForgotPassword={() => setCurrentView("forgot-password")}
             onSuccess={handleSuccess}
           />
@@ -34,6 +36,21 @@ export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalP
         return (
           <RegisterForm
             onSwitchToLogin={() => setCurrentView("login")}
+            onSuccess={handleSuccess}
+          />
+        );
+      case "signup-choice":
+        return (
+          <SignupChoice
+            onTrialSignup={() => setCurrentView("trial-register")}
+            onFreeSignup={() => setCurrentView("register")}
+            onBack={() => setCurrentView("login")}
+          />
+        );
+      case "trial-register":
+        return (
+          <TrialRegisterForm
+            onBack={() => setCurrentView("signup-choice")}
             onSuccess={handleSuccess}
           />
         );

@@ -1,0 +1,68 @@
+USER JOURNEY MAP:
+
+STEP 1: LANDING PAGE
+User arrives → Sees "Start 3-Day Pro Trial" CTA → Clicks button
+
+STEP 2: SIGNUP CHOICE
+Show signup page with TWO clear options:
+[ ] "Start 3-Day Pro Trial" (Recommended)
+    - Full access to all Pro features
+    - Requires payment method (no charge during trial)
+    - Automatic billing after 3 days unless cancelled
+    
+[ ] "Use Free Plan"  
+    - 1 rescue per month
+    - Basic features only
+    - No payment required
+
+STEP 3A: TRIAL SIGNUP FLOW
+If user chooses trial:
+1. Collect email + password
+2. Collect Stripe payment info (no charge yet)
+3. Set user.trialStartDate = NOW
+4. Set user.trialEndDate = NOW + 3 days
+5. Set user.status = "trial_active"
+6. Redirect to dashboard with "Trial Active" banner
+
+STEP 3B: FREE SIGNUP FLOW  
+If user chooses free:
+1. Collect email + password only
+2. Set user.status = "free"
+3. Set user.monthlyRescuesUsed = 0
+4. Redirect to dashboard with free limitations
+
+STEP 4: TRIAL EXPERIENCE
+Trial user dashboard shows:
+- "Trial Active: 2 days remaining" countdown
+- Full access to custom prompt generator
+- Unlimited rescues
+- All Pro features unlocked
+- NO "Upgrade to Pro" buttons
+
+STEP 5: TRIAL EXPIRY
+After 3 days:
+- Auto-charge the payment method → user becomes Pro
+- OR if payment fails → revert to free plan (1 rescue/month)
+- Show appropriate success/failure message
+
+FEATURE ACCESS LOGIC:
+```javascript
+function getUserAccess(user) {
+  if (user.isPro) {
+    return "full_access";
+  }
+  if (user.status === "trial_active" && !isTrialExpired(user)) {
+    return "full_access"; // Same as Pro during trial
+  }
+  return "free_access"; // Limited features
+}
+UI STATES TO IMPLEMENT:
+
+Trial Active: Show countdown, full features, no upgrade prompts
+Trial Expired → Paid: Show Pro dashboard
+Trial Expired → Failed Payment: Show free limitations + upgrade option
+Free User: Show usage limits + upgrade prompts
+
+IMPLEMENT THIS COMPLETE WORKFLOW so users understand exactly what happens at each step.
+
+This gives your AI agent a clear roadmap of the entire user experience from signup to conversion!
