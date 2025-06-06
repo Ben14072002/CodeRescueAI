@@ -53,8 +53,8 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
     setIsLoading(true);
     try {
       await register(formData.email, formData.password, formData.displayName);
-      // After successful registration, the user will have trial status
-      onSuccess();
+      // Move to payment step after successful account creation
+      setStep("payment");
     } catch (err) {
       console.error("Registration failed:", err);
     } finally {
@@ -62,17 +62,83 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
     }
   };
 
+  const handlePaymentComplete = () => {
+    // After payment method is added, complete trial signup
+    onSuccess();
+  };
+
   const handleGoogleSignup = async () => {
     setIsLoading(true);
     try {
       await loginWithGoogle();
-      onSuccess();
+      // Move to payment step after Google signup
+      setStep("payment");
     } catch (err) {
       console.error("Google signup failed:", err);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Render payment collection step
+  if (step === "payment") {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Crown className="w-8 h-8 text-purple-400 mr-2" />
+            <Badge className="bg-purple-500 text-white">Step 2 of 2</Badge>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-100 mb-2">Add Payment Method</h2>
+          <p className="text-slate-400">Required for trial - you won't be charged during the 3-day trial period</p>
+        </div>
+
+        <Card className="border-purple-500/30 bg-purple-500/10">
+          <CardContent className="p-4">
+            <div className="flex items-center text-sm text-purple-200 mb-2">
+              <Shield className="w-4 h-4 mr-2" />
+              <span className="font-medium">Trial Protection:</span>
+            </div>
+            <div className="text-xs text-purple-300 space-y-1">
+              <div>• No charge for 3 days</div>
+              <div>• Cancel anytime before trial ends</div>
+              <div>• Automatic conversion to Pro after trial ($9.99/month)</div>
+              <div>• Secure payment processing by Stripe</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="surface-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-slate-100">Payment Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-amber-500/30 bg-amber-500/10">
+              <AlertDescription className="text-amber-200">
+                This feature requires Stripe integration. Payment method collection will be available once Stripe is configured.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="flex gap-3">
+              <Button
+                onClick={onBack}
+                variant="outline"
+                className="flex-1 border-slate-600 text-slate-300"
+              >
+                Back to Signup Choice
+              </Button>
+              <Button
+                onClick={handlePaymentComplete}
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+              >
+                Complete Trial Setup
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
