@@ -33,33 +33,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Trial system API routes
   app.get("/api/trial-status/:userId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      const trialStatus = await storage.checkTrialStatus(userId);
+      const userId = req.params.userId;
+      
+      // Handle Firebase UID
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.json({ isTrialActive: false, daysRemaining: 0 });
+      }
+
+      const trialStatus = await storage.checkTrialStatus(user.id);
       res.json(trialStatus);
     } catch (error) {
+      console.error('Trial status error:', error);
       res.status(500).json({ error: "Failed to check trial status" });
     }
   });
 
   app.post("/api/expire-trial/:userId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      const user = await storage.expireTrial(userId);
-      res.json({ success: true, user });
+      const userId = req.params.userId;
+      
+      // Handle Firebase UID
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const updatedUser = await storage.expireTrial(user.id);
+      res.json({ success: true, user: updatedUser });
     } catch (error) {
+      console.error('Expire trial error:', error);
       res.status(500).json({ error: "Failed to expire trial" });
     }
   });
 
-  // Session management routes - simplified to work without passport authentication
-  app.get("/api/user/sessions/count", async (req, res) => {
-    // For now, return default values for new users
-    // TODO: Implement proper authentication
-    res.json({
-      monthlyCount: 0,
-      remainingFree: 3,
-      canCreateSession: true
-    });
+  // User registration endpoint for Firebase users
+  app.post("/api/register-user", async (req, res) => {
+    try {
+      const { userId, email, displayName } = req.body;
+
+      if (!userId || !email) {
+        return res.status(400).json({ error: "User ID and email are required" });
+      }
+
+      // Check if user already exists
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (user) {
+        return res.json({ success: true, user, message: "User already exists" });
+      }
+
+      // Create new trial user
+      user = await storage.createUser({
+        username: displayName || `user_${userId.substring(0, 8)}`,
+        email: `${userId}@firebase.temp`,
+        role: "user"
+      });
+
+      res.json({ success: true, user, message: "Trial user created successfully" });
+    } catch (error) {
+      console.error('User registration error:', error);
+      res.status(500).json({ error: "Failed to register user" });
+    }
+  });
+
+  // Session management routes with proper user authentication
+  app.get("/api/user/sessions/count/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.json({
+          monthlyCount: 0,
+          remainingFree: 3,
+          canCreateSession: true
+        });
+      }
+
+      const userTier = user.subscriptionTier || 'free';
+      const isProUser = userTier === 'pro' || userTier === 'pro_monthly' || userTier === 'pro_yearly';
+      const isTrialUser = userTier === 'trial';
+      
+      // Check if trial is still active
+      if (isTrialUser) {
+        const trialStatus = await storage.checkTrialStatus(user.id);
+        if (trialStatus.isTrialActive) {
+          return res.json({
+            monthlyCount: 0,
+            remainingFree: -1, // Unlimited during trial
+            canCreateSession: true,
+            trialActive: true,
+            daysRemaining: trialStatus.daysRemaining
+          });
+        } else {
+          // Trial expired, convert to free tier
+          await storage.expireTrial(user.id);
+        }
+      }
+
+      if (isProUser) {
+        return res.json({
+          monthlyCount: 0,
+          remainingFree: -1, // Unlimited
+          canCreateSession: true
+        });
+      }
+
+      // Free tier users
+      const monthlySessionCount = await storage.getUserSessionsThisMonth(user.id);
+      const remaining = Math.max(0, 3 - monthlySessionCount.length);
+
+      res.json({
+        monthlyCount: monthlySessionCount.length,
+        remainingFree: remaining,
+        canCreateSession: remaining > 0
+      });
+    } catch (error: any) {
+      console.error('Session count error:', error);
+      res.status(500).json({ error: error.message });
+    }
   });
 
   // Custom Prompt Generator - Pro feature using OpenAI

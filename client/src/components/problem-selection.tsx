@@ -29,7 +29,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
     const fetchSessionCount = async () => {
       if (user) {
         try {
-          const response = await apiRequest("GET", "/api/user/sessions/count");
+          const response = await apiRequest("GET", `/api/user/sessions/count/${user.uid}`);
           const data = await response.json();
           setSessionCount(data);
         } catch (error) {

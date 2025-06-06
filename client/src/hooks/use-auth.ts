@@ -19,8 +19,28 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      
+      // Register user in backend when they authenticate
+      if (user) {
+        try {
+          await fetch('/api/register-user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: user.uid,
+              email: user.email,
+              displayName: user.displayName
+            })
+          });
+        } catch (error) {
+          console.error('Failed to register user in backend:', error);
+        }
+      }
+      
       setLoading(false);
     });
 
