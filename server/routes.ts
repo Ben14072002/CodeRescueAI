@@ -636,7 +636,7 @@ Return a JSON object with this structure:
   // Enhanced Custom Prompt Generator (Pro Feature)
   app.post("/api/generate-category-prompts", async (req, res) => {
     try {
-      const { userId, category, problemDescription, codeContext, errorMessages } = req.body;
+      const { userId, category, problemDescription, customProblemDescription, programmingLanguage, aiTool, codeContext, errorMessages } = req.body;
       
       // Validate required inputs
       if (!category || !problemDescription?.trim()) {

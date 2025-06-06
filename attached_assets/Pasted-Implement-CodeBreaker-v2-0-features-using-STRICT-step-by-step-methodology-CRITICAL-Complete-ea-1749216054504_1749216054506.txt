@@ -1,0 +1,47 @@
+Implement CodeBreaker v2.0 features using STRICT step-by-step methodology.
+
+⚠️ CRITICAL: Complete each step FULLY before moving to the next. Do not work on multiple steps simultaneously.
+
+STEP 1: 3-DAY TRIAL SYSTEM ONLY
+Complete this ENTIRE step before proceeding:
+- Update user registration to start 3-day trial
+- Add trial countdown timer in UI  
+- Implement trial expiry logic (revert to 1 rescue/month)
+- Add upgrade prompts when trial ends
+- Test complete trial flow (signup → usage → expiry → upgrade)
+
+REPORT: "Step 1 complete and tested" before moving to Step 2.
+
+STEP 2: HALLUCINATION CATEGORY ONLY
+Complete this ENTIRE step before proceeding:
+- Add "AI Hallucination" as 6th problem category with 🧠 icon
+- Create 3-4 specific prompts for hallucination problems
+- Update problem selection UI to include new category
+- Test hallucination category end-to-end
+
+REPORT: "Step 2 complete and tested" before moving to Step 3.
+
+STEP 3: CUSTOM GENERATOR ENHANCEMENTS ONLY
+Complete this ENTIRE step before proceeding:
+- Add "Other" option to category dropdown
+- Add text field for custom problem description
+- Add programming language dropdown parameter
+- Add AI tool selection parameter
+- Test enhanced generator with all new parameters
+
+REPORT: "Step 3 complete and tested" before moving to Step 4.
+
+4. sFREE PROMPT TEMPLATES LIBRARY: 
+   - Add new section: "Ready-to-Use Templates" 
+   - Available to ALL users (free + pro) - Categories: * "Login System Broken" template * "API Integration Failing" template * "CSS Layout Issues" template * "Database Connection Problems" template * "Deployment Errors" template - Each template includes 2-3 proven prompts 
+   
+5. QUICK WIN FEATURES: 
+   SUCCESS TRACKING: - Add thumbs up/down to each generated prompt - Track which prompts users rate as "worked" - Show success rate for each prompt type PROMPT HISTORY: - "Recent Rescues" section in user dashboard - Shows last 10 rescue sessions with timestamps - Click to reuse successful prompts EMERGENCY RESCUE MODE: - Big red "Emergency Rescue" button - One-click access to most effective "reset AI" prompts - For when AI is completely broken/confused MULTI-TOOL SUPPORT: - Update all prompts to work with multiple AI tools - Add tool-specific variations where needed - "This prompt works with: Cursor, Replit AI, Claude, ChatGPT" IMPLEMENTATION PRIORITIES: PHASE 1 (Critical): 1. 3-day trial system (revenue impact) 2. Hallucination category (user demand) 3. "Other" option in custom generator PHASE 2 (User Experience): 4. Free prompt templates 5. Enhanced custom generator parameters 6. Success tracking system PHASE 3 (Advanced): 7. Prompt history 8. Emergency rescue mode 9. Multi-tool prompt variations UI/UX REQUIREMENTS: - Update onboarding to explain 3-day trial - Add progress indicators for trial users - New icons and descriptions for all features - Mobile-responsive design for new components - Maintain current dark theme and styling TECHNICAL IMPLEMENTATION: - Update user model to include trial status and expiry - Expand problem categories in database - Enhanced prompt generation logic for new parameters - Analytics tracking for new features - A/B testing setup for trial vs free tier conversion TESTING REQUIREMENTS: - Test complete trial signup → usage → conversion flow - Verify hallucination prompts work across different AI tools - Validate custom generator with all new parameters - Check mobile responsiveness of new features LAUNCH STRATEGY: - Announce v2.0 with popup (as previously designed) - Email existing users about new features - Update homepage to highlight 3-day trial - Create demo video showing new capabilities
+
+🚨 ENFORCEMENT RULES:
+- If you start working on Step 2 before Step 1 is complete, STOP and return to Step 1
+- Test each step thoroughly before proceeding
+- Do not skip ahead or work on multiple steps
+- Report completion of each step before moving forward
+
+This methodology prevents complexity overwhelm and ensures quality implementation.

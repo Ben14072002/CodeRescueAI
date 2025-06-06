@@ -68,12 +68,64 @@ const PROBLEM_CATEGORIES: ProblemCategory[] = [
     description: 'Stuck in endless debug loops',
     icon: Copy,
     strategies: ['architecture reset', 'constraint-driven development', 'alternative approaches']
+  },
+  {
+    id: 'ai-hallucination',
+    name: 'AI Hallucination',
+    description: 'AI provides incorrect information or non-existent solutions',
+    icon: Brain,
+    strategies: ['reality check', 'documentation verification', 'conservative debugging']
+  },
+  {
+    id: 'other',
+    name: 'Other',
+    description: 'Custom problem not covered by standard categories',
+    icon: Star,
+    strategies: ['problem analysis', 'context gathering', 'adaptive solutions']
   }
+];
+
+const PROGRAMMING_LANGUAGES = [
+  'JavaScript/TypeScript',
+  'Python',
+  'Java',
+  'C#',
+  'C++',
+  'Go',
+  'Rust',
+  'PHP',
+  'Ruby',
+  'Swift',
+  'Kotlin',
+  'Dart',
+  'HTML/CSS',
+  'SQL',
+  'Shell/Bash',
+  'Other'
+];
+
+const AI_TOOLS = [
+  'Replit Agent',
+  'ChatGPT',
+  'Claude',
+  'GitHub Copilot',
+  'Cursor',
+  'Windsurf',
+  'Lovable',
+  'V0.dev',
+  'Bolt.new',
+  'CodeWhisperer',
+  'Codeium',
+  'Tabnine',
+  'Other'
 ];
 
 export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [problemDescription, setProblemDescription] = useState("");
+  const [customProblemDescription, setCustomProblemDescription] = useState("");
+  const [programmingLanguage, setProgrammingLanguage] = useState<string>("");
+  const [aiTool, setAiTool] = useState<string>("");
   const [codeContext, setCodeContext] = useState("");
   const [errorMessages, setErrorMessages] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -94,7 +146,18 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
       return;
     }
 
-    if (!problemDescription.trim()) {
+    // For "Other" category, require custom problem description
+    if (selectedCategory === 'other' && !customProblemDescription.trim()) {
+      toast({
+        title: "Missing Custom Problem Description",
+        description: "Please describe your specific problem when using 'Other' category.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // For standard categories, require general problem description
+    if (selectedCategory !== 'other' && !problemDescription.trim()) {
       toast({
         title: "Missing Description",
         description: "Please describe your specific problem.",
@@ -108,7 +171,10 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
       const response = await apiRequest("POST", "/api/generate-category-prompts", {
         userId: user?.uid,
         category: selectedCategory,
-        problemDescription,
+        problemDescription: selectedCategory === 'other' ? customProblemDescription : problemDescription,
+        customProblemDescription: selectedCategory === 'other' ? customProblemDescription : undefined,
+        programmingLanguage,
+        aiTool,
         codeContext,
         errorMessages
       });
@@ -306,16 +372,74 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
                 )}
               </div>
 
+              {/* Show custom problem description field only for "Other" category */}
+              {selectedCategory === 'other' && (
+                <div>
+                  <Label className="text-slate-300 text-base mb-3 block">
+                    Custom Problem Description *
+                  </Label>
+                  <Textarea
+                    value={customProblemDescription}
+                    onChange={(e) => setCustomProblemDescription(e.target.value)}
+                    placeholder="Describe your specific problem that doesn't fit the standard categories. Be as detailed as possible about the issue you're facing..."
+                    className="min-h-32 bg-slate-800/50 border-slate-600 text-slate-100"
+                  />
+                </div>
+              )}
+
+              {/* Show standard problem description for all other categories */}
+              {selectedCategory && selectedCategory !== 'other' && (
+                <div>
+                  <Label className="text-slate-300 text-base mb-3 block">
+                    Problem Description *
+                  </Label>
+                  <Textarea
+                    value={problemDescription}
+                    onChange={(e) => setProblemDescription(e.target.value)}
+                    placeholder="Describe what you're trying to build and where you're stuck. Be as specific as possible about the issue you're facing with your AI assistant..."
+                    className="min-h-32 bg-slate-800/50 border-slate-600 text-slate-100"
+                  />
+                </div>
+              )}
+
+              {/* Programming Language Selection */}
               <div>
-                <Label className="text-slate-300 text-base mb-3 block">
-                  Problem Description *
+                <Label className="text-slate-300 text-base mb-3 block flex items-center">
+                  <Code className="w-4 h-4 mr-2 text-green-400" />
+                  Programming Language (Optional)
                 </Label>
-                <Textarea
-                  value={problemDescription}
-                  onChange={(e) => setProblemDescription(e.target.value)}
-                  placeholder="Describe what you're trying to build and where you're stuck. Be as specific as possible about the issue you're facing with your AI assistant..."
-                  className="min-h-32 bg-slate-800/50 border-slate-600 text-slate-100"
-                />
+                <Select value={programmingLanguage} onValueChange={setProgrammingLanguage}>
+                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-slate-100">
+                    <SelectValue placeholder="Select your programming language" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-600">
+                    {PROGRAMMING_LANGUAGES.map((language) => (
+                      <SelectItem key={language} value={language} className="text-slate-100 focus:bg-slate-700">
+                        {language}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* AI Tool Selection */}
+              <div>
+                <Label className="text-slate-300 text-base mb-3 block flex items-center">
+                  <Brain className="w-4 h-4 mr-2 text-purple-400" />
+                  AI Tool (Optional)
+                </Label>
+                <Select value={aiTool} onValueChange={setAiTool}>
+                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-slate-100">
+                    <SelectValue placeholder="Select the AI tool you're using" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-600">
+                    {AI_TOOLS.map((tool) => (
+                      <SelectItem key={tool} value={tool} className="text-slate-100 focus:bg-slate-700">
+                        {tool}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
