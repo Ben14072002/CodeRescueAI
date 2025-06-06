@@ -9,6 +9,7 @@ import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ProblemSelectionProps {
@@ -24,6 +25,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
   const [sessionCount, setSessionCount] = useState({ monthlyCount: 0, remainingFree: 3, canCreateSession: true });
   const { createSession } = useSession();
   const { user } = useAuth();
+  const { isProUser, tier, trialData } = useSubscription();
 
   useEffect(() => {
     const fetchSessionCount = async () => {
@@ -46,10 +48,8 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
     fetchSessionCount();
   }, [user]);
   
-  // For now, allow all authenticated users to test the feature
-  // TODO: Integrate with actual user subscription data from database
-  const userTier = 'free';
-  const isProUser = !!user;
+  // Use subscription hook to determine Pro access (includes trial users)
+  const userTier = tier || 'free';
   const canStartSession = sessionCount.canCreateSession;
   const remainingSessions = sessionCount.remainingFree;
 
@@ -201,7 +201,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
                 {isProUser ? (
                   <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
                     <Sparkles className="w-3 h-3 mr-1" />
-                    Pro Feature
+                    {trialData?.isTrialActive ? "Available in Trial" : "Pro Feature"}
                   </Badge>
                 ) : (
                   <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
