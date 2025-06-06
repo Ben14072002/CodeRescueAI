@@ -15,6 +15,7 @@ interface TrialRegisterFormProps {
 }
 
 export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps) {
+  const [step, setStep] = useState<"account" | "payment">("account");
   const [formData, setFormData] = useState({
     displayName: "",
     email: "",
@@ -95,7 +96,7 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
             <div>• Unlimited AI rescues for 3 days</div>
             <div>• Custom prompt generator access</div>
             <div>• All premium strategies</div>
-            <div>• No charge until trial ends</div>
+            <div>• Payment method required (no charge during trial)</div>
           </div>
         </CardContent>
       </Card>

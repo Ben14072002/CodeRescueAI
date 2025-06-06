@@ -17,6 +17,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useSession } from "@/hooks/use-session";
+import { useTrial } from "@/hooks/use-trial";
 
 interface UserDashboardProps {
   onClose: () => void;
@@ -25,8 +26,9 @@ interface UserDashboardProps {
 
 export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
   const { user, logout } = useAuth();
-  const { isPro, tier, status } = useSubscription();
+  const { isPro, tier, status, trialData } = useSubscription();
   const { sessions, getSessionStats } = useSession();
+  const { isTrialActive, daysRemaining } = useTrial();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const stats = getSessionStats();
@@ -109,23 +111,32 @@ export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-slate-100 mb-2">
-                {isPro ? "Pro Plan" : "Free Plan"}
+                {isTrialActive ? "Pro Plan" : isPro ? "Pro Plan" : "Free Plan"}
               </h3>
               <p className="text-slate-400">
-                {isPro 
-                  ? "Unlimited rescue sessions and custom prompt generation"
-                  : `${currentMonthSessions} of ${FREE_SESSIONS_LIMIT} rescue sessions used this month`
+                {isTrialActive 
+                  ? "Access to unlimited sessions and custom prompts"
+                  : isPro 
+                    ? "Unlimited rescue sessions and custom prompt generation"
+                    : `${currentMonthSessions} of ${FREE_SESSIONS_LIMIT} rescue sessions used this month`
                 }
               </p>
             </div>
             <Badge 
               variant="outline" 
-              className={`${isPro 
-                ? "bg-amber-500/20 text-amber-300 border-amber-500/30" 
-                : "bg-slate-700 text-slate-300"
+              className={`${isTrialActive 
+                ? "bg-blue-500/20 text-blue-300 border-blue-500/30" 
+                : isPro 
+                  ? "bg-amber-500/20 text-amber-300 border-amber-500/30" 
+                  : "bg-slate-700 text-slate-300"
               }`}
             >
-              {isPro ? (
+              {isTrialActive ? (
+                <>
+                  <Clock className="w-3 h-3 mr-1" />
+                  Trial Active: {daysRemaining} days left
+                </>
+              ) : isPro ? (
                 <>
                   <Crown className="w-3 h-3 mr-1" />
                   Pro Monthly
@@ -135,7 +146,7 @@ export function UserDashboard({ onClose, onSettings }: UserDashboardProps) {
               )}
             </Badge>
           </div>
-          {!isPro && (
+          {!isPro && !isTrialActive && (
             <>
               <div className="mt-4">
                 <div className="flex justify-between text-sm text-slate-400 mb-2">
