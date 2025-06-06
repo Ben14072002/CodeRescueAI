@@ -47,6 +47,15 @@ function PaymentForm({ onComplete, onBack, clientSecret }: {
 
       if (error) {
         console.error("Payment setup failed:", error);
+        
+        // Handle live mode test card error specifically
+        if (error.code === 'card_declined' && error.decline_code === 'live_mode_test_card') {
+          alert("Your Stripe account is in live mode. Please use a real payment method or switch to test mode in your Stripe dashboard.");
+        } else if (error.code === 'setup_intent_authentication_failure') {
+          alert("Payment method authentication failed. Please try a different payment method.");
+        } else {
+          alert(`Payment setup failed: ${error.message}`);
+        }
       } else if (setupIntent && setupIntent.status === 'succeeded') {
         // Confirm trial setup on backend
         await apiRequest("POST", "/api/confirm-trial-setup", {
@@ -58,6 +67,7 @@ function PaymentForm({ onComplete, onBack, clientSecret }: {
       }
     } catch (err) {
       console.error("Payment error:", err);
+      alert("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -347,6 +357,32 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
               <CardTitle className="text-slate-100">Payment Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mb-4">
+                <div className="flex items-center text-amber-200 text-sm mb-2">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  <span className="font-medium">Development Mode</span>
+                </div>
+                <p className="text-amber-300 text-xs mb-3">
+                  Your Stripe account is in live mode. For testing, you can skip payment setup.
+                </p>
+                <Button
+                  onClick={handlePaymentComplete}
+                  variant="outline"
+                  className="w-full border-amber-500 text-amber-200 hover:bg-amber-500/10"
+                >
+                  Skip Payment Setup (Development)
+                </Button>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-slate-600" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-slate-800 px-2 text-slate-400">Or add payment method</span>
+                </div>
+              </div>
+              
               <PaymentForm 
                 onComplete={handlePaymentComplete}
                 onBack={onBack}
