@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown, Sparkles } from "lucide-react";
+import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown, Sparkles, Brain } from "lucide-react";
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
@@ -59,6 +59,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
     lost_direction: Compass,
     no_planning: HelpCircle,
     repeated_failures: RotateCcw,
+    ai_hallucination: Brain,
     custom: Edit,
   };
 
@@ -68,6 +69,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
     lost_direction: "text-purple-500",
     no_planning: "text-orange-500",
     repeated_failures: "text-cyan-500",
+    ai_hallucination: "text-purple-600",
     custom: "text-slate-500",
   };
 
@@ -158,7 +160,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts }: Problem
                   </div>
                   <p className="text-slate-400 text-xs md:text-sm mb-3 md:mb-4 flex-grow">{problem.description}</p>
                   <div className="text-xs text-slate-500">
-                    <span className={`bg-${colorClass.split('-')[1]}-500/20 ${colorClass.replace('text-', 'text-')} px-2 py-1 rounded text-xs`}>
+                    <span className={`bg-${colorClass?.split('-')[1] || 'slate'}-500/20 ${colorClass || 'text-slate-500'} px-2 py-1 rounded text-xs`}>
                       {problem.strategy} Strategy
                     </span>
                   </div>
