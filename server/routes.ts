@@ -730,6 +730,28 @@ Return a JSON object with this structure:
             "Fresh perspective enforcement"
           ],
           methodology: "RESET → CHALLENGE → BREAK → ALTERNATIVE → REBUILD"
+        },
+        'ai-hallucination': {
+          systemPrompt: "You are an expert in AI hallucination detection and correction who forces reality-based responses. Create prompts that make AI assistants switch to conservative, verification-based approaches.",
+          techniques: [
+            "Reality check enforcement",
+            "Documentation verification forcing",
+            "Conservative mode activation",
+            "Source validation requirements",
+            "Uncertainty acknowledgment protocols"
+          ],
+          methodology: "STOP → VERIFY → VALIDATE → CONFIRM → PROCEED"
+        },
+        'other': {
+          systemPrompt: "You are an expert in adaptive problem-solving who creates custom solutions for unique situations. Analyze the specific problem and create prompts using the most appropriate techniques.",
+          techniques: [
+            "Problem analysis protocols",
+            "Context gathering methods",
+            "Adaptive solution strategies",
+            "Custom approach development",
+            "Situational pattern matching"
+          ],
+          methodology: "ANALYZE → ADAPT → CUSTOMIZE → IMPLEMENT → REFINE"
         }
       };
 
@@ -791,20 +813,29 @@ Problem Category: ${category.toUpperCase()}
 Methodology Required: ${strategy.methodology}
 
 DETAILED PROBLEM DESCRIPTION:
-${problemDescription}
+${problemDescription || customProblemDescription}
 
-TECHNICAL SETUP ANALYSIS:
+DEVELOPMENT CONTEXT:
+Programming Language: ${programmingLanguage || 'Not specified - include language detection prompts'}
+AI Tool Being Used: ${aiTool || 'Not specified - create tool-agnostic prompts'}
 Code Context: ${codeContext || 'No specific code context provided - generate prompts that request technical details'}
 Error Messages: ${errorMessages || 'No error messages provided - include diagnostic commands in prompts'}
 
-PROMPT GENERATION REQUIREMENTS:
+ENHANCED PROMPT GENERATION REQUIREMENTS:
 1. Analyze the technical stack and architecture patterns from the provided context
 2. Create prompts that force the AI to perform deep technical analysis of the user's specific setup
 3. Include commands that extract missing technical details if context is incomplete
 4. Apply ${strategy.methodology} methodology systematically
-5. Generate copy-paste ready prompts that manipulate AI behavior for this exact technical situation
+5. Tailor prompts specifically for ${programmingLanguage || 'the programming language being used'}
+6. ${aiTool ? `Optimize prompts for ${aiTool} AI tool characteristics and behavior patterns` : 'Create universal AI manipulation prompts that work across different AI tools'}
+7. Generate copy-paste ready prompts that manipulate AI behavior for this exact technical situation
 
-Generate 3 strategic AI manipulation prompts that solve this specific problem.`
+CONTEXT ADAPTATION:
+- If programming language is specified, include language-specific debugging and optimization techniques
+- If AI tool is specified, leverage that tool's specific strengths and address its known weaknesses
+- For custom problems (Other category), focus on problem analysis and adaptive solution strategies
+
+Generate 3 strategic AI manipulation prompts that solve this specific problem with enhanced context awareness.`
             }
           ],
           response_format: { type: "json_object" },
