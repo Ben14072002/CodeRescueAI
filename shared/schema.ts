@@ -56,11 +56,29 @@ export const promptRatings = pgTable("prompt_ratings", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const roadmaps = pgTable("roadmaps", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  projectName: text("project_name").notNull(),
+  projectDescription: text("project_description").notNull(),
+  techStack: text("tech_stack").array().notNull(),
+  experienceLevel: varchar("experience_level", { length: 20 }).notNull(),
+  complexity: varchar("complexity", { length: 20 }).notNull(),
+  timeline: varchar("timeline", { length: 20 }).notNull(),
+  steps: jsonb("steps").notNull(),
+  recommendations: jsonb("recommendations"),
+  currentStep: integer("current_step").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   sessions: many(sessions),
   preferences: one(userPreferences),
   promptRatings: many(promptRatings),
+  roadmaps: many(roadmaps),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one, many }) => ({
@@ -86,6 +104,13 @@ export const promptRatingsRelations = relations(promptRatings, ({ one }) => ({
   session: one(sessions, {
     fields: [promptRatings.sessionId],
     references: [sessions.id],
+  }),
+}));
+
+export const roadmapsRelations = relations(roadmaps, ({ one }) => ({
+  user: one(users, {
+    fields: [roadmaps.userId],
+    references: [users.id],
   }),
 }));
 
@@ -135,6 +160,49 @@ export const promptRatingSchema = z.object({
   createdAt: z.date(),
 });
 
+export const roadmapStepSchema = z.object({
+  stepNumber: z.number(),
+  title: z.string(),
+  description: z.string(),
+  estimatedTime: z.string(),
+  startPrompt: z.string(),
+  rescuePrompts: z.array(z.string()),
+  validationChecklist: z.array(z.string()),
+  isCompleted: z.boolean().default(false),
+  dependencies: z.array(z.number()).default([]),
+});
+
+export const roadmapRecommendationsSchema = z.object({
+  recommendedTechStack: z.array(z.string()),
+  suggestedComplexity: z.string(),
+  estimatedTimeline: z.string(),
+  coreFeatures: z.array(z.string()),
+  optionalFeatures: z.array(z.string()),
+  potentialChallenges: z.array(z.string()),
+  reasoning: z.object({
+    techStackReason: z.string(),
+    complexityReason: z.string(),
+    timelineReason: z.string(),
+  }),
+});
+
+export const roadmapSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  projectName: z.string(),
+  projectDescription: z.string(),
+  techStack: z.array(z.string()),
+  experienceLevel: z.enum(["beginner", "intermediate", "advanced"]),
+  complexity: z.enum(["simple", "medium", "complex"]),
+  timeline: z.enum(["fast", "production"]),
+  steps: z.array(roadmapStepSchema),
+  recommendations: roadmapRecommendationsSchema.optional(),
+  currentStep: z.number().default(0),
+  isActive: z.boolean().default(true),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
 // Types from database tables
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -142,6 +210,10 @@ export type Session = z.infer<typeof sessionSchema>;
 export type UserPreferences = z.infer<typeof userPreferencesSchema>;
 export type PromptRating = z.infer<typeof promptRatingSchema>;
 export type InsertPromptRating = typeof promptRatings.$inferInsert;
+export type Roadmap = z.infer<typeof roadmapSchema>;
+export type InsertRoadmap = typeof roadmaps.$inferInsert;
+export type RoadmapStep = z.infer<typeof roadmapStepSchema>;
+export type RoadmapRecommendations = z.infer<typeof roadmapRecommendationsSchema>;
 
 // Insert schemas
 export const insertSessionSchema = sessionSchema.omit({ id: true });

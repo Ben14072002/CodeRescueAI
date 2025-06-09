@@ -1,0 +1,435 @@
+# CodeBreaker v2.0: Roadmap Prompt Creator
+## Complete Feature Specification & Implementation Guide
+
+---
+
+## 🎯 FEATURE OVERVIEW
+
+**Name:** Roadmap Prompt Creator  
+**Type:** Premium Pro Feature  
+**Purpose:** Generate complete development roadmaps with custom AI prompts for each step  
+**Value Proposition:** "Plan your entire project + get specific prompts for every step + rescue when stuck"
+
+---
+
+## 🔧 CORE FUNCTIONALITY
+
+### Input Collection
+**Phase 1: Basic Project Input**
+- Project name (text input)
+- Project description (textarea - 200+ words recommended)
+- Experience level (Beginner/Intermediate/Advanced)
+
+**Phase 2: Smart Recommendations**
+Based on project description, AI suggests:
+- Recommended tech stack with explanations
+- Suggested project complexity level
+- Timeline estimate with reasoning
+- Essential features vs nice-to-have features
+- Potential challenges to consider
+
+**Phase 3: User Verification & Customization**
+User can review and modify:
+- Accept/reject suggested tech stack
+- Add additional technologies
+- Adjust complexity level
+- Modify feature list (add/remove/prioritize)
+- Set custom timeline preferences
+- Add specific requirements or constraints
+
+**Phase 4: Final Plan Generation**
+Generate roadmap based on verified inputs
+
+### Roadmap Generation
+**Creates structured development plan with:**
+- 10-20 sequential steps
+- Custom AI prompt for each step
+- Time estimates per step
+- Dependencies between steps
+- Validation checkpoints
+
+### Integrated Rescue System
+**Each roadmap step includes:**
+- "Start Step" prompt (sophisticated prompts for AI coding assistants)
+- "Stuck?" button → Opens existing custom prompt generator
+- "Validate" prompt (test before moving on)
+
+---
+
+## 🎨 USER INTERFACE DESIGN
+
+### Page Layout
+```
+HEADER: "Roadmap Prompt Creator" (Pro Feature Badge)
+
+LEFT PANEL (40% width): Generated Roadmap
+- Project overview
+- Step-by-step checklist
+- Progress tracking
+- Time estimates
+
+RIGHT PANEL (60% width): Active Step Details  
+- Current step description
+- Custom prompts for this step
+- CodeBreaker rescue integration
+- Validation checklist
+```
+
+### Roadmap Display Format
+```
+PROJECT: Todo App with Authentication
+TECH STACK: React + Node.js + MongoDB
+TIMELINE: ~12 hours total
+
+✅ Step 1: Project Setup (30 min) - COMPLETED
+🔄 Step 2: Authentication System (2 hours) - IN PROGRESS  
+⏳ Step 3: Todo CRUD Operations (1.5 hours) - PENDING
+⏳ Step 4: Frontend Components (2 hours) - PENDING
+⏳ Step 5: API Integration (1 hour) - PENDING
+```
+
+### Step Detail Panel
+```
+STEP 2: Build Authentication System
+
+📋 WHAT TO BUILD:
+- User registration endpoint
+- Login/logout functionality  
+- JWT token generation
+- Password hashing
+
+🚀 AI ASSISTANT PROMPT (For Cursor/Replit):
+"You are now a senior Node.js developer building ONLY an authentication system. Your task: Create exactly three components in this order:
+
+1. User registration route (/api/register) that validates email format and saves to database
+2. Login route (/api/login) that verifies credentials and returns JWT token  
+3. Password hashing middleware using bcrypt with salt rounds of 12
+
+Constraints:
+- Do NOT build profile management, password reset, or admin features
+- Use only these dependencies: express, bcrypt, jsonwebtoken, mongoose
+- Create one file per route in /routes directory
+- Test each route independently before proceeding
+
+Start with the registration route only. Do not implement login until registration is complete and tested."
+
+🆘 NEED RESCUE? 
+[Button: "Open Rescue Generator"] → Links to existing custom prompt generator
+
+✅ VALIDATION PROMPT (For AI Assistant):
+"Test the authentication system you just built:
+
+1. Use Postman to POST to /api/register with {email: 'test@test.com', password: 'password123'}
+2. Verify user is saved in database with hashed password
+3. Use Postman to POST to /api/login with same credentials  
+4. Verify you receive a valid JWT token
+5. Decode the JWT to confirm it contains user ID
+
+If any test fails, identify the specific issue before proceeding to next step."
+```
+
+---
+
+## 💻 TECHNICAL IMPLEMENTATION
+
+### Database Schema
+```javascript
+// Roadmap collection
+{
+  id: string,
+  userId: string,
+  projectName: string,
+  projectDescription: string,
+  techStack: string[],
+  experienceLevel: "beginner" | "intermediate" | "advanced",
+  complexity: "simple" | "medium" | "complex",
+  timeline: "fast" | "production",
+  steps: [
+    {
+      stepNumber: number,
+      title: string,
+      description: string,
+      estimatedTime: string,
+      startPrompt: string,
+      rescuePrompts: string[],
+      validationChecklist: string[],
+      isCompleted: boolean,
+      dependencies: number[] // array of step numbers
+    }
+  ],
+  createdAt: Date,
+  updatedAt: Date,
+  isActive: boolean
+}
+```
+
+### Smart Recommendation Engine
+```javascript
+function generateSmartRecommendations(projectDescription, experienceLevel) {
+  // 1. Analyze project description for keywords and requirements
+  const projectAnalysis = analyzeProjectRequirements(projectDescription);
+  
+  // 2. Recommend tech stack based on project type + experience
+  const techStack = recommendTechStack(projectAnalysis, experienceLevel);
+  
+  // 3. Assess complexity based on features mentioned
+  const complexity = assessComplexity(projectAnalysis, experienceLevel);
+  
+  // 4. Extract and categorize features
+  const features = categorizeFeatures(projectAnalysis);
+  
+  // 5. Identify potential challenges
+  const challenges = identifyPotentialChallenges(projectAnalysis, experienceLevel);
+  
+  // 6. Estimate timeline
+  const timeline = estimateTimeline(features, complexity, experienceLevel);
+  
+  return {
+    recommendedTechStack: techStack,
+    suggestedComplexity: complexity,
+    estimatedTimeline: timeline,
+    coreFeatures: features.essential,
+    optionalFeatures: features.optional,
+    potentialChallenges: challenges,
+    reasoning: generateRecommendationReasons(projectAnalysis)
+  };
+}
+
+const techStackRecommendations = {
+  "todo_app": {
+    beginner: ["HTML/CSS/JS", "Local Storage"],
+    intermediate: ["React", "Node.js", "MongoDB"],
+    advanced: ["React", "Express", "PostgreSQL", "Redis"]
+  },
+  "e_commerce": {
+    beginner: ["WordPress", "WooCommerce"],
+    intermediate: ["React", "Node.js", "Stripe", "MongoDB"],
+    advanced: ["Next.js", "Microservices", "PostgreSQL", "Redis", "Docker"]
+  },
+  "blog": {
+    beginner: ["WordPress", "Static HTML"],
+    intermediate: ["React", "Markdown", "Netlify"],
+    advanced: ["Next.js", "Headless CMS", "PostgreSQL"]
+  }
+};
+```
+
+### Prompt Generation Templates
+```javascript
+const sophisticatedPromptTemplates = {
+  cursorPrompts: {
+    basic: "You are now a {expertLevel} developer working on {stepDescription}. Your constraints: Use ONLY {techStack}, implement exactly {specificRequirements}, do NOT add {excludedFeatures}. Start with {firstComponent} and complete it fully before proceeding.",
+    
+    intermediate: "You are a {expertLevel} {techStack} developer. Task: {stepDescription}. Architecture requirements: {architecturalPattern}. Implementation order: {implementationOrder}. Quality gates: {qualityChecks}. Do not proceed to next component until current one passes all tests.",
+    
+    advanced: "Context reset: You are now a senior software architect. Project scope: {stepDescription}. Technical constraints: {technicalConstraints}. Design patterns required: {designPatterns}. Performance requirements: {performanceTargets}. Security considerations: {securityRequirements}. Implement using {implementationStrategy}."
+  },
+  
+  replitPrompts: {
+    fileStructure: "Create this exact file structure for {stepName}: {fileStructure}. Do not create additional files. Focus on one file at a time in this order: {fileOrder}.",
+    
+    incrementalBuild: "Build {component} incrementally. Step 1: {step1}. Test this works before proceeding. Step 2: {step2}. Test again. Step 3: {step3}. Each step must be fully functional.",
+    
+    contextMaintaining: "Continue working on {component} from previous context. Current status: {currentStatus}. Next task: {nextTask}. Do not modify {preserveComponents}. Only add {specificAddition}."
+  },
+  
+  validationPrompts: {
+    functionalTest: "Test {component} functionality: {testSteps}. Verify each test passes before marking complete.",
+    
+    integrationTest: "Integration test for {component}: {integrationSteps}. Ensure {component} works with {otherComponents}.",
+    
+    performanceCheck: "Performance validation: {performanceTests}. Ensure {component} meets {performanceTargets}."
+  }
+}
+```
+
+---
+
+## 🚀 IMPLEMENTATION PROMPT FOR AI AGENT
+
+```
+Implement the Roadmap Prompt Creator as a new Pro feature for CodeBreaker v2.0.
+
+IMPLEMENTATION REQUIREMENTS:
+
+1. CREATE NEW FEATURE PAGE:
+- Add "Roadmap Creator" to Pro navigation menu
+- Create new route: /roadmap-creator
+- Add Pro feature gate (trial users + paid users only)
+- Show upgrade prompt for free users
+
+2. BUILD MULTI-PHASE PROJECT INPUT:
+
+PHASE 1: Basic Input Form
+- Project Name (text input, required)
+- Project Description (textarea, 200+ chars, required)
+- Experience Level (radio: Beginner/Intermediate/Advanced)
+- Submit for smart analysis
+
+PHASE 2: Smart Recommendations Display
+After analyzing description, show:
+
+```
+🤖 SMART RECOMMENDATIONS BASED ON YOUR PROJECT:
+
+📱 SUGGESTED TECH STACK:
+✅ Frontend: React (Recommended)
+   ℹ️ Why: Great for interactive user interfaces, large community
+   
+✅ Backend: Node.js + Express (Recommended)  
+   ℹ️ Why: JavaScript everywhere, fast development
+   
+✅ Database: MongoDB (Recommended)
+   ℹ️ Why: Flexible for evolving requirements
+
+🎯 PROJECT COMPLEXITY: Medium
+   ℹ️ Why: Authentication + CRUD operations suggest medium complexity
+
+⏱️ ESTIMATED TIMELINE: 15-20 hours
+   ℹ️ Why: Based on features described and your experience level
+
+🔧 CORE FEATURES DETECTED:
+✅ User authentication (Essential)
+✅ Todo CRUD operations (Essential)  
+✅ User dashboard (Essential)
+⚠️ Real-time notifications (Nice-to-have)
+⚠️ File attachments (Nice-to-have)
+
+🚨 POTENTIAL CHALLENGES:
+- Authentication security implementation
+- Database design for user relationships
+- Frontend state management complexity
+```
+
+PHASE 3: User Verification Interface
+Allow users to modify recommendations:
+
+```
+📝 REVIEW & CUSTOMIZE YOUR PROJECT PLAN:
+
+TECH STACK: [Edit Mode]
+[✅] React          [❌] Vue           [❌] Angular
+[✅] Node.js        [❌] Python        [❌] PHP  
+[✅] MongoDB        [❌] PostgreSQL    [❌] MySQL
+[Add Custom Technology: ____________]
+
+COMPLEXITY LEVEL:
+[⚪] Simple    [🔘] Medium    [⚪] Complex
+Custom note: ________________________________
+
+FEATURES PRIORITY:
+[Essential] User authentication
+[Essential] Todo CRUD operations  
+[Essential] User dashboard
+[Optional] Real-time notifications → [Move to Essential/Remove]
+[Optional] File attachments → [Move to Essential/Remove]
+[Add Feature: ____________________________]
+
+TIMELINE PREFERENCE:
+[⚪] Fast prototype (basic functionality)
+[🔘] Production ready (full features + testing)
+
+ADDITIONAL REQUIREMENTS:
+[Textarea for custom constraints, preferences, etc.]
+```
+
+PHASE 4: Final Plan Generation
+Generate detailed roadmap using verified inputs
+
+3. IMPLEMENT ROADMAP GENERATION:
+Create roadmap generator that produces:
+- 8-15 sequential development steps
+- Each step has: title, description, time estimate, custom prompts
+- Steps are logically ordered with dependencies
+- Total project time estimate
+
+4. BUILD ROADMAP DISPLAY:
+Left Panel: Step List
+- Show all steps with checkboxes
+- Mark current step as active
+- Show completed/pending/blocked status
+- Display time estimates
+- Allow manual step completion
+
+Right Panel: Active Step Detail
+- Step description and requirements
+- "Start Prompt" for AI assistant
+- 2-3 "Rescue Prompts" for when stuck  
+- Validation checklist
+- CodeBreaker integration button
+
+5. INTEGRATE WITH EXISTING CODEBREAKER:
+- "Need Rescue?" button in each step
+- Opens existing custom prompt generator pre-filled with:
+  * Current step context
+  * Project tech stack
+  * Specific problem user describes
+- User describes their stuck situation
+- Generates sophisticated rescue prompt
+- Returns user to roadmap after rescue
+
+6. ADD PERSISTENCE:
+- Save roadmaps to database
+- Allow users to have multiple active roadmaps
+- Resume progress between sessions
+- Export roadmap as PDF/markdown
+
+7. PREMIUM POSITIONING:
+- Prominent "Pro Feature" badges
+- Showcase this in Pro tier marketing
+- Add to upgrade prompts for free users
+- Include in v2.0 announcement
+
+TECHNICAL SPECS:
+- Use existing UI component library
+- Follow current dark theme design
+- Mobile responsive (especially step list)
+- Fast loading (roadmap generation under 5 seconds)
+- Error handling for generation failures
+
+TESTING REQUIREMENTS:
+- Test roadmap generation for different project types
+- Verify prompts are specific and actionable
+- Check Pro access gates work correctly
+- Validate mobile experience
+- Test progress persistence
+
+START WITH: Basic project input form and simple roadmap generation
+BUILD INCREMENTALLY: Add advanced features after core works
+PRIORITY: Get basic version working before adding complexity
+
+This feature positions CodeBreaker as a complete AI development companion, not just a rescue tool.
+```
+
+---
+
+## 📊 SUCCESS METRICS
+
+**User Engagement:**
+- Roadmaps created per user
+- Steps completed per roadmap
+- Time spent in roadmap creator
+- Rescue usage from roadmap steps
+
+**Business Impact:**
+- Conversion from free to Pro (roadmap as hook)
+- Pro user retention (sticky feature)
+- User satisfaction scores
+- Support ticket reduction
+
+**Feature Adoption:**
+- % of Pro users who try roadmap creator
+- Average roadmaps per user
+- Most popular project types
+- Step completion rates
+
+---
+
+## 🎯 LAUNCH STRATEGY
+
+**Phase 1:** MVP with basic roadmap generation
+**Phase 2:** Advanced prompt customization  
+**Phase 3:** Community roadmap sharing
+**Phase 4:** AI learning from successful roadmaps
+
+This feature transforms CodeBreaker from a rescue tool into a complete AI development platform!
