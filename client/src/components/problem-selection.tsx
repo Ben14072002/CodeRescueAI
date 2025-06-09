@@ -18,9 +18,10 @@ interface ProblemSelectionProps {
   onCustomPrompts?: () => void;
   onTemplates?: () => void;
   onProjectPlanner?: () => void;
+  onAIWizard?: () => void;
 }
 
-export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplates, onProjectPlanner }: ProblemSelectionProps) {
+export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplates, onProjectPlanner, onAIWizard }: ProblemSelectionProps) {
   const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -179,8 +180,8 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplat
               !isProUser ? 'opacity-75' : ''
             }`}
             onClick={() => {
-              if (isProUser && onProjectPlanner) {
-                onProjectPlanner();
+              if (isProUser && onAIWizard) {
+                onAIWizard();
               } else {
                 window.location.href = '/?section=pricing';
               }

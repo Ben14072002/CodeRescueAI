@@ -47,6 +47,7 @@ export default function Home() {
   const navigateToCustomPrompts = () => setCurrentSection("custom-prompts");
   const navigateToTemplates = () => setCurrentSection("templates");
   const navigateToProjectPlanner = () => setCurrentSection("project-planner");
+  const navigateToAIWizard = () => setCurrentSection("ai-wizard");
   const navigateToSettings = () => setCurrentSection("settings");
 
   const handleSuccess = () => {
@@ -151,6 +152,7 @@ export default function Home() {
             onCustomPrompts={navigateToCustomPrompts}
             onTemplates={navigateToTemplates}
             onProjectPlanner={navigateToProjectPlanner}
+            onAIWizard={navigateToAIWizard}
           />
         )}
         
@@ -174,6 +176,10 @@ export default function Home() {
 
         {currentSection === "project-planner" && (
           <ProjectPlanner onBack={navigateToProblems} />
+        )}
+
+        {currentSection === "ai-wizard" && (
+          <AIDevelopmentWizard onBack={navigateToProblems} />
         )}
 
         {currentSection === "settings" && (
