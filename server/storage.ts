@@ -49,9 +49,11 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.sessions = new Map();
     this.promptRatings = new Map();
+    this.projects = new Map();
     this.currentId = 1;
     this.currentSessionId = 1;
     this.currentRatingId = 1;
+    this.currentProjectId = 1;
     
     // Initialize with your Pro subscription
     this.createUser({
@@ -227,6 +229,81 @@ export class MemStorage implements IStorage {
     
     return userSessions;
   }
+
+  // Project persistence methods
+  async createProject(project: InsertProject): Promise<Project> {
+    const newProject: Project = {
+      id: this.currentProjectId++,
+      ...project,
+      createdAt: new Date(),
+      lastModified: new Date(),
+    };
+    
+    this.projects.set(newProject.id, newProject);
+    return newProject;
+  }
+
+  async updateProject(projectId: number, updates: Partial<InsertProject>): Promise<Project> {
+    const existingProject = this.projects.get(projectId);
+    if (!existingProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+
+    const updatedProject: Project = {
+      ...existingProject,
+      ...updates,
+      lastModified: new Date(),
+    };
+
+    this.projects.set(projectId, updatedProject);
+    return updatedProject;
+  }
+
+  async getProject(projectId: number): Promise<Project | undefined> {
+    return this.projects.get(projectId);
+  }
+
+  async getUserProjects(userId: number): Promise<Project[]> {
+    return Array.from(this.projects.values())
+      .filter(project => project.userId === userId)
+      .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
+  }
+
+  async deleteProject(projectId: number): Promise<void> {
+    this.projects.delete(projectId);
+  }
+
+  async updateProjectProgress(projectId: number, progress: any): Promise<Project> {
+    const existingProject = this.projects.get(projectId);
+    if (!existingProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+
+    const updatedProject: Project = {
+      ...existingProject,
+      projectProgress: progress,
+      lastModified: new Date(),
+    };
+
+    this.projects.set(projectId, updatedProject);
+    return updatedProject;
+  }
+
+  async markProjectCompleted(projectId: number): Promise<Project> {
+    const existingProject = this.projects.get(projectId);
+    if (!existingProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+
+    const updatedProject: Project = {
+      ...existingProject,
+      isCompleted: true,
+      lastModified: new Date(),
+    };
+
+    this.projects.set(projectId, updatedProject);
+    return updatedProject;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -349,6 +426,72 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
     
     return userSessions;
+  }
+
+  // Project persistence methods
+  async createProject(project: InsertProject): Promise<Project> {
+    const [newProject] = await db
+      .insert(projects)
+      .values(project)
+      .returning();
+    return newProject;
+  }
+
+  async updateProject(projectId: number, updates: Partial<InsertProject>): Promise<Project> {
+    const [updatedProject] = await db
+      .update(projects)
+      .set({ ...updates, lastModified: new Date() })
+      .where(eq(projects.id, projectId))
+      .returning();
+    
+    if (!updatedProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+    
+    return updatedProject;
+  }
+
+  async getProject(projectId: number): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+    return project || undefined;
+  }
+
+  async getUserProjects(userId: number): Promise<Project[]> {
+    return await db.select().from(projects)
+      .where(eq(projects.userId, userId))
+      .orderBy(projects.lastModified);
+  }
+
+  async deleteProject(projectId: number): Promise<void> {
+    await db.delete(projects).where(eq(projects.id, projectId));
+  }
+
+  async updateProjectProgress(projectId: number, progress: any): Promise<Project> {
+    const [updatedProject] = await db
+      .update(projects)
+      .set({ projectProgress: progress, lastModified: new Date() })
+      .where(eq(projects.id, projectId))
+      .returning();
+    
+    if (!updatedProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+    
+    return updatedProject;
+  }
+
+  async markProjectCompleted(projectId: number): Promise<Project> {
+    const [updatedProject] = await db
+      .update(projects)
+      .set({ isCompleted: true, lastModified: new Date() })
+      .where(eq(projects.id, projectId))
+      .returning();
+    
+    if (!updatedProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+    
+    return updatedProject;
   }
 }
 

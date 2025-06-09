@@ -1134,6 +1134,168 @@ Generate 3 strategic AI manipulation prompts that solve this specific problem wi
     }
   });
 
+  // PROJECT PERSISTENCE API ROUTES
+
+  // Create a new project
+  app.post("/api/projects", async (req, res) => {
+    try {
+      const { userId, projectName, projectDetails, generatedRecipe, roadmapSteps } = req.body;
+
+      if (!userId || !projectName) {
+        return res.status(400).json({ error: "User ID and project name are required" });
+      }
+
+      // Find user
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      const projectData = {
+        userId: user.id,
+        projectName,
+        projectDetails: projectDetails || {},
+        generatedRecipe: generatedRecipe || null,
+        roadmapSteps: roadmapSteps || [],
+        projectProgress: {
+          currentStep: 0,
+          totalSteps: Array.isArray(roadmapSteps) ? roadmapSteps.length : 0,
+          completedSteps: [],
+          timeSpent: 0
+        }
+      };
+
+      const project = await storage.createProject(projectData);
+      res.json(project);
+    } catch (error: any) {
+      console.error('Project creation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user's projects
+  app.get("/api/projects/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.json({ projects: [] });
+      }
+
+      const projects = await storage.getUserProjects(user.id);
+      res.json({ projects });
+    } catch (error: any) {
+      console.error('Get projects error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get specific project
+  app.get("/api/project/:projectId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+
+      if (isNaN(projectId)) {
+        return res.status(400).json({ error: "Invalid project ID" });
+      }
+
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
+      res.json(project);
+    } catch (error: any) {
+      console.error('Get project error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update project
+  app.put("/api/project/:projectId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const updates = req.body;
+
+      if (isNaN(projectId)) {
+        return res.status(400).json({ error: "Invalid project ID" });
+      }
+
+      // Remove fields that shouldn't be updated directly
+      delete updates.id;
+      delete updates.userId;
+      delete updates.createdAt;
+
+      const updatedProject = await storage.updateProject(projectId, updates);
+      res.json(updatedProject);
+    } catch (error: any) {
+      console.error('Project update error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update project progress
+  app.put("/api/project/:projectId/progress", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const { progress } = req.body;
+
+      if (isNaN(projectId)) {
+        return res.status(400).json({ error: "Invalid project ID" });
+      }
+
+      const updatedProject = await storage.updateProjectProgress(projectId, progress);
+      res.json(updatedProject);
+    } catch (error: any) {
+      console.error('Project progress update error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Mark project as completed
+  app.put("/api/project/:projectId/complete", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+
+      if (isNaN(projectId)) {
+        return res.status(400).json({ error: "Invalid project ID" });
+      }
+
+      const completedProject = await storage.markProjectCompleted(projectId);
+      res.json(completedProject);
+    } catch (error: any) {
+      console.error('Project completion error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Delete project
+  app.delete("/api/project/:projectId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+
+      if (isNaN(projectId)) {
+        return res.status(400).json({ error: "Invalid project ID" });
+      }
+
+      await storage.deleteProject(projectId);
+      res.json({ success: true, message: "Project deleted successfully" });
+    } catch (error: any) {
+      console.error('Project deletion error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
