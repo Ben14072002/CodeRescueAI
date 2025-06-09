@@ -710,176 +710,1161 @@ Deploy my ${input.targetAudience} application to production. I need COMPLETE dep
         cicd: 'GitHub Actions with automated testing',
         scaling: input.expectedUsers === 'Enterprise scale' ? 'Load balancer + CDN + Auto-scaling' : 'Standard hosting'
       },
-      fileStructure: generateFileStructure(input, recommendations),
-      databaseSchema: generateDatabaseSchema(input),
-      apiEndpoints: generateAPIEndpoints(input),
-      uiComponents: generateUIComponents(input),
-      dependencies: generateDependencies(recommendations),
-      detailedTimeline: generateDetailedTimeline(input, recommendations)
+      fileStructure: generateComprehensiveFileStructure(input, recommendations),
+      databaseSchema: generateComprehensiveDatabaseSchema(input),
+      apiEndpoints: generateComprehensiveAPIEndpoints(input),
+      uiComponents: generateComprehensiveUIComponents(input),
+      dependencies: generateComprehensiveDependencies(recommendations),
+      detailedTimeline: generateComprehensiveTimeline(input, recommendations)
     };
   };
 
-  const generateFileStructure = (input: ProjectInput, recommendations: Recommendations) => {
-    return `
-project-root/
-├── src/
-│   ├── components/
-│   │   ├── ui/
-│   │   ├── auth/
-│   │   └── layout/
-│   ├── pages/
-│   ├── hooks/
-│   ├── lib/
-│   ├── types/
-│   └── utils/
-├── public/
-├── tests/
-├── docs/
-└── deployment/
-    ├── docker/
-    ├── ci-cd/
-    └── scripts/`;
-  };
-
-  const generateDatabaseSchema = (input: ProjectInput) => {
-    if (input.dataComplexity === 'Static content') return 'No database required';
+  const generateComprehensiveFileStructure = (input: ProjectInput, recommendations: Recommendations) => {
+    const frontend = recommendations.recommendedTechStack.find(tech => tech.includes('React')) ? 'React' : 'Vue';
+    const backend = recommendations.recommendedTechStack.find(tech => tech.includes('Node')) ? 'Node.js' : 'Express';
     
     return `
--- Users table
+project-root/
+├── client/ (Frontend - ${frontend})
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/ (Button, Input, Modal, etc.)
+│   │   │   ├── auth/ (Login, Register, Profile)
+│   │   │   ├── layout/ (Header, Footer, Sidebar)
+│   │   │   ├── features/ (Core feature components)
+│   │   │   └── shared/ (Reusable components)
+│   │   ├── pages/
+│   │   │   ├── auth/ (Login, Register pages)
+│   │   │   ├── dashboard/ (Main dashboard)
+│   │   │   └── settings/ (User settings)
+│   │   ├── hooks/ (Custom React hooks)
+│   │   ├── lib/ (API client, utilities)
+│   │   ├── types/ (TypeScript definitions)
+│   │   ├── context/ (React Context providers)
+│   │   ├── utils/ (Helper functions)
+│   │   └── assets/ (Images, icons, styles)
+│   ├── public/
+│   ├── tests/ (Component & integration tests)
+│   └── docs/ (Component documentation)
+├── server/ (Backend - ${backend})
+│   ├── src/
+│   │   ├── controllers/ (Route handlers)
+│   │   ├── middleware/ (Auth, validation, etc.)
+│   │   ├── models/ (Database models)
+│   │   ├── routes/ (API routes)
+│   │   ├── services/ (Business logic)
+│   │   ├── utils/ (Helper functions)
+│   │   ├── config/ (Database, environment)
+│   │   └── types/ (TypeScript definitions)
+│   ├── tests/ (API & unit tests)
+│   └── migrations/ (Database migrations)
+├── shared/ (Shared types & utilities)
+├── docs/ (Project documentation)
+├── deployment/
+│   ├── docker/ (Containerization)
+│   ├── ci-cd/ (GitHub Actions)
+│   └── scripts/ (Build & deploy scripts)
+└── tools/ (Development tools & configs)`;
+  };
+
+  const generateComprehensiveDatabaseSchema = (input: ProjectInput) => {
+    if (input.dataComplexity === 'Static content') return 'No database required - Static hosting';
+    
+    const features = extractFeaturesFromDescription(input.description.toLowerCase());
+    const hasChat = features.some(f => f.title.includes('Messaging'));
+    const hasPayments = features.some(f => f.title.includes('Payment'));
+    const hasAnalytics = features.some(f => f.title.includes('Analytics'));
+    
+    let schema = `-- Core User Management
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  avatar_url VARCHAR(500),
+  role VARCHAR(50) DEFAULT 'user',
+  is_active BOOLEAN DEFAULT true,
+  email_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- User Sessions
+CREATE TABLE user_sessions (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(255) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Additional tables based on your project needs
--- Generated based on project description analysis`;
+-- User Preferences
+CREATE TABLE user_preferences (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  theme VARCHAR(20) DEFAULT 'light',
+  notifications_enabled BOOLEAN DEFAULT true,
+  language VARCHAR(10) DEFAULT 'en',
+  timezone VARCHAR(50),
+  updated_at TIMESTAMP DEFAULT NOW()
+);`;
+
+    if (input.dataComplexity === 'Database driven' || input.dataComplexity === 'Complex analytics') {
+      schema += `
+
+-- Core Data Entities
+CREATE TABLE projects (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  status VARCHAR(50) DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Project Members
+CREATE TABLE project_members (
+  project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  role VARCHAR(50) DEFAULT 'member',
+  joined_at TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (project_id, user_id)
+);
+
+-- Main Data Items
+CREATE TABLE items (
+  id SERIAL PRIMARY KEY,
+  project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  assignee_id INTEGER REFERENCES users(id),
+  status VARCHAR(50) DEFAULT 'pending',
+  priority VARCHAR(20) DEFAULT 'medium',
+  due_date TIMESTAMP,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);`;
+    }
+
+    if (hasChat) {
+      schema += `
+
+-- Real-time Messaging
+CREATE TABLE conversations (
+  id SERIAL PRIMARY KEY,
+  project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+  name VARCHAR(255),
+  type VARCHAR(50) DEFAULT 'group',
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
+  sender_id INTEGER REFERENCES users(id),
+  content TEXT NOT NULL,
+  message_type VARCHAR(50) DEFAULT 'text',
+  reply_to INTEGER REFERENCES messages(id),
+  created_at TIMESTAMP DEFAULT NOW()
+);`;
+    }
+
+    if (hasPayments) {
+      schema += `
+
+-- Payment System
+CREATE TABLE subscriptions (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  stripe_customer_id VARCHAR(255),
+  stripe_subscription_id VARCHAR(255),
+  plan_name VARCHAR(100),
+  status VARCHAR(50),
+  current_period_end TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE payments (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  stripe_payment_id VARCHAR(255),
+  amount DECIMAL(10,2),
+  currency VARCHAR(3) DEFAULT 'USD',
+  status VARCHAR(50),
+  created_at TIMESTAMP DEFAULT NOW()
+);`;
+    }
+
+    if (hasAnalytics) {
+      schema += `
+
+-- Analytics & Tracking
+CREATE TABLE user_activities (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  action VARCHAR(100) NOT NULL,
+  resource_type VARCHAR(50),
+  resource_id INTEGER,
+  metadata JSONB,
+  ip_address INET,
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE analytics_events (
+  id SERIAL PRIMARY KEY,
+  event_name VARCHAR(100) NOT NULL,
+  user_id INTEGER REFERENCES users(id),
+  properties JSONB,
+  session_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);`;
+    }
+
+    schema += `
+
+-- Indexes for Performance
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_user_sessions_token ON user_sessions(token_hash);
+CREATE INDEX idx_items_project ON items(project_id);
+CREATE INDEX idx_items_assignee ON items(assignee_id);
+CREATE INDEX idx_items_status ON items(status);`;
+
+    if (hasChat) {
+      schema += `
+CREATE INDEX idx_messages_conversation ON messages(conversation_id);
+CREATE INDEX idx_messages_created ON messages(created_at);`;
+    }
+
+    if (hasAnalytics) {
+      schema += `
+CREATE INDEX idx_activities_user ON user_activities(user_id);
+CREATE INDEX idx_activities_created ON user_activities(created_at);
+CREATE INDEX idx_events_name ON analytics_events(event_name);`;
+    }
+
+    return schema;
   };
 
-  const generateAPIEndpoints = (input: ProjectInput) => {
-    const endpoints = [];
+  const generateComprehensiveAPIEndpoints = (input: ProjectInput) => {
+    let endpoints = `# Authentication Endpoints`;
     
     if (input.authenticationNeeds !== 'None') {
-      endpoints.push('POST /api/auth/register');
-      endpoints.push('POST /api/auth/login');
-      endpoints.push('POST /api/auth/logout');
+      endpoints += `
+POST   /api/auth/register       # User registration
+POST   /api/auth/login          # User login
+POST   /api/auth/logout         # User logout
+POST   /api/auth/refresh        # Refresh token
+POST   /api/auth/forgot-password # Password reset request
+POST   /api/auth/reset-password  # Password reset confirmation
+GET    /api/auth/verify-email   # Email verification
+POST   /api/auth/resend-verification # Resend verification`;
     }
-    
+
+    endpoints += `
+
+# User Management
+GET    /api/users/profile       # Get current user profile
+PUT    /api/users/profile       # Update user profile
+POST   /api/users/avatar        # Upload avatar
+GET    /api/users/preferences   # Get user preferences
+PUT    /api/users/preferences   # Update preferences
+DELETE /api/users/account       # Delete account`;
+
     if (input.dataComplexity !== 'Static content') {
-      endpoints.push('GET /api/data');
-      endpoints.push('POST /api/data');
-      endpoints.push('PUT /api/data/:id');
-      endpoints.push('DELETE /api/data/:id');
+      endpoints += `
+
+# Core Resource Management
+GET    /api/projects            # List user projects
+POST   /api/projects            # Create new project
+GET    /api/projects/:id        # Get project details
+PUT    /api/projects/:id        # Update project
+DELETE /api/projects/:id        # Delete project
+
+# Project Members
+GET    /api/projects/:id/members # List project members
+POST   /api/projects/:id/members # Add member
+PUT    /api/projects/:id/members/:userId # Update member role
+DELETE /api/projects/:id/members/:userId # Remove member
+
+# Items/Tasks Management
+GET    /api/projects/:id/items  # List project items
+POST   /api/projects/:id/items  # Create item
+GET    /api/items/:id           # Get item details
+PUT    /api/items/:id           # Update item
+DELETE /api/items/:id           # Delete item
+POST   /api/items/:id/assign    # Assign item to user`;
     }
+
+    const features = extractFeaturesFromDescription(input.description.toLowerCase());
     
-    return endpoints.join('\n');
+    if (features.some(f => f.title.includes('Messaging'))) {
+      endpoints += `
+
+# Real-time Messaging
+GET    /api/conversations       # List user conversations
+POST   /api/conversations       # Create conversation
+GET    /api/conversations/:id/messages # Get messages
+POST   /api/conversations/:id/messages # Send message
+PUT    /api/messages/:id        # Edit message
+DELETE /api/messages/:id        # Delete message
+
+# WebSocket Events
+- user:online, user:offline
+- message:new, message:updated
+- typing:start, typing:stop`;
+    }
+
+    if (features.some(f => f.title.includes('Payment'))) {
+      endpoints += `
+
+# Payment System
+GET    /api/billing/plans       # Available plans
+POST   /api/billing/subscribe   # Create subscription
+GET    /api/billing/subscription # Current subscription
+PUT    /api/billing/subscription # Update subscription
+DELETE /api/billing/subscription # Cancel subscription
+GET    /api/billing/invoices    # Payment history
+POST   /api/billing/portal      # Customer portal link`;
+    }
+
+    if (features.some(f => f.title.includes('Analytics'))) {
+      endpoints += `
+
+# Analytics & Reporting
+GET    /api/analytics/dashboard # Dashboard metrics
+GET    /api/analytics/users     # User analytics
+GET    /api/analytics/projects  # Project analytics
+POST   /api/analytics/events    # Track custom event
+GET    /api/analytics/export    # Export data`;
+    }
+
+    if (input.integrations.length > 0) {
+      endpoints += `
+
+# Third-party Integrations`;
+      input.integrations.forEach(integration => {
+        endpoints += `
+GET    /api/integrations/${integration.toLowerCase()} # ${integration} status
+POST   /api/integrations/${integration.toLowerCase()}/connect # Connect ${integration}
+DELETE /api/integrations/${integration.toLowerCase()}/disconnect # Disconnect ${integration}`;
+      });
+    }
+
+    endpoints += `
+
+# File Management
+POST   /api/upload              # Upload file
+GET    /api/files/:id           # Get file
+DELETE /api/files/:id           # Delete file
+
+# Search & Filtering
+GET    /api/search              # Global search
+GET    /api/search/users        # Search users
+GET    /api/search/projects     # Search projects
+
+# Admin (if applicable)
+GET    /api/admin/stats         # System statistics
+GET    /api/admin/users         # User management
+POST   /api/admin/announcements # System announcements`;
+
+    return endpoints;
   };
 
-  const generateUIComponents = (input: ProjectInput) => {
-    const components = [];
-    
-    components.push('Header/Navigation');
-    components.push('Footer');
-    components.push('Layout components');
-    
+  const generateComprehensiveUIComponents = (input: ProjectInput) => {
+    let components = `# Core UI Components
+
+## Layout Components
+- AppLayout: Main application wrapper
+- Header: Navigation, user menu, notifications
+- Sidebar: Main navigation, project switcher
+- Footer: Links, version, status
+- PageContainer: Consistent page wrapper
+
+## Form Components
+- Input: Text, email, password inputs
+- Textarea: Multi-line text input
+- Select: Dropdown selection
+- Checkbox: Boolean input
+- RadioGroup: Single selection from options
+- DatePicker: Date/time selection
+- FileUpload: File upload with preview
+- FormField: Wrapper with label and validation
+
+## UI Elements
+- Button: Primary, secondary, danger variants
+- Badge: Status indicators, counts
+- Avatar: User profile pictures
+- Card: Content containers
+- Modal: Overlay dialogs
+- Toast: Notification messages
+- Loader: Loading states and skeletons
+- Pagination: List navigation
+- Tabs: Content organization
+- Accordion: Collapsible content`;
+
     if (input.authenticationNeeds !== 'None') {
-      components.push('Login form');
-      components.push('Registration form');
-      components.push('User profile');
+      components += `
+
+## Authentication Components
+- LoginForm: User login interface
+- RegisterForm: User registration
+- ForgotPasswordForm: Password reset request
+- ResetPasswordForm: Password reset confirmation
+- EmailVerification: Email verification prompt
+- AuthGuard: Protected route wrapper
+- UserProfile: Profile management
+- PasswordChange: Password update form`;
     }
-    
+
     if (input.dataComplexity !== 'Static content') {
-      components.push('Data display components');
-      components.push('Form components');
+      components += `
+
+## Data Management Components
+- ProjectCard: Project overview display
+- ProjectList: Grid/list of projects
+- ProjectForm: Create/edit projects
+- ItemCard: Individual item display
+- ItemList: List of items with filtering
+- ItemForm: Create/edit items
+- SearchBar: Global search interface
+- FilterPanel: Advanced filtering options
+- SortControls: Sorting options`;
     }
+
+    const features = extractFeaturesFromDescription(input.description.toLowerCase());
     
-    return components.join('\n');
+    if (features.some(f => f.title.includes('Messaging'))) {
+      components += `
+
+## Real-time Chat Components
+- ChatWindow: Main chat interface
+- MessageList: Message display area
+- MessageInput: Message composition
+- ConversationList: Chat list sidebar
+- UserList: Online users display
+- TypingIndicator: Typing status
+- MessageBubble: Individual message
+- EmojiPicker: Reaction selection`;
+    }
+
+    if (features.some(f => f.title.includes('Analytics'))) {
+      components += `
+
+## Analytics Components
+- DashboardCard: Metric display cards
+- ChartContainer: Chart wrapper
+- LineChart: Time-series data
+- BarChart: Comparison data
+- PieChart: Proportion display
+- MetricCard: Single statistic display
+- DateRangePicker: Date filtering
+- ExportButton: Data export controls`;
+    }
+
+    if (features.some(f => f.title.includes('Payment'))) {
+      components += `
+
+## Payment Components
+- PricingCard: Plan display
+- PaymentForm: Credit card input
+- SubscriptionStatus: Current plan display
+- BillingHistory: Payment history
+- PlanUpgrade: Upgrade interface
+- PaymentMethod: Saved payment display`;
+    }
+
+    components += `
+
+## Responsive Design
+- Mobile-first approach
+- Tablet breakpoint adaptations
+- Desktop optimizations
+- Touch-friendly interactions
+- Keyboard navigation support`;
+
+    return components;
   };
 
-  const generateDependencies = (recommendations: Recommendations) => {
-    return recommendations.recommendedTechStack.join(', ') + ', Testing libraries, Build tools';
+  const generateComprehensiveDependencies = (recommendations: Recommendations) => {
+    const frontend = recommendations.recommendedTechStack.find(tech => tech.includes('React')) ? 'React' : 'Vue';
+    const backend = recommendations.recommendedTechStack.find(tech => tech.includes('Node')) ? 'Node.js' : 'Express';
+    
+    return `# Frontend Dependencies (${frontend})
+## Core Framework
+- ${frontend.toLowerCase()}: ^18.0.0
+- typescript: ^5.0.0
+- vite: ^4.0.0
+
+## UI & Styling
+- tailwindcss: ^3.3.0
+- @headlessui/react: ^1.7.0
+- lucide-react: ^0.263.0
+- framer-motion: ^10.12.0
+
+## State Management
+- zustand: ^4.3.0 (or @reduxjs/toolkit if complex)
+- react-query: ^3.39.0
+
+## Forms & Validation
+- react-hook-form: ^7.44.0
+- zod: ^3.21.0
+- @hookform/resolvers: ^3.1.0
+
+## Routing & Navigation
+- react-router-dom: ^6.11.0
+- @reach/router: ^1.3.0
+
+## HTTP & Real-time
+- axios: ^1.4.0
+- socket.io-client: ^4.6.0
+
+# Backend Dependencies (${backend})
+## Core Framework
+- express: ^4.18.0
+- typescript: ^5.0.0
+- ts-node: ^10.9.0
+
+## Database & ORM
+- prisma: ^4.15.0 (or drizzle-orm)
+- postgresql: ^14.0.0
+- redis: ^4.6.0
+
+## Authentication & Security
+- jsonwebtoken: ^9.0.0
+- bcryptjs: ^2.4.0
+- helmet: ^7.0.0
+- cors: ^2.8.0
+- rate-limiter-flexible: ^2.4.0
+
+## Real-time Communication
+- socket.io: ^4.6.0
+
+## File Handling
+- multer: ^1.4.0
+- sharp: ^0.32.0
+
+## Email & Notifications
+- nodemailer: ^6.9.0
+- twilio: ^4.11.0
+
+## Testing
+- jest: ^29.5.0
+- supertest: ^6.3.0
+- @testing-library/react: ^13.4.0
+
+## Development Tools
+- eslint: ^8.42.0
+- prettier: ^2.8.0
+- husky: ^8.0.0
+- lint-staged: ^13.2.0
+
+## Deployment & Monitoring
+- pm2: ^5.3.0
+- winston: ^3.9.0
+- sentry: ^7.54.0`;
   };
 
-  const generateDetailedTimeline = (input: ProjectInput, recommendations: Recommendations) => {
-    return `
-Week 1: Project setup, basic structure, authentication
-Week 2-3: Core feature development, database integration
-Week 4: UI/UX implementation, testing
-Week 5: Integration, optimization, deployment
-Total: ${recommendations.estimatedTimeline}`;
+  const generateComprehensiveTimeline = (input: ProjectInput, recommendations: Recommendations) => {
+    const complexity = recommendations.suggestedComplexity;
+    const hasAuth = input.authenticationNeeds !== 'None';
+    const hasRealtime = input.dataComplexity === 'Real-time data';
+    const features = extractFeaturesFromDescription(input.description.toLowerCase());
+    
+    let timeline = `# Development Timeline - ${recommendations.estimatedTimeline}
+
+## Phase 1: Foundation & Setup (Week 1)
+**Duration**: 5-7 days
+**Goals**: Project infrastructure and basic architecture
+
+### Tasks:
+- [ ] Initialize project repositories (frontend/backend)
+- [ ] Set up development environment and tools
+- [ ] Configure TypeScript, linting, and formatting
+- [ ] Set up database and basic schema
+- [ ] Implement CI/CD pipeline basics
+- [ ] Create project documentation structure
+
+**Deliverables**:
+- Working development environment
+- Basic project structure
+- Database connection established
+- Initial deployment pipeline`;
+
+    if (hasAuth) {
+      timeline += `
+
+## Phase 2: Authentication System (Week 2)
+**Duration**: 5-7 days
+**Goals**: Complete user management system
+
+### Tasks:
+- [ ] Design user database schema
+- [ ] Implement registration/login API endpoints
+- [ ] Create password reset functionality
+- [ ] Build authentication middleware
+- [ ] Design login/register UI components
+- [ ] Implement protected routes
+- [ ] Add email verification system
+- [ ] Create user profile management
+
+**Deliverables**:
+- Fully functional auth system
+- User registration and login flows
+- Password reset capability
+- Protected routes implementation`;
+    }
+
+    timeline += `
+
+## Phase 3: Core Features Development (Weeks ${hasAuth ? '3-5' : '2-4'})
+**Duration**: ${complexity === 'simple' ? '2 weeks' : complexity === 'medium' ? '3 weeks' : '4 weeks'}
+**Goals**: Main application functionality
+
+### Tasks:
+- [ ] Implement core data models
+- [ ] Build CRUD API endpoints
+- [ ] Create main dashboard interface
+- [ ] Develop core feature components
+- [ ] Implement search and filtering
+- [ ] Add data validation and error handling
+- [ ] Create responsive layouts
+- [ ] Implement basic user permissions`;
+
+    features.forEach(feature => {
+      timeline += `
+- [ ] ${feature.title} implementation
+- [ ] ${feature.title} UI components
+- [ ] ${feature.title} testing`;
+    });
+
+    timeline += `
+
+**Deliverables**:
+- Core application functionality
+- Main user interfaces
+- Data management system
+- Search and filtering features`;
+
+    if (hasRealtime || features.some(f => f.title.includes('Messaging'))) {
+      timeline += `
+
+## Phase 4: Real-time Features (Week ${hasAuth ? '6' : '5'})
+**Duration**: 5-7 days
+**Goals**: Real-time communication and updates
+
+### Tasks:
+- [ ] Set up WebSocket infrastructure
+- [ ] Implement real-time data synchronization
+- [ ] Build chat/messaging system
+- [ ] Add live notifications
+- [ ] Create presence indicators
+- [ ] Implement typing indicators
+- [ ] Add real-time collaboration features
+
+**Deliverables**:
+- Real-time messaging system
+- Live data updates
+- Notification system
+- Collaborative features`;
+    }
+
+    timeline += `
+
+## Phase 5: Advanced Features & Polish (Weeks ${hasAuth ? '6-7' : '5-6'})
+**Duration**: 1-2 weeks
+**Goals**: Enhanced functionality and user experience
+
+### Tasks:
+- [ ] Implement advanced filtering and search
+- [ ] Add file upload and management
+- [ ] Create analytics and reporting
+- [ ] Build admin interface (if needed)
+- [ ] Implement data export features
+- [ ] Add advanced user preferences
+- [ ] Create onboarding flow
+- [ ] Optimize performance and loading`;
+
+    if (input.integrations.length > 0) {
+      timeline += `
+- [ ] Third-party integrations setup
+- [ ] API integration testing
+- [ ] Integration error handling`;
+    }
+
+    timeline += `
+
+**Deliverables**:
+- Advanced feature set
+- Analytics and reporting
+- File management system
+- Optimized performance`;
+
+    timeline += `
+
+## Phase 6: Testing & Quality Assurance (Week ${hasAuth ? '8' : '7'})
+**Duration**: 5-7 days
+**Goals**: Comprehensive testing and bug fixes
+
+### Tasks:
+- [ ] Write comprehensive unit tests
+- [ ] Implement integration testing
+- [ ] Perform end-to-end testing
+- [ ] Conduct security audit
+- [ ] Performance testing and optimization
+- [ ] Cross-browser compatibility testing
+- [ ] Mobile responsiveness testing
+- [ ] Accessibility compliance check
+
+**Deliverables**:
+- Complete test suite (80%+ coverage)
+- Security audit report
+- Performance optimization
+- Cross-platform compatibility
+
+## Phase 7: Deployment & Launch (Week ${hasAuth ? '9-10' : '8-9'})
+**Duration**: 1-2 weeks
+**Goals**: Production deployment and monitoring
+
+### Tasks:
+- [ ] Set up production environment
+- [ ] Configure monitoring and logging
+- [ ] Implement backup strategies
+- [ ] Set up SSL certificates
+- [ ] Configure CDN and caching
+- [ ] Implement error tracking
+- [ ] Create deployment documentation
+- [ ] Conduct final security review
+- [ ] Perform load testing
+- [ ] Launch monitoring dashboard
+
+**Deliverables**:
+- Production-ready application
+- Monitoring and alerting system
+- Deployment documentation
+- Launch readiness certification
+
+## Post-Launch: Maintenance & Iteration
+**Ongoing**: After initial launch
+**Goals**: Continuous improvement and feature expansion
+
+### Monthly Tasks:
+- [ ] Monitor system performance
+- [ ] Gather user feedback
+- [ ] Plan feature iterations
+- [ ] Security updates and patches
+- [ ] Performance optimizations
+- [ ] User experience improvements
+
+## Success Metrics:
+- Application uptime: 99.9%+
+- Average response time: <200ms
+- Test coverage: 80%+
+- Security vulnerabilities: 0 critical
+- User satisfaction: 4.5+ stars`;
+
+    return timeline;
   };
 
   const downloadProjectRecipe = () => {
     if (!projectRecipe || !recommendations) return;
     
-    const content = `# ${projectInput.name} - Complete Project Recipe
+    const features = extractFeaturesFromDescription(projectInput.description.toLowerCase());
+    const hasAuth = projectInput.authenticationNeeds !== 'None';
+    const hasRealtime = projectInput.dataComplexity === 'Real-time data' || features.some(f => f.title.includes('Messaging'));
+    
+    const content = `# AI-Ready Project Plan: ${projectInput.name}
 
-## Project Overview
-- **Name**: ${projectInput.name}
-- **Description**: ${projectInput.description}
-- **Target Audience**: ${projectInput.targetAudience}
-- **Platform**: ${projectInput.platform}
-- **Expected Users**: ${projectInput.expectedUsers}
-- **Timeline**: ${recommendations.estimatedTimeline}
+## 1. PROJECT OVERVIEW
 
-## Architecture
-- **Frontend**: ${projectRecipe.architecture.frontend}
-- **Backend**: ${projectRecipe.architecture.backend}
-- **Database**: ${projectRecipe.architecture.database}
+### Project Name: ${projectInput.name}
 
-## File Structure
-\`\`\`
-${projectRecipe.fileStructure}
-\`\`\`
+### Vision Statement
+${projectInput.description}
 
-## Database Schema
+### Core Value Proposition
+- ${projectInput.targetAudience} focused ${projectInput.platform.toLowerCase()} application
+- ${projectInput.designComplexity.toLowerCase()} design with ${projectInput.responsiveness.toLowerCase()} support
+- Built for ${projectInput.expectedUsers} with ${projectInput.performanceNeeds.toLowerCase()} performance requirements
+- ${projectInput.experienceLevel.charAt(0).toUpperCase() + projectInput.experienceLevel.slice(1)}-level development complexity
+
+### Success Metrics
+- User acquisition target: ${projectInput.expectedUsers}
+- Performance target: ${projectInput.performanceNeeds === 'Enterprise scale' ? 'Sub-100ms response times' : 'Sub-200ms response times'}
+- Availability target: ${projectInput.expectedUsers === 'Enterprise scale' ? '99.99%' : '99.9%'} uptime
+- User engagement: ${projectInput.expectedUsers === '1-100' ? '70%+' : '80%+'} active user retention
+
+## 2. TECHNICAL SPECIFICATION
+
+### Tech Stack
+${recommendations.recommendedTechStack.map(tech => `- **${tech}**: ${getTechDescription(tech)}`).join('\n')}
+
+### Architecture Pattern
+- **Frontend**: ${projectRecipe.architecture.frontend} with component-based architecture
+- **Backend**: ${projectRecipe.architecture.backend} with ${projectInput.dataComplexity === 'Complex analytics' ? 'microservices' : 'monolithic'} pattern
+- **Database**: ${projectRecipe.architecture.database} with ${projectInput.dataComplexity === 'Simple forms' ? 'basic' : 'optimized'} design
+- **State Management**: ${recommendations.recommendedTechStack.includes('React') ? 'React Context + useReducer' : 'Vuex/Pinia'}
+
+### Performance Requirements
+- Page load time: ${projectInput.performanceNeeds === 'High performance' ? '< 1 second' : '< 2 seconds'}
+- API response time: ${projectInput.performanceNeeds === 'Enterprise scale' ? '< 100ms' : '< 200ms'}
+- Concurrent users: ${getPerformanceTarget(projectInput.expectedUsers)}
+- Uptime target: ${projectInput.expectedUsers === 'Enterprise scale' ? '99.99%' : '99.9%'}
+
+## 3. FEATURE BREAKDOWN
+
+### Phase 1: Core Features (MVP)
+${recommendations.coreFeatures.map(feature => `- ${feature}`).join('\n')}
+
+### Phase 2: Enhanced Features
+${recommendations.optionalFeatures.map(feature => `- ${feature}`).join('\n')}
+
+${features.length > 0 ? `### Phase 3: Advanced Features
+${features.map(feature => `- ${feature.title}: ${feature.description}`).join('\n')}` : ''}
+
+${projectInput.integrations.length > 0 ? `### Phase 4: Integrations
+${projectInput.integrations.map(integration => `- ${integration} integration with full OAuth and API management`).join('\n')}` : ''}
+
+## 4. DATABASE DESIGN
+
+### Schema Overview
 \`\`\`sql
 ${projectRecipe.databaseSchema}
 \`\`\`
 
-## API Endpoints
+### Key Relationships
+${generateDatabaseRelationships()}
+
+### Performance Considerations
+- Proper indexing on frequently queried columns
+- Connection pooling for ${projectInput.expectedUsers} concurrent users
+- ${projectInput.dataComplexity === 'Complex analytics' ? 'Read replicas for analytics queries' : 'Single database instance'}
+- ${projectInput.performanceNeeds === 'High performance' ? 'Redis caching layer' : 'Application-level caching'}
+
+## 5. API DESIGN
+
+### Endpoint Specification
 \`\`\`
 ${projectRecipe.apiEndpoints}
 \`\`\`
 
-## UI Components
+### Authentication Strategy
+${hasAuth ? `- ${projectInput.authenticationNeeds} implementation
+- JWT tokens with refresh token rotation
+- Role-based access control (RBAC)
+- Session management with security best practices` : '- No authentication required (public application)'}
+
+### Response Format
+\`\`\`json
+{
+  "success": true,
+  "data": { /* response data */ },
+  "message": "Optional message",
+  "pagination": { /* for list endpoints */ },
+  "meta": { /* additional metadata */ }
+}
+\`\`\`
+
+## 6. UI/UX WIREFRAMES
+
+### Key Pages
+${generateKeyPages()}
+
+### Component Library
 ${projectRecipe.uiComponents}
 
-## Dependencies
-${projectRecipe.dependencies}
+### Design System
+- Color palette: ${projectInput.designComplexity === 'Custom branded' ? 'Custom brand colors' : 'Standard UI colors'}
+- Typography: ${projectInput.designComplexity === 'Minimal/functional' ? 'System fonts' : 'Custom typography'}
+- Spacing: 8px grid system
+- Animations: ${projectInput.designComplexity === 'Complex animations' ? 'Advanced micro-interactions' : 'Subtle transitions'}
 
-## Timeline
+## 7. DEVELOPMENT PHASES
+
 ${projectRecipe.detailedTimeline}
 
-## Deployment Strategy
-- **Hosting**: ${projectRecipe.deploymentStrategy.hosting}
-- **CI/CD**: ${projectRecipe.deploymentStrategy.cicd}
-- **Scaling**: ${projectRecipe.deploymentStrategy.scaling}
+## 8. AI ASSISTANT PROMPTS STRATEGY
 
-## Next Steps
-1. Set up development environment
-2. Initialize project with recommended tech stack
-3. Follow the detailed roadmap for implementation
-4. Test thoroughly before deployment
-5. Deploy to production environment
+### Setup Prompts
+- "Create a new ${recommendations.recommendedTechStack[0]} project with ${recommendations.recommendedTechStack[1]} setup"
+- "Set up ${projectRecipe.architecture.backend} server with ${projectRecipe.architecture.database} database"
+- "Generate complete project structure based on the specification above"
+
+### Feature Development Prompts
+${hasAuth ? `- "Create a complete ${projectInput.authenticationNeeds} authentication system with security best practices"` : ''}
+${hasRealtime ? `- "Implement real-time functionality using WebSocket connections"` : ''}
+${features.map(feature => `- "Build ${feature.title.toLowerCase()} with complete functionality and error handling"`).join('\n')}
+
+### Code Quality Prompts
+- "Add comprehensive error handling to all API endpoints"
+- "Write unit tests with 80%+ coverage for all components"
+- "Optimize performance for ${projectInput.expectedUsers} concurrent users"
+- "Implement security best practices for ${projectInput.targetAudience} applications"
+
+## 9. TESTING STRATEGY
+
+### Unit Tests
+- All utility functions and business logic
+- React/Vue component functionality
+- API endpoint logic with mocked dependencies
+- Database query functions
+
+### Integration Tests
+- API endpoints with real database connections
+- Authentication and authorization flows
+- File upload and processing workflows
+${hasRealtime ? '- Real-time messaging and WebSocket functionality' : ''}
+
+### E2E Tests
+${generateE2ETests()}
+
+### Performance Tests
+- Load testing for ${projectInput.expectedUsers}
+- API response time benchmarks
+- Frontend bundle size optimization
+- Database query performance analysis
+
+## 10. DEPLOYMENT & MONITORING
+
+### Production Environment
+${generateDeploymentStrategy()}
+
+### Monitoring & Analytics
+- Application performance monitoring (APM)
+- Error tracking and logging
+- User analytics and behavior tracking
+- System resource monitoring
+- ${projectInput.expectedUsers === 'Enterprise scale' ? 'Advanced alerting and incident response' : 'Basic monitoring dashboard'}
+
+### Security Measures
+${generateSecurityMeasures()}
+
+## 11. FILE STRUCTURE
+
+\`\`\`
+${projectRecipe.fileStructure}
+\`\`\`
+
+## 12. DEPENDENCIES
+
+${projectRecipe.dependencies}
+
+## 13. LAUNCH CHECKLIST
+
+### Pre-Launch
+- [ ] All core features tested and functional
+- [ ] Security audit completed with no critical vulnerabilities
+- [ ] Performance optimization meeting targets
+- [ ] ${projectInput.responsiveness !== 'Desktop only' ? 'Mobile responsiveness verified across devices' : 'Desktop compatibility verified'}
+- [ ] Error handling comprehensive across all scenarios
+- [ ] Documentation complete and accessible
+
+### Launch Day
+- [ ] Deploy to production environment
+- [ ] Configure monitoring and alerting systems
+- [ ] Set up analytics and tracking
+- [ ] Prepare customer support channels
+- [ ] Monitor system performance and user feedback
+
+### Post-Launch
+- [ ] Gather user feedback and usage analytics
+- [ ] Monitor performance metrics and system health
+- [ ] Plan feature iterations based on user needs
+- [ ] Scale infrastructure based on actual usage patterns
+
+## 14. RISK MANAGEMENT
+
+### Technical Risks
+${generateTechnicalRisks()}
+
+### Business Risks
+${generateBusinessRisks()}
+
+## 15. SUCCESS METRICS & KPIs
+
+### Technical Metrics
+- API response times: ${projectInput.performanceNeeds === 'Enterprise scale' ? '< 100ms' : '< 200ms'}
+- Frontend bundle size: < 500KB gzipped
+- Test coverage: > 80%
+- Security vulnerabilities: 0 critical, < 5 medium
+
+### Business Metrics
+- User acquisition: ${projectInput.expectedUsers}
+- User retention: ${projectInput.expectedUsers === '1-100' ? '70%+' : '80%+'} after 30 days
+- Performance satisfaction: 4.5+ star rating
+- System availability: ${projectInput.expectedUsers === 'Enterprise scale' ? '99.99%' : '99.9%'}
 
 ---
-Generated by CodeBreaker AI Project Planner
+
+## AI DEVELOPMENT COMPANION
+
+This comprehensive project plan is optimized for AI-assisted development. Each section provides specific context and requirements that can be directly used with AI coding assistants like:
+
+- **Replit AI**: Use complete specifications for full file generation
+- **Cursor AI**: Reference architecture details for context-aware coding
+- **Windsurf AI**: Leverage technical requirements for system design
+- **Lovable AI**: Utilize UI/UX specifications for component development
+
+### Quick Start Command
+\`\`\`bash
+# Copy this entire specification to your AI assistant for complete project setup
+# Estimated development time: ${recommendations.estimatedTimeline}
+# Complexity level: ${recommendations.suggestedComplexity}
+\`\`\`
+
+Generated by CodeBreaker - AI Project Planner
+Project Configuration: ${projectInput.experienceLevel} | ${projectInput.targetAudience} | ${projectInput.platform}
 `;
 
     const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${projectInput.name.replace(/\s+/g, '-').toLowerCase()}-project-recipe.md`;
+    a.download = `${projectInput.name.replace(/\s+/g, '-').toLowerCase()}-complete-project-plan.md`;
     a.click();
     URL.revokeObjectURL(url);
 
     toast({
-      title: "Recipe Downloaded",
-      description: "Complete project specification has been downloaded.",
+      title: "Complete Project Plan Downloaded",
+      description: "Comprehensive AI-ready project specification generated successfully.",
     });
+  };
+
+  const getTechDescription = (tech: string) => {
+    const descriptions: Record<string, string> = {
+      'React': 'Modern UI library with hooks and components',
+      'TypeScript': 'Type-safe JavaScript for better development',
+      'Node.js': 'Server-side JavaScript runtime',
+      'Express': 'Minimal web framework for Node.js',
+      'PostgreSQL': 'Robust relational database system',
+      'Tailwind CSS': 'Utility-first CSS framework',
+      'Socket.io': 'Real-time bidirectional communication',
+      'Redis': 'In-memory data structure store',
+      'Next.js': 'Full-stack React framework',
+      'Supabase': 'Open source Firebase alternative'
+    };
+    return descriptions[tech] || 'Modern development technology';
+  };
+
+  const getPerformanceTarget = (users: string) => {
+    switch (users) {
+      case '1-100': return '100+ concurrent users';
+      case '100-1000': return '1,000+ concurrent users';
+      case '1000+': return '5,000+ concurrent users';
+      case 'Enterprise scale': return '10,000+ concurrent users';
+      default: return '1,000+ concurrent users';
+    }
+  };
+
+  const generateDatabaseRelationships = () => {
+    if (projectInput.dataComplexity === 'Static content') return 'No database relationships required';
+    
+    return `- Users have many Projects (as owners and members)
+- Projects have many Tasks/Items
+- Tasks belong to Projects and can be assigned to Users
+- Users can have many Sessions for authentication
+- Projects can have many Members through join table`;
+  };
+
+  const generateKeyPages = () => {
+    const pages = ['Landing/Home page with clear value proposition'];
+    
+    if (projectInput.authenticationNeeds !== 'None') {
+      pages.push('Authentication pages (login, register, password reset)');
+    }
+    
+    pages.push('Main dashboard with overview and navigation');
+    
+    if (projectInput.dataComplexity !== 'Static content') {
+      pages.push('Data management interface with CRUD operations');
+      pages.push('Detail views for individual items');
+    }
+    
+    pages.push('User settings and preferences');
+    pages.push('Help/support documentation');
+    
+    return pages.map((page, i) => `${i + 1}. **${page}**`).join('\n');
+  };
+
+  const generateE2ETests = () => {
+    const tests = [];
+    
+    if (projectInput.authenticationNeeds !== 'None') {
+      tests.push('- Complete user registration and login workflow');
+      tests.push('- Password reset and email verification process');
+    }
+    
+    if (projectInput.dataComplexity !== 'Static content') {
+      tests.push('- End-to-end data creation and management workflow');
+      tests.push('- Search, filtering, and pagination functionality');
+    }
+    
+    tests.push('- Cross-browser compatibility testing');
+    tests.push(`- ${projectInput.responsiveness} responsiveness validation`);
+    
+    return tests.join('\n');
+  };
+
+  const generateDeploymentStrategy = () => {
+    return `- **Frontend**: ${projectRecipe.deploymentStrategy.hosting}
+- **Backend**: ${projectInput.hostingType === 'Cloud platform' ? 'Railway/Render with automatic scaling' : projectInput.hostingType}
+- **Database**: ${projectInput.hostingType === 'Cloud platform' ? 'Managed PostgreSQL with automated backups' : 'Self-hosted database'}
+- **CI/CD**: ${projectRecipe.deploymentStrategy.cicd}
+- **Domain**: Custom domain with SSL certificates
+- **CDN**: CloudFlare for global content delivery`;
+  };
+
+  const generateSecurityMeasures = () => {
+    const measures = [
+      '- Input validation and sanitization on all endpoints',
+      '- CORS configuration for secure cross-origin requests',
+      '- Rate limiting to prevent abuse and DDoS attacks',
+      '- Secure headers (HSTS, CSP, X-Frame-Options)',
+      '- SQL injection prevention through parameterized queries'
+    ];
+    
+    if (projectInput.authenticationNeeds !== 'None') {
+      measures.push('- Secure password hashing with bcrypt');
+      measures.push('- JWT token security with rotation');
+      measures.push('- Session management with secure cookies');
+    }
+    
+    if (projectInput.expectedUsers === 'Enterprise scale') {
+      measures.push('- Advanced threat detection and monitoring');
+      measures.push('- Regular security audits and penetration testing');
+    }
+    
+    return measures.join('\n');
+  };
+
+  const generateTechnicalRisks = () => {
+    const risks = [];
+    
+    if (projectInput.expectedUsers === 'Enterprise scale') {
+      risks.push('- **Scaling challenges**: Implement load balancing and database optimization early');
+    }
+    
+    if (projectInput.dataComplexity === 'Real-time data') {
+      risks.push('- **Real-time performance**: Use Redis for WebSocket scaling and message queuing');
+    }
+    
+    if (projectInput.integrations.length > 3) {
+      risks.push('- **Integration complexity**: Implement circuit breakers and fallback mechanisms');
+    }
+    
+    risks.push('- **Performance degradation**: Regular monitoring and optimization cycles');
+    risks.push('- **Security vulnerabilities**: Automated security scanning and updates');
+    
+    return risks.join('\n');
+  };
+
+  const generateBusinessRisks = () => {
+    return `- **User adoption**: Focus on intuitive UX and comprehensive onboarding
+- **Market competition**: Differentiate with unique features and superior performance
+- **Technical debt**: Maintain code quality through regular reviews and refactoring
+- **Scalability costs**: Plan infrastructure scaling based on actual growth patterns`;
   };
 
   const markStepComplete = (stepNumber: number) => {
@@ -1771,4 +2756,4 @@ ${customProblem}
   }
 
   return null;
-}
+};
