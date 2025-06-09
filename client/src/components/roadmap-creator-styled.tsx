@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Target, Brain, Zap, Code2, Database, Globe, CheckCircle, Download, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Target, Brain, Zap, Code2, Database, Globe, CheckCircle, Download, AlertTriangle, X, Plus, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 interface RoadmapCreatorStyledProps {
   onBack: () => void;
 }
@@ -7,6 +8,12 @@ interface RoadmapCreatorStyledProps {
 // Styled version of RoadmapCreatorV3 with CodeBreaker branding
 export function RoadmapCreatorStyled({ onBack }: RoadmapCreatorStyledProps) {
   const [currentPhase, setCurrentPhase] = useState<'input' | 'analysis' | 'recipe' | 'roadmap'>('input');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [projectAnalysis, setProjectAnalysis] = useState<any>(null);
+  const [projectRecipe, setProjectRecipe] = useState<any>(null);
+  const [roadmapData, setRoadmapData] = useState<any>(null);
+  const { toast } = useToast();
+  
   const [projectInput, setProjectInput] = useState({
     name: '',
     description: '',
@@ -67,6 +74,105 @@ export function RoadmapCreatorStyled({ onBack }: RoadmapCreatorStyledProps) {
 
   const canProceed = projectInput.name && projectInput.description && 
                    projectInput.goals.some(g => g.trim()) && projectInput.timeline;
+
+  const generateAnalysis = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/analyze-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectName: projectInput.name,
+          description: projectInput.description,
+          goals: projectInput.goals.filter(g => g.trim()),
+          constraints: projectInput.constraints.filter(c => c.trim()),
+          timeline: projectInput.timeline,
+          experience: projectInput.experience
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze project');
+      }
+
+      const analysis = await response.json();
+      setProjectAnalysis(analysis);
+      setCurrentPhase('analysis');
+    } catch (error) {
+      toast({
+        title: "Analysis Failed",
+        description: "Failed to analyze project. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const generateRecipe = async () => {
+    if (!projectAnalysis) return;
+    
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate-recipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectInput,
+          analysis: projectAnalysis
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate recipe');
+      }
+
+      const recipe = await response.json();
+      setProjectRecipe(recipe);
+      setCurrentPhase('recipe');
+    } catch (error) {
+      toast({
+        title: "Recipe Generation Failed",
+        description: "Failed to generate project recipe. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const generateRoadmap = async () => {
+    if (!projectRecipe) return;
+    
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate-roadmap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectInput,
+          analysis: projectAnalysis,
+          recipe: projectRecipe
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate roadmap');
+      }
+
+      const roadmap = await response.json();
+      setRoadmapData(roadmap);
+      setCurrentPhase('roadmap');
+    } catch (error) {
+      toast({
+        title: "Roadmap Generation Failed",
+        description: "Failed to generate roadmap. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -243,12 +349,21 @@ export function RoadmapCreatorStyled({ onBack }: RoadmapCreatorStyledProps) {
         {/* Action Button */}
         <div className="text-center">
           <button
-            disabled={!canProceed}
-            onClick={() => setCurrentPhase('analysis')}
+            disabled={!canProceed || isGenerating}
+            onClick={generateAnalysis}
             className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 mx-auto"
           >
-            <Brain className="w-5 h-5" />
-            Analyze Project & Generate Roadmap
+            {isGenerating ? (
+              <>
+                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                Analyzing Project...
+              </>
+            ) : (
+              <>
+                <Brain className="w-5 h-5" />
+                Analyze Project & Generate Roadmap
+              </>
+            )}
           </button>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             This will generate a comprehensive development roadmap with AI-optimized prompts

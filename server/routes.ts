@@ -1296,6 +1296,197 @@ Generate 3 strategic AI manipulation prompts that solve this specific problem wi
     }
   });
 
+  // Roadmap Creator API Endpoints
+  app.post("/api/analyze-project", async (req, res) => {
+    try {
+      const { projectName, description, goals, constraints, timeline, experience } = req.body;
+
+      const analysisPrompt = `Analyze this project and provide a comprehensive analysis:
+
+Project Name: ${projectName}
+Description: ${description}
+Goals: ${goals.join(', ')}
+Constraints: ${constraints.join(', ')}
+Timeline: ${timeline}
+Experience Level: ${experience}
+
+Please provide a detailed analysis including:
+1. Project type classification with confidence level
+2. Detected features with complexity and estimated hours
+3. Technology stack recommendations
+4. Architecture patterns
+5. Potential challenges and risks
+
+Return as JSON with this structure:
+{
+  "projectType": "string",
+  "projectTypeConfidence": 0.95,
+  "projectTypeReasoning": "explanation",
+  "detectedFeatures": [
+    {
+      "feature": "Feature name",
+      "complexity": "low|medium|high",
+      "estimatedHours": 5,
+      "reasoning": "Why this feature is needed"
+    }
+  ],
+  "techStackRecommendations": {
+    "frontend": ["technology1", "technology2"],
+    "backend": ["technology1", "technology2"],
+    "database": ["technology1"],
+    "deployment": ["platform1"]
+  },
+  "architecturePatterns": ["pattern1", "pattern2"],
+  "challenges": ["challenge1", "challenge2"],
+  "estimatedTotalHours": 40
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: analysisPrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const analysis = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(analysis);
+    } catch (error: any) {
+      console.error('Project analysis error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/generate-recipe", async (req, res) => {
+    try {
+      const { projectInput, analysis } = req.body;
+
+      const recipePrompt = `Based on the project analysis, generate a comprehensive technical recipe:
+
+Project: ${projectInput.name}
+Analysis: ${JSON.stringify(analysis, null, 2)}
+
+Create a detailed technical recipe following the TaskFlow template format with:
+1. Project overview and objectives
+2. Technical specifications
+3. Architecture decisions
+4. Implementation approach
+5. Testing strategy
+6. Deployment plan
+
+Return as JSON with this structure:
+{
+  "projectName": "${projectInput.name}",
+  "overview": "Comprehensive project overview",
+  "technicalSpecs": {
+    "frontend": "Detailed frontend specifications",
+    "backend": "Detailed backend specifications",
+    "database": "Database design and schema",
+    "apis": "API design and endpoints"
+  },
+  "architecture": {
+    "patterns": ["pattern1", "pattern2"],
+    "principles": ["principle1", "principle2"],
+    "decisions": [
+      {
+        "decision": "Architecture decision",
+        "reasoning": "Why this decision was made"
+      }
+    ]
+  },
+  "implementation": {
+    "phases": [
+      {
+        "phase": "Phase name",
+        "description": "What will be built",
+        "deliverables": ["deliverable1", "deliverable2"]
+      }
+    ]
+  },
+  "testing": "Testing strategy and approach",
+  "deployment": "Deployment strategy and requirements"
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: recipePrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const recipe = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(recipe);
+    } catch (error: any) {
+      console.error('Recipe generation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/generate-roadmap", async (req, res) => {
+    try {
+      const { projectInput, analysis, recipe } = req.body;
+
+      const roadmapPrompt = `Generate a comprehensive AI-optimized development roadmap with granular micro-steps:
+
+Project: ${projectInput.name}
+Experience: ${projectInput.experience}
+Timeline: ${projectInput.timeline}
+
+Based on the analysis and recipe, create 15-25 micro-steps that are:
+1. Highly specific and actionable
+2. Optimized for AI coding assistants (Replit AI, Cursor, Windsurf, Lovable)
+3. Include comprehensive AI prompts with context, constraints, examples, validation, troubleshooting
+4. Prevent scope creep through clear boundaries
+5. Include emergency rescue prompts
+
+Return as JSON with this structure:
+{
+  "projectName": "${projectInput.name}",
+  "totalSteps": 20,
+  "estimatedHours": 40,
+  "phases": [
+    {
+      "phaseName": "Setup & Foundation",
+      "description": "Initial project setup",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "title": "Project Initialization",
+          "description": "Set up project structure and dependencies",
+          "estimatedTime": "2 hours",
+          "difficulty": "beginner",
+          "aiPrompt": {
+            "context": "Starting a new project with specific requirements",
+            "task": "Initialize project structure with modern best practices",
+            "constraints": ["Must use specific tech stack", "Follow established patterns"],
+            "examples": ["Example file structure", "Example configuration"],
+            "validation": ["Check file structure", "Verify dependencies"],
+            "troubleshooting": ["Common setup issues", "Dependency conflicts"],
+            "expectedOutput": "Fully configured project ready for development",
+            "testingInstructions": ["Run initialization tests", "Verify setup"],
+            "commonMistakes": ["Forgetting env files", "Wrong dependency versions"],
+            "optimizationTips": ["Use latest stable versions", "Follow naming conventions"]
+          },
+          "emergencyRescue": "If setup fails, try: [specific recovery steps]",
+          "prerequisites": [],
+          "deliverables": ["Project structure", "Package.json", "Initial config"]
+        }
+      ]
+    }
+  ]
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: roadmapPrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const roadmap = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(roadmap);
+    } catch (error: any) {
+      console.error('Roadmap generation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
