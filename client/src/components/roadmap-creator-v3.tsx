@@ -1209,34 +1209,45 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
   };
 
   // PHASE 4: SOPHISTICATED PROMPT ENHANCEMENT
-  const enhanceAIPrompt = (basePrompt: any, stepType: string, input: ProjectInput): any => {
-    return {
-      ...basePrompt,
-      expectedOutput: `Completed ${stepType} implementation with:
+  const createEnhancedPrompt = (
+    context: string,
+    task: string,
+    constraints: string[],
+    examples: string[],
+    validation: string[],
+    troubleshooting: string[],
+    stepType: string
+  ) => ({
+    context,
+    task,
+    constraints,
+    examples,
+    validation,
+    troubleshooting,
+    expectedOutput: `Completed ${stepType} implementation with:
 - All required functionality working correctly
 - Proper error handling and validation
 - Clean, maintainable code structure
 - Documentation and comments where needed`,
-      testingInstructions: [
-        'Test all implemented functionality manually',
-        'Check for console errors in browser/terminal',
-        'Verify all validation rules work correctly',
-        'Test edge cases and error scenarios'
-      ],
-      commonMistakes: [
-        'Implementing features beyond the current step scope',
-        'Skipping proper error handling and validation',
-        'Not testing the implementation thoroughly',
-        'Proceeding to next steps before current step works'
-      ],
-      optimizationTips: [
-        'Follow coding best practices and conventions',
-        'Add helpful comments for complex logic',
-        'Use proper naming conventions for variables/functions',
-        'Keep code modular and reusable where possible'
-      ]
-    };
-  };
+    testingInstructions: [
+      'Test all implemented functionality manually',
+      'Check for console errors in browser/terminal',
+      'Verify all validation rules work correctly',
+      'Test edge cases and error scenarios'
+    ],
+    commonMistakes: [
+      'Implementing features beyond the current step scope',
+      'Skipping proper error handling and validation',
+      'Not testing the implementation thoroughly',
+      'Proceeding to next steps before current step works'
+    ],
+    optimizationTips: [
+      'Follow coding best practices and conventions',
+      'Add helpful comments for complex logic',
+      'Use proper naming conventions for variables/functions',
+      'Keep code modular and reusable where possible'
+    ]
+  });
 
   // PHASE 3: GRANULAR ROADMAP BREAKDOWN
   const generateGranularRoadmap = async () => {
@@ -1505,34 +1516,35 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
         difficulty: 'medium' as const,
         phase: 'Authentication System',
         dependencies: [startNumber - 1],
-        aiPrompt: enhanceAIPrompt({
-          context: `Building user authentication for ${input.name}. Use ${database} database with the exact schema from the technical recipe.`,
-          task: 'Create user table with proper fields for authentication and profile data.',
-          constraints: [
+        aiPrompt: createEnhancedPrompt(
+          `Building user authentication for ${input.name}. Use ${database} database with the exact schema from the technical recipe.`,
+          'Create user table with proper fields for authentication and profile data.',
+          [
             'ONLY create the user table and related auth tables',
             'DO NOT create application-specific tables yet',
             'Use exact field names and types from the recipe',
             'Include proper indexes for performance',
             'Add password hashing and security considerations'
           ],
-          examples: [
+          [
             'CREATE TABLE users (id, email, password_hash, username, created_at)',
             'Add unique constraints on email and username',
             'Create indexes on frequently queried fields',
             'Set up password hashing with bcrypt or similar'
           ],
-          validation: [
+          [
             'User table exists with all required fields',
             'Unique constraints work (no duplicate emails)',
             'Indexes are properly created',
             'Database connection works from application'
           ],
-          troubleshooting: [
+          [
             'If table creation fails: Check database connection string',
             'If constraints fail: Verify field types match requirements',
             'If permissions error: Ensure database user has CREATE privileges'
-          ]
-        }, 'User Database Schema', input),
+          ],
+          'User Database Schema'
+        ),
         rescuePrompts: [
           `**DATABASE SETUP RESCUE**: My ${input.name} user database schema creation is failing. Debug database connection and table creation.`
         ],
