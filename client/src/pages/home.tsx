@@ -171,6 +171,16 @@ export default function Home() {
           <PromptTemplatesLibrary onBack={navigateToProblems} />
         )}
 
+        {currentSection === "roadmap-creator" && (
+          <RoadmapCreator 
+            onBack={navigateToProblems} 
+            onOpenRescue={(context) => {
+              // Store context for custom prompt generator
+              navigateToCustomPrompts();
+            }}
+          />
+        )}
+
         {currentSection === "settings" && (
           <UserSettings onBack={navigateToDashboard} />
         )}

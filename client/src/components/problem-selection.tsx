@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown, Sparkles, Brain } from "lucide-react";
+import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown, Sparkles, Brain, Map, Wand2, BookOpen, Zap } from "lucide-react";
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
@@ -172,6 +172,50 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplat
           })}
 
 
+
+          {/* Roadmap Creator - Pro Feature */}
+          <Card
+            className={`cursor-pointer transition-all bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-blue-500/50 hover:border-blue-400 min-h-[140px] active:scale-95 ${
+              !isProUser ? 'opacity-75' : ''
+            }`}
+            onClick={() => {
+              if (isProUser && onRoadmapCreator) {
+                onRoadmapCreator();
+              } else {
+                window.location.href = '/?section=pricing';
+              }
+            }}
+          >
+            <CardContent className="p-4 md:p-6 h-full flex flex-col">
+              <div className="text-center mb-3 md:mb-4">
+                <div className="relative">
+                  <Map className="w-6 h-6 md:w-8 md:h-8 text-blue-400 mb-2 md:mb-3 mx-auto" />
+                  {!isProUser && (
+                    <Crown className="w-3 h-3 md:w-4 md:h-4 text-amber-400 absolute -top-1 -right-1" />
+                  )}
+                </div>
+                <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2 text-blue-200">
+                  Roadmap Creator
+                </h3>
+              </div>
+              <p className="text-blue-300 text-xs md:text-sm mb-3 md:mb-4 flex-grow">
+                Generate complete project roadmaps with AI prompts for each development step
+              </p>
+              <div className="text-xs">
+                {isProUser ? (
+                  <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                    <Map className="w-3 h-3 mr-1" />
+                    {trialData?.isTrialActive ? "Available in Trial" : "Pro Feature"}
+                  </Badge>
+                ) : (
+                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Upgrade Required
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Custom Prompt Generator - Pro Feature */}
           <Card
