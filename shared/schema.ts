@@ -73,12 +73,27 @@ export const roadmaps = pgTable("roadmaps", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  projectName: varchar("project_name", { length: 255 }).notNull(),
+  projectDetails: jsonb("project_details").notNull(), // All form inputs
+  generatedRecipe: jsonb("generated_recipe"), // Complete project recipe
+  roadmapSteps: jsonb("roadmap_steps").notNull().default('[]'), // Step progress
+  projectProgress: jsonb("project_progress").notNull().default('{"currentStep":0,"totalSteps":0,"completedSteps":[],"timeSpent":0}'),
+  isActive: boolean("is_active").notNull().default(true),
+  isCompleted: boolean("is_completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  lastModified: timestamp("last_modified").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   sessions: many(sessions),
   preferences: one(userPreferences),
   promptRatings: many(promptRatings),
   roadmaps: many(roadmaps),
+  projects: many(projects),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one, many }) => ({
@@ -110,6 +125,13 @@ export const promptRatingsRelations = relations(promptRatings, ({ one }) => ({
 export const roadmapsRelations = relations(roadmaps, ({ one }) => ({
   user: one(users, {
     fields: [roadmaps.userId],
+    references: [users.id],
+  }),
+}));
+
+export const projectsRelations = relations(projects, ({ one }) => ({
+  user: one(users, {
+    fields: [projects.userId],
     references: [users.id],
   }),
 }));
@@ -214,6 +236,8 @@ export type Roadmap = z.infer<typeof roadmapSchema>;
 export type InsertRoadmap = typeof roadmaps.$inferInsert;
 export type RoadmapStep = z.infer<typeof roadmapStepSchema>;
 export type RoadmapRecommendations = z.infer<typeof roadmapRecommendationsSchema>;
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
 
 // Insert schemas
 export const insertSessionSchema = sessionSchema.omit({ id: true });

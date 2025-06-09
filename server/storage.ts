@@ -1,4 +1,4 @@
-import { users, sessions, promptRatings, type User, type InsertUser, type Session, type InsertSession, type PromptRating, type InsertPromptRating } from "@shared/schema";
+import { users, sessions, promptRatings, projects, type User, type InsertUser, type Session, type InsertSession, type PromptRating, type InsertPromptRating, type Project, type InsertProject } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte } from "drizzle-orm";
 
@@ -24,15 +24,26 @@ export interface IStorage {
   ratePrompt(rating: InsertPromptRating): Promise<PromptRating>;
   getPromptSuccessRate(problemType: string): Promise<{ positiveCount: number; totalCount: number; }>;
   getUserRecentSessions(userId: number, limit?: number): Promise<Session[]>;
+  
+  // Project persistence methods
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(projectId: number, updates: Partial<InsertProject>): Promise<Project>;
+  getProject(projectId: number): Promise<Project | undefined>;
+  getUserProjects(userId: number): Promise<Project[]>;
+  deleteProject(projectId: number): Promise<void>;
+  updateProjectProgress(projectId: number, progress: any): Promise<Project>;
+  markProjectCompleted(projectId: number): Promise<Project>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private sessions: Map<number, Session>;
   private promptRatings: Map<number, PromptRating>;
+  private projects: Map<number, Project>;
   currentId: number;
   currentSessionId: number;
   currentRatingId: number;
+  currentProjectId: number;
 
   constructor() {
     this.users = new Map();
