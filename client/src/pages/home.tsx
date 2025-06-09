@@ -152,6 +152,7 @@ export default function Home() {
             onCustomPrompts={navigateToCustomPrompts}
             onTemplates={navigateToTemplates}
             onProjectPlanner={navigateToProjectPlanner}
+            onMyProjects={navigateToMyProjects}
           />
         )}
         
@@ -175,6 +176,10 @@ export default function Home() {
 
         {currentSection === "project-planner" && (
           <ProjectPlanner onBack={navigateToProblems} />
+        )}
+
+        {currentSection === "my-projects" && (
+          <MyProjects onBack={navigateToProblems} />
         )}
 
         {currentSection === "settings" && (
