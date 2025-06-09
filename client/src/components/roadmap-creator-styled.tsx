@@ -176,6 +176,279 @@ export function RoadmapCreatorStyled({ onBack }: RoadmapCreatorStyledProps) {
     }
   };
 
+  // Debug current state
+  console.log('Rendering phase:', currentPhase, 'hasAnalysis:', !!projectAnalysis);
+
+  // Analysis Phase
+  if (currentPhase === 'analysis' && projectAnalysis) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setCurrentPhase('input')}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to Input
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Project Analysis
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    AI analysis of "{projectInput.name}"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Analysis Results */}
+        <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+          {/* Project Type */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Brain className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Project Classification</h2>
+            </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-gray-900 dark:text-white">Type: {projectAnalysis.projectType}</span>
+              <span className="text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 px-2 py-1 rounded">
+                {Math.round(projectAnalysis.projectTypeConfidence * 100)}% confidence
+              </span>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">{projectAnalysis.projectTypeReasoning}</p>
+          </div>
+
+          {/* Detected Features */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <Zap className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Detected Features</h2>
+            </div>
+            <div className="space-y-3">
+              {projectAnalysis.detectedFeatures?.map((feature: any, index: number) => (
+                <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-900 dark:text-white">{feature.feature}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        feature.complexity === 'low' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' :
+                        feature.complexity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400' :
+                        'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
+                      }`}>
+                        {feature.complexity} complexity
+                      </span>
+                      <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded">
+                        ~{feature.estimatedHours}h
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{feature.reasoning}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Continue Button */}
+          <div className="text-center">
+            <button
+              onClick={generateRecipe}
+              disabled={isGenerating}
+              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 mx-auto"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                  Generating Recipe...
+                </>
+              ) : (
+                <>
+                  <Code2 className="w-5 h-5" />
+                  Generate Technical Recipe
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Recipe Phase
+  if (currentPhase === 'recipe' && projectRecipe) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setCurrentPhase('analysis')}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to Analysis
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Technical Recipe
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Detailed specifications for "{projectRecipe.projectName}"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recipe Content */}
+        <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+          {/* Overview */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Project Overview</h2>
+            <p className="text-gray-600 dark:text-gray-400">{projectRecipe.overview}</p>
+          </div>
+
+          {/* Technical Specs */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Technical Specifications</h2>
+            <div className="space-y-4">
+              {Object.entries(projectRecipe.technicalSpecs || {}).map(([key, value]) => (
+                <div key={key} className="border-l-4 border-purple-500 pl-4">
+                  <h3 className="font-medium text-gray-900 dark:text-white capitalize">{key}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">{value as string}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Continue Button */}
+          <div className="text-center">
+            <button
+              onClick={generateRoadmap}
+              disabled={isGenerating}
+              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 mx-auto"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                  Generating Roadmap...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  Generate Development Roadmap
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Roadmap Phase
+  if (currentPhase === 'roadmap' && roadmapData) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setCurrentPhase('recipe')}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to Recipe
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    AI-Optimized Roadmap
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {roadmapData.totalSteps} steps • {roadmapData.estimatedHours} hours estimated
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  const dataStr = JSON.stringify(roadmapData, null, 2);
+                  const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                  const url = URL.createObjectURL(dataBlob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `${roadmapData.projectName}-roadmap.json`;
+                  link.click();
+                }}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
+              >
+                <Download className="w-5 h-5" />
+                Download Roadmap
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Roadmap Content */}
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="space-y-8">
+            {roadmapData.phases?.map((phase: any, phaseIndex: number) => (
+              <div key={phaseIndex} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{phase.phaseName}</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">{phase.description}</p>
+                
+                <div className="space-y-4">
+                  {phase.steps?.map((step: any, stepIndex: number) => (
+                    <div key={stepIndex} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center text-sm font-medium">
+                          {step.stepNumber}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 dark:text-white">{step.title}</h3>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{step.description}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span>{step.estimatedTime}</span>
+                            <span className="capitalize">{step.difficulty}</span>
+                          </div>
+                          
+                          {step.aiPrompt && (
+                            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                              <h4 className="font-medium text-gray-900 dark:text-white mb-2">AI Prompt</h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{step.aiPrompt.task}</p>
+                              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                Expected: {step.aiPrompt.expectedOutput}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Input Phase (default)
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
