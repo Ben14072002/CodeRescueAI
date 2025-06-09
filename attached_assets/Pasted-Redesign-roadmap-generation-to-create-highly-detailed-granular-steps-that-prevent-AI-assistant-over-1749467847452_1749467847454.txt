@@ -1,0 +1,247 @@
+Redesign roadmap generation to create highly detailed, granular steps that prevent AI assistant overwhelm.
+
+CURRENT PROBLEM: Steps too broad, AI gets confused with complex prompts
+SOLUTION: Break everything into micro-tasks with single-focus prompts
+
+ROADMAP STRUCTURE REDESIGN:
+
+LEVEL 1: PHASES (Major sections)
+├── LEVEL 2: MODULES (Logical components)
+    ├── LEVEL 3: TASKS (Specific features)
+        ├── LEVEL 4: MICRO-STEPS (Single-focus actions)
+
+EXAMPLE BREAKDOWN:
+
+PHASE 1: PROJECT FOUNDATION
+├── MODULE 1.1: Environment Setup
+│   ├── TASK 1.1.1: Initialize Frontend Project
+│   │   ├── STEP 1.1.1.1: Create React app structure (15 min)
+│   │   ├── STEP 1.1.1.2: Install essential dependencies (10 min)
+│   │   ├── STEP 1.1.1.3: Configure development environment (15 min)
+│   │   └── STEP 1.1.1.4: Test basic app runs successfully (10 min)
+│   └── TASK 1.1.2: Initialize Backend Project
+│       ├── STEP 1.1.2.1: Create Express server structure (15 min)
+│       ├── STEP 1.1.2.2: Install backend dependencies (10 min)
+│       ├── STEP 1.1.2.3: Configure basic middleware (15 min)
+│       └── STEP 1.1.2.4: Test server starts successfully (10 min)
+└── MODULE 1.2: Database Setup
+    └── TASK 1.2.1: MongoDB Configuration
+        ├── STEP 1.2.1.1: Install MongoDB dependencies (10 min)
+        ├── STEP 1.2.1.2: Create database connection file (20 min)
+        ├── STEP 1.2.1.3: Test database connection (15 min)
+        └── STEP 1.2.1.4: Create basic error handling (15 min)
+
+MICRO-STEP PROMPT STRUCTURE:
+Each micro-step gets ultra-specific prompt:
+
+STEP 1.1.1.1: Create React App Structure
+🤖 AI PROMPT:
+"You are setting up a new React project for ${projectName}.
+
+SINGLE TASK: Create the basic React app structure only.
+
+EXACT COMMANDS:
+1. Run: npx create-react-app ${projectName.toLowerCase().replace(' ', '-')}
+2. Navigate to project directory
+3. Create these folders in src/:
+   - components/
+   - pages/
+   - hooks/
+   - utils/
+4. Remove unnecessary files: App.test.js, logo.svg, reportWebVitals.js
+
+DO NOT:
+- Install additional packages
+- Modify any components
+- Set up routing
+- Add styling frameworks
+
+OUTPUT: Basic React project structure ready for development
+TEST: npm start should show default React page
+
+Stop here. Do not proceed to next steps."
+
+IMPLEMENTATION LOGIC:
+
+function generateDetailedRoadmap(projectAnalysis, userInput) {
+  const roadmap = {
+    projectName: userInput.projectName,
+    description: userInput.description,
+    phases: []
+  };
+  
+  // Generate phases based on project complexity
+  roadmap.phases = generatePhases(projectAnalysis, userInput);
+  
+  // Break each phase into modules
+  roadmap.phases.forEach(phase => {
+    phase.modules = generateModules(phase, projectAnalysis, userInput);
+    
+    // Break each module into tasks
+    phase.modules.forEach(module => {
+      module.tasks = generateTasks(module, projectAnalysis, userInput);
+      
+      // Break each task into micro-steps
+      module.tasks.forEach(task => {
+        task.microSteps = generateMicroSteps(task, projectAnalysis, userInput);
+      });
+    });
+  });
+  
+  return roadmap;
+}
+
+function generateMicroSteps(task, analysis, userInput) {
+  const microSteps = [];
+  
+  switch (task.type) {
+    case 'component_creation':
+      microSteps.push(
+        createFileStructureStep(task, userInput),
+        createComponentBoilerplateStep(task, userInput),
+        addComponentLogicStep(task, userInput),
+        addComponentStylingStep(task, userInput),
+        testComponentStep(task, userInput)
+      );
+      break;
+      
+    case 'api_endpoint':
+      microSteps.push(
+        createRouteFileStep(task, userInput),
+        addBasicRouteStep(task, userInput),
+        addValidationStep(task, userInput),
+        addDatabaseLogicStep(task, userInput),
+        addErrorHandlingStep(task, userInput),
+        testEndpointStep(task, userInput)
+      );
+      break;
+      
+    case 'database_model':
+      microSteps.push(
+        createSchemaFileStep(task, userInput),
+        defineSchemaStructureStep(task, userInput),
+        addValidationRulesStep(task, userInput),
+        addSchemaMethodsStep(task, userInput),
+        testSchemaStep(task, userInput)
+      );
+      break;
+  }
+  
+  return microSteps;
+}
+
+function createComponentBoilerplateStep(task, userInput) {
+  return {
+    id: generateStepId(),
+    name: `Create ${task.componentName} Component Boilerplate`,
+    description: `Build the basic structure for ${task.componentName} component`,
+    estimatedTime: "15 minutes",
+    dependencies: [task.previousStepId],
+    aiPrompt: `You are creating a React component for ${userInput.projectName}.
+
+SINGLE TASK: Create ONLY the basic boilerplate for ${task.componentName} component.
+
+CREATE FILE: src/components/${task.componentName}.jsx
+
+EXACT CODE STRUCTURE:
+\`\`\`jsx
+import React from 'react';
+
+const ${task.componentName} = () => {
+  return (
+    <div className="${task.componentName.toLowerCase()}">
+      <h2>${task.componentName}</h2>
+      {/* Component content will go here */}
+    </div>
+  );
+};
+
+export default ${task.componentName};
+\`\`\`
+
+DO NOT:
+- Add complex logic
+- Add state management
+- Add API calls
+- Add detailed styling
+- Import other components
+
+OUTPUT: Basic functional component that renders without errors
+TEST: Import and use component in App.js to verify it displays
+
+Stop here. Logic will be added in next step.`,
+    validation: [
+      `File src/components/${task.componentName}.jsx exists`,
+      `Component exports properly`,
+      `Component renders without errors when imported`
+    ]
+  };
+}
+
+DETAILED TASK TYPES:
+
+1. SETUP_TASKS:
+   - Environment configuration
+   - Dependency installation
+   - Basic file structure
+   - Development tools setup
+
+2. FOUNDATION_TASKS:
+   - Database models
+   - Basic routing
+   - Authentication setup
+   - Middleware configuration
+
+3. FEATURE_TASKS:
+   - UI components
+   - API endpoints
+   - Business logic
+   - Data operations
+
+4. INTEGRATION_TASKS:
+   - Frontend-backend connection
+   - Third-party integrations
+   - Payment systems
+   - External APIs
+
+5. POLISH_TASKS:
+   - Error handling
+   - Validation
+   - Testing
+   - Performance optimization
+
+PROMPT PRINCIPLES FOR MICRO-STEPS:
+
+1. SINGLE FOCUS:
+   - One file or component per step
+   - One specific functionality per step
+   - Clear input/output defined
+
+2. EXPLICIT CONSTRAINTS:
+   - List what NOT to do
+   - Prevent scope creep
+   - Stop AI from adding extra features
+
+3. TESTABLE OUTCOMES:
+   - Clear success criteria
+   - Specific validation steps
+   - Immediate feedback possible
+
+4. CONTEXT PRESERVATION:
+   - Reference project name and description
+   - Maintain consistency across steps
+   - Build on previous steps logically
+
+5. TIME BOUNDED:
+   - 10-30 minutes per micro-step
+   - Prevents overwhelming tasks
+   - Allows for quick wins
+
+IMPLEMENTATION PRIORITY:
+1. Fix roadmap generation to create micro-steps
+2. Ensure each step has ultra-specific prompts
+3. Add proper step dependencies
+4. Test with different project types
+5. Verify AI assistants can follow prompts successfully
+
+This granular approach ensures AI assistants never get overwhelmed and users make consistent progress!

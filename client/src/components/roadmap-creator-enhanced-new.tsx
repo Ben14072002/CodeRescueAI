@@ -1094,8 +1094,862 @@ SEARCH FEATURES:
 Focus on ${input.name} content discovery and user search needs.`;
   };
 
+  // MICRO-STEP PROMPT GENERATORS
+  const generateFrontendSetupMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const projectSlug = input.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const framework = recommendations.recommendedTechStack.includes('Next.js') ? 'Next.js' : 'React';
+    
+    return `You are setting up the frontend for "${input.name}" - a ${analysis.projectType.replace('_', ' ')} application.
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Create ONLY the basic ${framework} project structure.
+
+EXACT COMMANDS:
+${framework === 'Next.js' ? 
+  `1. Run: npx create-next-app@latest ${projectSlug} --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+2. Navigate to project directory: cd ${projectSlug}` :
+  `1. Run: npx create-react-app ${projectSlug} --template typescript
+2. Navigate to project directory: cd ${projectSlug}`}
+
+3. Create these folders in src/:
+   - components/
+   - pages/
+   - hooks/
+   - utils/
+   - lib/
+   - types/
+
+4. Remove unnecessary files: ${framework === 'Next.js' ? 'README.md boilerplate' : 'App.test.tsx, logo.svg, reportWebVitals.ts'}
+
+DO NOT:
+- Install additional packages
+- Modify any components
+- Set up routing beyond basic structure
+- Add styling frameworks
+- Create any business logic
+
+OUTPUT: Basic ${framework} project structure ready for development
+TEST: ${framework === 'Next.js' ? 'npm run dev' : 'npm start'} should show default page
+
+Stop here. Dependencies will be installed in next step.`;
+  };
+
+  const generateFrontendDependenciesMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const uiLibrary = recommendations.recommendedTechStack.includes('Material-UI') ? '@mui/material @emotion/react @emotion/styled' : 
+                     recommendations.recommendedTechStack.includes('Chakra') ? '@chakra-ui/react @emotion/react @emotion/styled framer-motion' :
+                     'lucide-react class-variance-authority clsx tailwind-merge';
+    
+    return `Install essential dependencies for "${input.name}" frontend.
+
+PROJECT CONTEXT: "${input.description}"
+
+SINGLE TASK: Install ONLY the core UI and utility packages.
+
+EXACT COMMANDS:
+1. Install UI library: npm install ${uiLibrary}
+2. Install utilities: npm install axios react-query
+${analysis.features.includes('real_time_updates') ? '3. Install WebSocket: npm install socket.io-client' : ''}
+${analysis.features.includes('payment_processing') ? '3. Install Stripe: npm install @stripe/stripe-js @stripe/react-stripe-js' : ''}
+
+DO NOT:
+- Install backend dependencies
+- Install testing libraries
+- Install development tools
+- Configure any packages
+- Modify any code files
+
+OUTPUT: All essential frontend packages installed
+TEST: npm list should show all packages, npm start should still work
+
+Stop here. Backend setup comes next.`;
+  };
+
+  const generateBackendSetupMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const projectSlug = input.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    
+    return `Create the backend server structure for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Create ONLY the basic Express server foundation.
+
+CREATE FILE STRUCTURE:
+\`\`\`
+backend/
+├── src/
+│   ├── index.js
+│   ├── routes/
+│   ├── middleware/
+│   ├── models/
+│   └── utils/
+├── package.json
+└── .env.example
+\`\`\`
+
+EXACT CODE for src/index.js:
+\`\`\`javascript
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Basic middleware
+app.use(cors());
+app.use(express.json());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ message: '${input.name} API is running', timestamp: new Date().toISOString() });
+});
+
+app.listen(PORT, () => {
+  console.log(\`${input.name} server running on port \${PORT}\`);
+});
+\`\`\`
+
+EXACT COMMANDS:
+1. mkdir backend && cd backend
+2. npm init -y
+3. npm install express cors dotenv
+4. Create folder structure as shown above
+
+DO NOT:
+- Set up database connections
+- Create API routes
+- Add authentication
+- Configure advanced middleware
+
+OUTPUT: Basic Express server that starts successfully
+TEST: node src/index.js should start server, GET /health should return JSON
+
+Stop here. Database connection comes next.`;
+  };
+
+  const generateDatabaseConnectionMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 
+                   recommendations.recommendedTechStack.includes('PostgreSQL') ? 'PostgreSQL' : 'MongoDB';
+    
+    return `Setup database connection for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Configure ONLY the ${dbType} database connection.
+
+INSTALL DEPENDENCIES:
+${dbType === 'MongoDB' ? 
+  'npm install mongoose' : 
+  'npm install pg'}
+
+CREATE FILE: src/config/database.js
+\`\`\`javascript
+${dbType === 'MongoDB' ? 
+  `const mongoose = require('mongoose');
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/${input.name.toLowerCase().replace(/[^a-z0-9]/g, '')}');
+    console.log(\`${input.name} MongoDB Connected: \${conn.connection.host}\`);
+  } catch (error) {
+    console.error(\`${input.name} Database connection error: \${error.message}\`);
+    process.exit(1);
+  }
+};
+
+module.exports = connectDB;` :
+  `const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://localhost:5432/${input.name.toLowerCase().replace(/[^a-z0-9]/g, '')}',
+});
+
+const connectDB = async () => {
+  try {
+    const client = await pool.connect();
+    console.log('${input.name} PostgreSQL Connected');
+    client.release();
+  } catch (error) {
+    console.error(\`${input.name} Database connection error: \${error.message}\`);
+    process.exit(1);
+  }
+};
+
+module.exports = { pool, connectDB };`}
+\`\`\`
+
+UPDATE src/index.js - ADD these lines after require statements:
+\`\`\`javascript
+const ${dbType === 'MongoDB' ? 'connectDB' : '{ connectDB }'} = require('./config/database');
+
+// Connect to database
+connectDB();
+\`\`\`
+
+DO NOT:
+- Create database schemas
+- Create models
+- Add data validation
+- Create database operations
+
+OUTPUT: Database connects successfully when server starts
+TEST: Server should log successful database connection
+
+Stop here. Authentication setup comes next.`;
+  };
+
+  // AUTHENTICATION MICRO-STEP GENERATORS
+  const generateUserModelMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 'PostgreSQL';
+    
+    return `Create user model for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Define ONLY the user data structure.
+
+CREATE FILE: ${dbType === 'MongoDB' ? 'src/models/User.js' : 'src/models/user.js'}
+\`\`\`javascript
+${dbType === 'MongoDB' ? 
+  `const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    minlength: 3,
+    maxlength: 30
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  }
+}, {
+  timestamps: true
+});
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+module.exports = mongoose.model('User', userSchema);` :
+  `const { pool } = require('../config/database');
+const bcrypt = require('bcryptjs');
+
+const createUsersTable = async () => {
+  const query = \`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(30) UNIQUE NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      role VARCHAR(20) DEFAULT 'user',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  \`;
+  
+  try {
+    await pool.query(query);
+    console.log('${input.name} users table created');
+  } catch (error) {
+    console.error('Error creating users table:', error);
+  }
+};
+
+const hashPassword = async (password) => {
+  return await bcrypt.hash(password, 12);
+};
+
+module.exports = { createUsersTable, hashPassword };`}
+\`\`\`
+
+INSTALL DEPENDENCY:
+npm install bcryptjs
+
+DO NOT:
+- Create authentication routes
+- Build login/register forms
+- Add JWT functionality
+- Create user operations
+
+OUTPUT: User model defined with password hashing
+TEST: Model should import without errors
+
+Stop here. Registration form comes next.`;
+  };
+
+  const generateRegistrationFormMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const framework = recommendations.recommendedTechStack.includes('Next.js') ? 'Next.js' : 'React';
+    
+    return `Create registration form for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the registration form component.
+
+CREATE FILE: src/components/RegistrationForm.${framework === 'Next.js' ? 'tsx' : 'jsx'}
+\`\`\`${framework === 'Next.js' ? 'typescript' : 'javascript'}
+${framework === 'Next.js' ? "import { useState } from 'react';" : "import React, { useState } from 'react';"}
+
+const RegistrationForm = () => {
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e${framework === 'Next.js' ? ': React.ChangeEvent<HTMLInputElement>' : ''}) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors${framework === 'Next.js' ? ': any' : ''} = {};
+    
+    if (!formData.username || formData.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    }
+    
+    if (!formData.email || !/\\S+@\\S+\\.\\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+    
+    if (!formData.password || formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e${framework === 'Next.js' ? ': React.FormEvent' : ''}) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // API call will be implemented in next step
+      console.log('${input.name} registration data:', formData);
+      alert('Registration form works! API integration comes next.');
+    } catch (error) {
+      console.error('Registration error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Join ${input.name}</h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Username</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Enter username"
+          />
+          {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Enter email"
+          />
+          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Enter password"
+          />
+          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Confirm Password</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Confirm password"
+          />
+          {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Creating Account...' : 'Create Account'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default RegistrationForm;
+\`\`\`
+
+DO NOT:
+- Connect to API endpoints
+- Add authentication logic
+- Implement actual registration
+- Add advanced styling
+
+OUTPUT: Functional registration form with validation
+TEST: Form should render, validate inputs, and show success message
+
+Stop here. Registration API comes next.`;
+  };
+
+  const generateRegistrationAPIMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 'PostgreSQL';
+    
+    return `Create registration API endpoint for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the registration API endpoint.
+
+CREATE FILE: src/routes/auth.js
+\`\`\`javascript
+const express = require('express');
+${dbType === 'MongoDB' ? 
+  "const User = require('../models/User');" : 
+  "const { pool, hashPassword } = require('../models/user');"}
+const router = express.Router();
+
+// Registration endpoint
+router.post('/register', async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    
+    // Input validation
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username, email, and password are required'
+      });
+    }
+    
+    if (username.length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username must be at least 3 characters'
+      });
+    }
+    
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address'
+      });
+    }
+
+${dbType === 'MongoDB' ? 
+  `    // Check if user already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }]
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email or username already exists'
+      });
+    }
+    
+    // Create new user
+    const newUser = new User({
+      username,
+      email,
+      password // Will be hashed by pre-save middleware
+    });
+    
+    await newUser.save();
+    
+    // Remove password from response
+    const userResponse = newUser.toObject();
+    delete userResponse.password;` :
+  `    // Check if user already exists
+    const existingUserQuery = 'SELECT id FROM users WHERE email = $1 OR username = $2';
+    const existingUser = await pool.query(existingUserQuery, [email, username]);
+    
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email or username already exists'
+      });
+    }
+    
+    // Hash password
+    const hashedPassword = await hashPassword(password);
+    
+    // Create new user
+    const insertQuery = \`
+      INSERT INTO users (username, email, password) 
+      VALUES ($1, $2, $3) 
+      RETURNING id, username, email, role, created_at
+    \`;
+    
+    const result = await pool.query(insertQuery, [username, email, hashedPassword]);
+    const userResponse = result.rows[0];`}
+    
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully for ${input.name}',
+      user: userResponse
+    });
+    
+  } catch (error) {
+    console.error('${input.name} registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during registration'
+    });
+  }
+});
+
+module.exports = router;
+\`\`\`
+
+UPDATE src/index.js - ADD these lines:
+\`\`\`javascript
+const authRoutes = require('./routes/auth');
+
+// Routes
+app.use('/api/auth', authRoutes);
+\`\`\`
+
+DO NOT:
+- Add JWT token generation
+- Create login functionality
+- Add session management
+- Implement user authentication
+
+OUTPUT: Working registration endpoint
+TEST: POST /api/auth/register should create users successfully
+
+Stop here. Login form comes next.`;
+  };
+
+  const generateLoginFormMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const framework = recommendations.recommendedTechStack.includes('Next.js') ? 'Next.js' : 'React';
+    
+    return `Create login form for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the login form component.
+
+CREATE FILE: src/components/LoginForm.${framework === 'Next.js' ? 'tsx' : 'jsx'}
+\`\`\`${framework === 'Next.js' ? 'typescript' : 'javascript'}
+${framework === 'Next.js' ? "import { useState } from 'react';" : "import React, { useState } from 'react';"}
+
+const LoginForm = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e${framework === 'Next.js' ? ': React.ChangeEvent<HTMLInputElement>' : ''}) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors${framework === 'Next.js' ? ': any' : ''} = {};
+    
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e${framework === 'Next.js' ? ': React.FormEvent' : ''}) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // API call will be implemented in next step
+      console.log('${input.name} login data:', formData);
+      alert('Login form works! API integration comes next.');
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Welcome to ${input.name}</h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Enter your email"
+          />
+          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Enter your password"
+          />
+          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Signing In...' : 'Sign In'}
+        </button>
+      </form>
+      
+      <p className="text-center mt-4 text-sm text-gray-600">
+        Don't have an account? 
+        <span className="text-blue-600 cursor-pointer hover:underline ml-1">
+          Sign up here
+        </span>
+      </p>
+    </div>
+  );
+};
+
+export default LoginForm;
+\`\`\`
+
+DO NOT:
+- Connect to API endpoints
+- Add authentication logic
+- Implement session management
+- Add JWT handling
+
+OUTPUT: Functional login form with validation
+TEST: Form should render, validate inputs, and show success message
+
+Stop here. Login API comes next.`;
+  };
+
+  const generateLoginAPIMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 'PostgreSQL';
+    
+    return `Create login API endpoint for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the login API endpoint with JWT.
+
+INSTALL DEPENDENCIES:
+npm install jsonwebtoken
+
+UPDATE src/routes/auth.js - ADD login endpoint:
+\`\`\`javascript
+const jwt = require('jsonwebtoken');
+${dbType === 'MongoDB' ? 
+  "const bcrypt = require('bcryptjs');" : 
+  "const bcrypt = require('bcryptjs');"}
+
+// Add this after the registration endpoint
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Input validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+
+${dbType === 'MongoDB' ? 
+  `    // Find user by email
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    // Remove password from user object
+    const userResponse = user.toObject();
+    delete userResponse.password;` :
+  `    // Find user by email
+    const userQuery = 'SELECT * FROM users WHERE email = $1';
+    const userResult = await pool.query(userQuery, [email]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    const user = userResult.rows[0];
+    
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    // Remove password from response
+    const userResponse = { ...user };
+    delete userResponse.password;`}
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: ${dbType === 'MongoDB' ? 'user._id' : 'user.id'}, 
+        email: user.email,
+        username: user.username 
+      },
+      process.env.JWT_SECRET || '${input.name.toLowerCase().replace(/[^a-z0-9]/g, '')}_secret_key',
+      { expiresIn: '24h' }
+    );
+    
+    res.json({
+      success: true,
+      message: 'Login successful for ${input.name}',
+      token,
+      user: userResponse
+    });
+    
+  } catch (error) {
+    console.error('${input.name} login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during login'
+    });
+  }
+});
+\`\`\`
+
+ADD TO .env file:
+\`\`\`
+JWT_SECRET=${input.name.toLowerCase().replace(/[^a-z0-9]/g, '')}_jwt_secret_key_change_in_production
+\`\`\`
+
+DO NOT:
+- Add token refresh functionality
+- Create protected routes
+- Add session management
+- Implement user profile features
+
+OUTPUT: Working login endpoint with JWT tokens
+TEST: POST /api/auth/login should return JWT token
+
+Stop here. Core features come next.`;
+  };
+
   const generateIntelligentRoadmap = (input: ProjectInput, recommendations: Recommendations): RoadmapStep[] => {
-    console.log("=== GENERATING CUSTOM ROADMAP ===");
+    console.log("=== GENERATING GRANULAR ROADMAP ===");
     console.log("Project Name:", input.name);
     console.log("Project Description:", input.description);
     
@@ -1103,47 +1957,181 @@ Focus on ${input.name} content discovery and user search needs.`;
     const steps: RoadmapStep[] = [];
     let stepNumber = 1;
 
-    // Always start with project setup
+    // PHASE 1: PROJECT FOUNDATION - MICRO-STEPS
+    // MODULE 1.1: Frontend Setup
     steps.push({
       stepNumber: stepNumber++,
-      title: `Setup ${input.name} Foundation`,
-      description: `Initialize ${input.name} as a ${input.platform} project with ${recommendations.recommendedTechStack.slice(0, 3).join(', ')}`,
-      estimatedTime: "2-4 hours",
+      title: `Create ${input.name} Frontend Structure`,
+      description: `Initialize React/Next.js project structure for ${input.name} - Basic setup only`,
+      estimatedTime: "15 minutes",
       isCompleted: false,
       dependencies: [],
       rescuePrompts: [
-        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} SETUP**: My ${input.name} project setup is failing. Help me debug initialization errors, dependency conflicts, and build configuration issues for this ${analysis.projectType} application.`,
-        `**AI CODING AGENT RESCUE - BUILD ERRORS**: Fix all build configuration errors in my ${input.name} project. I need complete working configuration files.`
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} FRONTEND**: My ${input.name} frontend initialization is failing. Help me create the basic React/Next.js project structure.`,
       ],
-      startPrompt: generateCustomSetupPrompt(input, recommendations, analysis),
+      startPrompt: generateFrontendSetupMicroStep(input, recommendations, analysis),
       validationChecklist: [
-        `${input.name} project builds without errors`,
-        "Development server starts successfully",
-        "Basic routing is functional",
-        "Git repository is initialized with project structure"
+        `${input.name} frontend project created`,
+        "Essential folder structure exists",
+        "Development server can start",
+        "No build errors in terminal"
       ]
     });
 
-    // Add authentication if needed or detected
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Install ${input.name} Frontend Dependencies`,
+      description: `Install core UI libraries and dependencies for ${input.name} - Dependencies only`,
+      estimatedTime: "10 minutes",
+      isCompleted: false,
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} DEPENDENCIES**: My ${input.name} dependency installation is failing. Help me install the required packages.`,
+      ],
+      startPrompt: generateFrontendDependenciesMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "All dependencies installed successfully",
+        "No package conflicts in package.json",
+        "Node modules directory exists",
+        "Project still builds without errors"
+      ]
+    });
+
+    // MODULE 1.2: Backend Setup
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Create ${input.name} Backend Server Structure`,
+      description: `Initialize Express server structure for ${input.name} - Server foundation only`,
+      estimatedTime: "15 minutes",
+      isCompleted: false,
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} BACKEND**: My ${input.name} backend server setup is failing. Help me create the Express server structure.`,
+      ],
+      startPrompt: generateBackendSetupMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Express server file created",
+        "Basic middleware configured",
+        "Server starts successfully",
+        "Health check endpoint responds"
+      ]
+    });
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Setup ${input.name} Database Connection`,
+      description: `Configure database connection for ${input.name} - Connection setup only`,
+      estimatedTime: "20 minutes",
+      isCompleted: false,
+      dependencies: [3],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} DATABASE**: My ${input.name} database connection is failing. Help me configure the database connection.`,
+      ],
+      startPrompt: generateDatabaseConnectionMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Database connection file created",
+        "Connection string configured",
+        "Database connects successfully",
+        "Connection error handling implemented"
+      ]
+    });
+
+    // PHASE 2: AUTHENTICATION (if needed)
     if (input.authenticationNeeds !== 'None' || analysis.features.includes('user_authentication')) {
-      const authType = analysis.features.includes('social_authentication') ? 'Social OAuth' : input.authenticationNeeds;
+      const authType = analysis.features.includes('social_authentication') ? 'OAuth' : input.authenticationNeeds;
+      
       steps.push({
         stepNumber: stepNumber++,
-        title: `${input.name} User Authentication System`,
-        description: `Implement ${authType.toLowerCase()} authentication for ${input.name} users based on project requirements`,
-        estimatedTime: authType.includes('OAuth') || authType.includes('Social') ? "4-6 hours" : "3-5 hours",
+        title: `Create ${input.name} User Model`,
+        description: `Define user data structure for ${input.name} - Model definition only`,
+        estimatedTime: "15 minutes",
         isCompleted: false,
-        dependencies: [1],
+        dependencies: [4],
         rescuePrompts: [
-          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} AUTH**: My ${input.name} authentication system is broken. Debug login/logout issues and session management for this ${analysis.projectType} app.`,
-          `**AI CODING AGENT RESCUE - LOGIN ERRORS**: Fix all login/register functionality errors in ${input.name} with complete working forms.`
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} USER MODEL**: My ${input.name} user model creation is failing. Help me define the user schema.`,
         ],
-        startPrompt: generateCustomAuthPrompt(input, recommendations, analysis),
+        startPrompt: generateUserModelMicroStep(input, recommendations, analysis),
         validationChecklist: [
-          `Users can register for ${input.name}`,
-          `User login/logout works in ${input.name}`,
-          "Protected routes working correctly",
-          "Session persistence implemented"
+          "User model file created",
+          "Required fields defined",
+          "Model exports properly",
+          "No syntax errors in model"
+        ]
+      });
+
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `Build ${input.name} Registration Form`,
+        description: `Create user registration form for ${input.name} - Frontend form only`,
+        estimatedTime: "20 minutes",
+        isCompleted: false,
+        dependencies: [2, 5],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} REGISTRATION**: My ${input.name} registration form is broken. Help me create the registration form component.`,
+        ],
+        startPrompt: generateRegistrationFormMicroStep(input, recommendations, analysis),
+        validationChecklist: [
+          "Registration form component created",
+          "Form fields render correctly",
+          "Basic form validation works",
+          "Form submits without errors"
+        ]
+      });
+
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `Create ${input.name} Registration API`,
+        description: `Build registration endpoint for ${input.name} - API endpoint only`,
+        estimatedTime: "25 minutes",
+        isCompleted: false,
+        dependencies: [3, 5],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} REG API**: My ${input.name} registration API is failing. Help me create the registration endpoint.`,
+        ],
+        startPrompt: generateRegistrationAPIMicroStep(input, recommendations, analysis),
+        validationChecklist: [
+          "Registration endpoint created",
+          "Password hashing implemented",
+          "User data validation works",
+          "API returns proper responses"
+        ]
+      });
+
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `Build ${input.name} Login Form`,
+        description: `Create user login form for ${input.name} - Frontend form only`,
+        estimatedTime: "20 minutes",
+        isCompleted: false,
+        dependencies: [6],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} LOGIN**: My ${input.name} login form is broken. Help me create the login form component.`,
+        ],
+        startPrompt: generateLoginFormMicroStep(input, recommendations, analysis),
+        validationChecklist: [
+          "Login form component created",
+          "Form fields render correctly",
+          "Form validation works",
+          "Form connects to API"
+        ]
+      });
+
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `Create ${input.name} Login API`,
+        description: `Build login endpoint for ${input.name} - API endpoint only`,
+        estimatedTime: "25 minutes",
+        isCompleted: false,
+        dependencies: [7],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} LOGIN API**: My ${input.name} login API is failing. Help me create the login endpoint.`,
+        ],
+        startPrompt: generateLoginAPIMicroStep(input, recommendations, analysis),
+        validationChecklist: [
+          "Login endpoint created",
+          "Password verification works",
+          "JWT tokens generated",
+          "Session management functional"
         ]
       });
     }
