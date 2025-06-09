@@ -1,0 +1,222 @@
+🚨 CRITICAL FIX: CUSTOM ROADMAP GENERATION
+Fix roadmap generation to be completely based on user's specific project details.
+
+CURRENT PROBLEM: Roadmap is generic regardless of project description
+ROOT CAUSE: Generator not analyzing user input properly
+
+REQUIRED FIX:
+
+1. PROJECT ANALYSIS ENGINE:
+Must extract specific requirements from user input:
+
+```javascript
+function analyzeProjectDetails(projectInput) {
+  const analysis = {
+    projectType: detectProjectType(projectInput.description),
+    features: extractFeatures(projectInput.description),
+    complexity: assessActualComplexity(projectInput),
+    techRequirements: determineTechNeeds(projectInput),
+    userGoals: extractUserGoals(projectInput.description),
+    constraints: identifyConstraints(projectInput)
+  };
+  
+  return analysis;
+}
+
+function detectProjectType(description) {
+  const keywords = description.toLowerCase();
+  
+  if (keywords.includes('todo') || keywords.includes('task management')) {
+    return 'task_management';
+  }
+  if (keywords.includes('e-commerce') || keywords.includes('shop') || keywords.includes('store')) {
+    return 'ecommerce';
+  }
+  if (keywords.includes('blog') || keywords.includes('cms') || keywords.includes('content')) {
+    return 'content_management';
+  }
+  if (keywords.includes('dashboard') || keywords.includes('analytics') || keywords.includes('admin')) {
+    return 'dashboard';
+  }
+  if (keywords.includes('social') || keywords.includes('chat') || keywords.includes('messaging')) {
+    return 'social_platform';
+  }
+  
+  return 'custom'; // Analyze further for custom projects
+}
+
+function extractFeatures(description) {
+  const features = [];
+  const text = description.toLowerCase();
+  
+  // Authentication features
+  if (text.includes('login') || text.includes('register') || text.includes('auth')) {
+    features.push('user_authentication');
+  }
+  if (text.includes('oauth') || text.includes('google login') || text.includes('social login')) {
+    features.push('social_authentication');
+  }
+  
+  // Data features
+  if (text.includes('database') || text.includes('save') || text.includes('store')) {
+    features.push('data_persistence');
+  }
+  if (text.includes('real-time') || text.includes('live') || text.includes('instant')) {
+    features.push('real_time_updates');
+  }
+  
+  // UI features
+  if (text.includes('responsive') || text.includes('mobile')) {
+    features.push('responsive_design');
+  }
+  if (text.includes('dashboard') || text.includes('admin panel')) {
+    features.push('admin_dashboard');
+  }
+  
+  // Integration features
+  if (text.includes('api') || text.includes('integration')) {
+    features.push('api_integration');
+  }
+  if (text.includes('payment') || text.includes('stripe') || text.includes('checkout')) {
+    features.push('payment_processing');
+  }
+  
+  return features;
+}
+
+CUSTOM ROADMAP GENERATION:
+Generate steps based on ACTUAL project requirements:
+
+javascriptfunction generateCustomRoadmap(projectAnalysis, userInput) {
+  const roadmap = {
+    phases: [],
+    totalSteps: 0,
+    estimatedTime: 0
+  };
+  
+  // Always start with setup phase
+  roadmap.phases.push(generateSetupPhase(userInput.techStack));
+  
+  // Add authentication if needed
+  if (projectAnalysis.features.includes('user_authentication')) {
+    roadmap.phases.push(generateAuthPhase(projectAnalysis));
+  }
+  
+  // Add core features based on project type
+  roadmap.phases.push(...generateCoreFeatures(projectAnalysis, userInput));
+  
+  // Add integrations if mentioned
+  if (projectAnalysis.features.includes('payment_processing')) {
+    roadmap.phases.push(generatePaymentPhase(userInput.techStack));
+  }
+  
+  // Add deployment phase
+  roadmap.phases.push(generateDeploymentPhase(userInput));
+  
+  return roadmap;
+}
+
+function generateCoreFeatures(projectAnalysis, userInput) {
+  const phases = [];
+  
+  switch (projectAnalysis.projectType) {
+    case 'task_management':
+      phases.push(generateTaskManagementPhases(projectAnalysis, userInput));
+      break;
+    case 'ecommerce':
+      phases.push(generateEcommercePhases(projectAnalysis, userInput));
+      break;
+    case 'blog':
+      phases.push(generateBlogPhases(projectAnalysis, userInput));
+      break;
+    default:
+      phases.push(generateCustomPhases(projectAnalysis, userInput));
+  }
+  
+  return phases;
+}
+
+SPECIFIC STEP GENERATION:
+Each step must reference the user's actual project:
+
+javascriptfunction generateTaskManagementPhases(analysis, userInput) {
+  const phases = [];
+  
+  // Core CRUD phase
+  phases.push({
+    name: `Build ${userInput.projectName} Core Features`,
+    description: `Implement the main task management functionality for ${userInput.projectName}`,
+    steps: [
+      {
+        name: `Create Task Model for ${userInput.projectName}`,
+        description: `Build the data structure for tasks in your ${userInput.projectName} application`,
+        aiPrompt: generateTaskModelPrompt(userInput),
+        estimatedTime: "45 minutes"
+      },
+      {
+        name: `Build Task Creation Interface`,
+        description: `Create the UI for users to add new tasks in ${userInput.projectName}`,
+        aiPrompt: generateTaskCreationPrompt(userInput),
+        estimatedTime: "60 minutes"
+      }
+      // ... more specific steps
+    ]
+  });
+  
+  // Add team features if mentioned
+  if (userInput.description.includes('team') || userInput.description.includes('collaboration')) {
+    phases.push(generateTeamCollaborationPhase(userInput));
+  }
+  
+  return phases;
+}
+
+function generateTaskModelPrompt(userInput) {
+  return `You are building the task management system for "${userInput.projectName}".
+
+Based on the project description: "${userInput.description}"
+
+Create a task data model using ${userInput.techStack.join(' + ')} that includes:
+- Task title and description
+- Due dates and priority levels
+${userInput.description.includes('team') ? '- Assignment to team members' : ''}
+${userInput.description.includes('categories') ? '- Task categories/tags' : ''}
+
+Use ${userInput.techStack.includes('MongoDB') ? 'Mongoose schema' : 'appropriate data structure'} for this task model.
+
+Focus ONLY on the task model - do not build UI or API endpoints yet.`;
+}
+
+DEBUGGING THE CURRENT SYSTEM:
+Add logging to see what's happening:
+
+javascriptfunction debugRoadmapGeneration(userInput) {
+  console.log("=== ROADMAP GENERATION DEBUG ===");
+  console.log("User Input:", userInput);
+  
+  const analysis = analyzeProjectDetails(userInput);
+  console.log("Project Analysis:", analysis);
+  
+  const roadmap = generateCustomRoadmap(analysis, userInput);
+  console.log("Generated Roadmap:", roadmap);
+  
+  return roadmap;
+}
+IMMEDIATE FIXES NEEDED:
+
+Verify user input is being passed to roadmap generator
+Check if projectDetails are being analyzed properly
+Ensure roadmap steps reference actual project requirements
+Test with different project types
+
+TESTING REQUIREMENTS:
+Create test projects and verify roadmap is specific:
+Test 1: "Build a todo app with team collaboration and real-time updates"
+Expected: Steps should mention teams, real-time features, collaboration
+Test 2: "Create an e-commerce site with Stripe payments and inventory management"
+Expected: Steps should include payment integration, inventory system
+Test 3: "Build a personal blog with markdown support and comments"
+Expected: Steps should include markdown parsing, comment system
+The roadmap MUST be completely customized to what the user actually described!
+
+This is a critical bug that makes the entire feature useless. The roadmap should feel like it was created specifically for their project, not a generic template!

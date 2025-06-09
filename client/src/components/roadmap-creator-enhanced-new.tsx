@@ -408,96 +408,828 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
     }
   };
 
+  // COMPREHENSIVE PROJECT ANALYSIS ENGINE
+  const analyzeProjectDetails = (input: ProjectInput) => {
+    console.log("=== ROADMAP GENERATION DEBUG ===");
+    console.log("User Input:", input);
+    
+    const analysis = {
+      projectType: detectProjectType(input.description),
+      features: extractSpecificFeatures(input.description),
+      complexity: assessActualComplexity(input),
+      techRequirements: determineTechNeeds(input),
+      userGoals: extractUserGoals(input.description),
+      constraints: identifyConstraints(input),
+      customSteps: generateCustomSteps(input)
+    };
+    
+    console.log("Project Analysis:", analysis);
+    return analysis;
+  };
+
+  const detectProjectType = (description: string) => {
+    const keywords = description.toLowerCase();
+    
+    if (keywords.includes('todo') || keywords.includes('task management') || keywords.includes('kanban') || keywords.includes('project management')) {
+      return 'task_management';
+    }
+    if (keywords.includes('e-commerce') || keywords.includes('shop') || keywords.includes('store') || keywords.includes('marketplace') || keywords.includes('selling')) {
+      return 'ecommerce';
+    }
+    if (keywords.includes('blog') || keywords.includes('cms') || keywords.includes('content') || keywords.includes('articles') || keywords.includes('posts')) {
+      return 'content_management';
+    }
+    if (keywords.includes('dashboard') || keywords.includes('analytics') || keywords.includes('admin') || keywords.includes('reporting') || keywords.includes('metrics')) {
+      return 'dashboard';
+    }
+    if (keywords.includes('social') || keywords.includes('chat') || keywords.includes('messaging') || keywords.includes('community') || keywords.includes('forum')) {
+      return 'social_platform';
+    }
+    if (keywords.includes('booking') || keywords.includes('appointment') || keywords.includes('scheduling') || keywords.includes('calendar')) {
+      return 'booking_system';
+    }
+    if (keywords.includes('portfolio') || keywords.includes('showcase') || keywords.includes('gallery')) {
+      return 'portfolio';
+    }
+    if (keywords.includes('learning') || keywords.includes('course') || keywords.includes('education') || keywords.includes('tutorial')) {
+      return 'learning_platform';
+    }
+    
+    return 'custom';
+  };
+
+  const extractSpecificFeatures = (description: string) => {
+    const features: string[] = [];
+    const text = description.toLowerCase();
+    
+    // Authentication features
+    if (text.includes('login') || text.includes('register') || text.includes('auth') || text.includes('account')) {
+      features.push('user_authentication');
+    }
+    if (text.includes('oauth') || text.includes('google login') || text.includes('social login') || text.includes('github login')) {
+      features.push('social_authentication');
+    }
+    
+    // Data features
+    if (text.includes('database') || text.includes('save') || text.includes('store') || text.includes('persist')) {
+      features.push('data_persistence');
+    }
+    if (text.includes('real-time') || text.includes('live') || text.includes('instant') || text.includes('websocket')) {
+      features.push('real_time_updates');
+    }
+    if (text.includes('search') || text.includes('filter') || text.includes('find')) {
+      features.push('search_functionality');
+    }
+    
+    // Business features
+    if (text.includes('payment') || text.includes('stripe') || text.includes('checkout') || text.includes('billing') || text.includes('subscription')) {
+      features.push('payment_processing');
+    }
+    if (text.includes('notification') || text.includes('email') || text.includes('alert') || text.includes('reminder')) {
+      features.push('notifications');
+    }
+    if (text.includes('upload') || text.includes('file') || text.includes('image') || text.includes('document')) {
+      features.push('file_upload');
+    }
+    
+    // UI/UX features
+    if (text.includes('responsive') || text.includes('mobile') || text.includes('tablet')) {
+      features.push('responsive_design');
+    }
+    if (text.includes('dashboard') || text.includes('admin panel') || text.includes('control panel')) {
+      features.push('admin_dashboard');
+    }
+    if (text.includes('drag') || text.includes('drop') || text.includes('sortable')) {
+      features.push('drag_drop');
+    }
+    
+    // Integration features
+    if (text.includes('api') || text.includes('integration') || text.includes('webhook')) {
+      features.push('api_integration');
+    }
+    if (text.includes('map') || text.includes('location') || text.includes('geolocation')) {
+      features.push('maps_integration');
+    }
+    
+    // Collaboration features
+    if (text.includes('team') || text.includes('collaboration') || text.includes('share') || text.includes('invite')) {
+      features.push('team_collaboration');
+    }
+    if (text.includes('comment') || text.includes('review') || text.includes('feedback')) {
+      features.push('commenting_system');
+    }
+    
+    return features;
+  };
+
+  // Helper functions for project analysis
+  const assessActualComplexity = (input: ProjectInput) => {
+    const factors = [];
+    if (input.dataComplexity === 'Complex analytics' || input.dataComplexity === 'Real-time data') factors.push('high_data');
+    if (input.expectedUsers === 'Enterprise scale') factors.push('high_scale');
+    if (input.authenticationNeeds === 'Enterprise SSO') factors.push('complex_auth');
+    if (input.integrations.length > 3) factors.push('many_integrations');
+    
+    return factors.length > 2 ? 'complex' : factors.length > 0 ? 'medium' : 'simple';
+  };
+
+  const determineTechNeeds = (input: ProjectInput) => {
+    const needs = [];
+    if (input.dataComplexity !== 'Static content') needs.push('database');
+    if (input.authenticationNeeds !== 'None') needs.push('authentication');
+    if (input.description.toLowerCase().includes('real-time')) needs.push('websockets');
+    if (input.description.toLowerCase().includes('payment')) needs.push('payments');
+    return needs;
+  };
+
+  const extractUserGoals = (description: string) => {
+    const goals = [];
+    const text = description.toLowerCase();
+    if (text.includes('manage') || text.includes('organize')) goals.push('organization');
+    if (text.includes('share') || text.includes('collaborate')) goals.push('collaboration');
+    if (text.includes('sell') || text.includes('monetize')) goals.push('monetization');
+    if (text.includes('automate') || text.includes('streamline')) goals.push('automation');
+    return goals;
+  };
+
+  const identifyConstraints = (input: ProjectInput) => {
+    const constraints = [];
+    if (input.budget === 'Free/minimal') constraints.push('low_budget');
+    if (input.projectTimeline === 'Weekend project') constraints.push('tight_timeline');
+    if (input.experienceLevel === 'beginner') constraints.push('learning_curve');
+    return constraints;
+  };
+
+  const generateTaskManagementSteps = (input: ProjectInput, analysis: any) => {
+    const steps = [];
+    
+    steps.push({
+      title: `Build ${input.name} Task Management Core`,
+      description: `Create the main task management functionality for ${input.name} including task creation, editing, and status tracking`,
+      estimatedTime: "4-6 hours",
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} TASKS**: My ${input.name} task management system is broken. Debug task creation, editing, and status updates.`,
+        `**AI CODING AGENT RESCUE - TASK CRUD**: Fix all task CRUD operations in ${input.name} with proper data validation.`
+      ],
+      startPrompt: generateTaskManagementPrompt(input, analysis),
+      validationChecklist: [
+        "Users can create new tasks",
+        "Tasks can be edited and updated",
+        "Task status can be changed",
+        "Task list displays correctly"
+      ]
+    });
+
+    if (analysis.features.includes('team_collaboration')) {
+      steps.push({
+        title: `${input.name} Team Collaboration Features`,
+        description: `Implement team features for ${input.name} including task assignment and team member management`,
+        estimatedTime: "3-5 hours",
+        dependencies: [1, 2],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} TEAMS**: My ${input.name} team collaboration features are failing. Debug task assignment and team member management.`
+        ],
+        startPrompt: generateTeamCollaborationPrompt(input, analysis),
+        validationChecklist: [
+          "Tasks can be assigned to team members",
+          "Team members can be invited",
+          "Team dashboard shows assigned tasks",
+          "Collaboration notifications work"
+        ]
+      });
+    }
+
+    return steps;
+  };
+
+  const generateEcommerceSteps = (input: ProjectInput, analysis: any) => {
+    const steps = [];
+    
+    steps.push({
+      title: `${input.name} Product Catalog System`,
+      description: `Build the product management system for ${input.name} including product listings, categories, and inventory`,
+      estimatedTime: "5-7 hours",
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} PRODUCTS**: My ${input.name} product catalog is broken. Debug product creation, categories, and inventory management.`
+      ],
+      startPrompt: generateProductCatalogPrompt(input, analysis),
+      validationChecklist: [
+        "Products can be added and managed",
+        "Product categories work correctly",
+        "Product images upload properly",
+        "Inventory tracking is functional"
+      ]
+    });
+
+    steps.push({
+      title: `${input.name} Shopping Cart & Checkout`,
+      description: `Implement shopping cart functionality and checkout process for ${input.name}`,
+      estimatedTime: "4-6 hours",
+      dependencies: [1, 2],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} CART**: My ${input.name} shopping cart and checkout are failing. Debug cart operations and checkout flow.`
+      ],
+      startPrompt: generateCartCheckoutPrompt(input, analysis),
+      validationChecklist: [
+        "Items can be added to cart",
+        "Cart quantities can be updated",
+        "Checkout process works smoothly",
+        "Order confirmation is sent"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateCMSSteps = (input: ProjectInput, analysis: any) => {
+    const steps = [];
+    
+    steps.push({
+      title: `${input.name} Content Management System`,
+      description: `Build the core content management features for ${input.name} including post creation and editing`,
+      estimatedTime: "4-6 hours",
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} CMS**: My ${input.name} content management system is broken. Debug post creation, editing, and publishing.`
+      ],
+      startPrompt: generateCMSPrompt(input, analysis),
+      validationChecklist: [
+        "Posts can be created and edited",
+        "Rich text editor works properly",
+        "Posts can be published/unpublished",
+        "Content categorization works"
+      ]
+    });
+
+    if (analysis.features.includes('commenting_system')) {
+      steps.push({
+        title: `${input.name} Comment System`,
+        description: `Implement commenting functionality for ${input.name} posts`,
+        estimatedTime: "2-4 hours",
+        dependencies: [1, 2],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} COMMENTS**: My ${input.name} comment system is failing. Debug comment submission and display.`
+        ],
+        startPrompt: generateCommentSystemPrompt(input, analysis),
+        validationChecklist: [
+          "Users can post comments",
+          "Comments display correctly",
+          "Comment moderation works",
+          "Reply functionality works"
+        ]
+      });
+    }
+
+    return steps;
+  };
+
+  const generateDashboardSteps = (input: ProjectInput, analysis: any) => {
+    const steps = [];
+    
+    steps.push({
+      title: `${input.name} Dashboard Analytics`,
+      description: `Build the analytics dashboard for ${input.name} with charts and data visualization`,
+      estimatedTime: "5-7 hours",
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} DASHBOARD**: My ${input.name} dashboard analytics are broken. Debug data fetching and chart rendering.`
+      ],
+      startPrompt: generateDashboardPrompt(input, analysis),
+      validationChecklist: [
+        "Charts render data correctly",
+        "Dashboard loads quickly",
+        "Data refreshes properly",
+        "Responsive design works"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateSocialSteps = (input: ProjectInput, analysis: any) => {
+    const steps = [];
+    
+    steps.push({
+      title: `${input.name} Social Features`,
+      description: `Implement core social functionality for ${input.name} including user profiles and posts`,
+      estimatedTime: "6-8 hours",
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} SOCIAL**: My ${input.name} social features are broken. Debug user profiles, posts, and social interactions.`
+      ],
+      startPrompt: generateSocialPrompt(input, analysis),
+      validationChecklist: [
+        "User profiles display correctly",
+        "Posts can be created and shared",
+        "Social interactions work",
+        "Feed displays properly"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateBookingSteps = (input: ProjectInput, analysis: any) => {
+    const steps = [];
+    
+    steps.push({
+      title: `${input.name} Booking System`,
+      description: `Build the appointment booking system for ${input.name} with calendar integration`,
+      estimatedTime: "6-8 hours",
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} BOOKING**: My ${input.name} booking system is failing. Debug appointment scheduling and calendar integration.`
+      ],
+      startPrompt: generateBookingPrompt(input, analysis),
+      validationChecklist: [
+        "Appointments can be scheduled",
+        "Calendar displays correctly",
+        "Booking confirmations sent",
+        "Time slots managed properly"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateGenericSteps = (input: ProjectInput, analysis: any) => {
+    const steps = [];
+    
+    steps.push({
+      title: `${input.name} Core Functionality`,
+      description: `Build the main features for ${input.name} based on your project description`,
+      estimatedTime: "5-8 hours",
+      dependencies: [1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} FEATURES**: My ${input.name} core functionality is broken. Debug the main features based on project requirements.`
+      ],
+      startPrompt: generateGenericPrompt(input, analysis),
+      validationChecklist: [
+        "Main features work as described",
+        "User interface is functional",
+        "Data operations work correctly",
+        "Business logic is implemented"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateCustomSteps = (input: ProjectInput) => {
+    // Avoid infinite recursion by not calling analyzeProjectDetails again
+    const analysis = {
+      projectType: detectProjectType(input.description),
+      features: extractSpecificFeatures(input.description),
+      complexity: assessActualComplexity(input),
+      techRequirements: determineTechNeeds(input),
+      userGoals: extractUserGoals(input.description),
+      constraints: identifyConstraints(input)
+    };
+    
+    const steps: any[] = [];
+    
+    // Generate project-specific steps based on analysis
+    switch (analysis.projectType) {
+      case 'task_management':
+        steps.push(...generateTaskManagementSteps(input, analysis));
+        break;
+      case 'ecommerce':
+        steps.push(...generateEcommerceSteps(input, analysis));
+        break;
+      case 'content_management':
+        steps.push(...generateCMSSteps(input, analysis));
+        break;
+      case 'dashboard':
+        steps.push(...generateDashboardSteps(input, analysis));
+        break;
+      case 'social_platform':
+        steps.push(...generateSocialSteps(input, analysis));
+        break;
+      case 'booking_system':
+        steps.push(...generateBookingSteps(input, analysis));
+        break;
+      default:
+        steps.push(...generateGenericSteps(input, analysis));
+    }
+    
+    return steps;
+  };
+
+  // Custom prompt generators for project-specific steps
+  const generateCustomSetupPrompt = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    return `You are building "${input.name}" - a ${analysis.projectType.replace('_', ' ')} application.
+
+PROJECT DESCRIPTION: "${input.description}"
+
+TECHNICAL REQUIREMENTS:
+- Platform: ${input.platform}
+- Tech Stack: ${recommendations.recommendedTechStack.join(', ')}
+- Expected Users: ${input.expectedUsers}
+- Authentication: ${input.authenticationNeeds}
+- Data Complexity: ${input.dataComplexity}
+
+SETUP TASKS:
+1. Initialize ${input.platform} project with proper folder structure
+2. Install and configure: ${recommendations.recommendedTechStack.slice(0, 5).join(', ')}
+3. Set up development environment and scripts
+4. Configure routing for ${analysis.projectType} application
+5. Set up basic layout and navigation structure
+
+Focus specifically on ${input.name} requirements. This is a ${analysis.projectType} app, so structure the project accordingly.
+
+CRITICAL: Reference "${input.name}" in all file names, components, and documentation.`;
+  };
+
+  const generateCustomAuthPrompt = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const authType = analysis.features.includes('social_authentication') ? 'Social OAuth (Google, GitHub)' : input.authenticationNeeds;
+    
+    return `Implement ${authType} authentication for "${input.name}" - your ${analysis.projectType.replace('_', ' ')} application.
+
+PROJECT CONTEXT: "${input.description}"
+
+AUTHENTICATION REQUIREMENTS:
+- Auth Type: ${authType}
+- User Scale: ${input.expectedUsers}
+- Platform: ${input.platform}
+- Security Level: ${input.authenticationNeeds}
+
+IMPLEMENTATION TASKS:
+1. Set up ${authType.toLowerCase()} authentication system
+2. Create user registration and login forms for ${input.name}
+3. Implement protected routes for ${input.name} features
+4. Add user session management and persistence
+5. Create user profile management for ${input.name} users
+
+${analysis.features.includes('social_authentication') ? 
+  '6. Configure OAuth providers (Google, GitHub, etc.)\n7. Handle OAuth callbacks and user data' : 
+  '6. Implement password hashing and validation\n7. Add email verification if needed'}
+
+Focus on ${input.name} user experience and ${analysis.projectType} application needs.`;
+  };
+
+  const generateTaskManagementPrompt = (input: ProjectInput, analysis: any) => {
+    return `Build the core task management system for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+TASK MANAGEMENT FEATURES TO IMPLEMENT:
+1. Create Task model with fields relevant to ${input.name}
+2. Build task creation interface for ${input.name} users
+3. Implement task listing and display
+4. Add task editing and status updates
+5. Create task filtering and search functionality
+
+${analysis.features.includes('team_collaboration') ? 
+  'TEAM FEATURES:\n6. Add task assignment to team members\n7. Implement task ownership and delegation\n8. Create team task dashboard' : ''}
+
+${analysis.features.includes('real_time_updates') ? 
+  'REAL-TIME FEATURES:\n- Live task updates across users\n- Real-time status changes\n- Live notifications' : ''}
+
+Make this specific to ${input.name} and reference the project description throughout the implementation.`;
+  };
+
+  const generateProductCatalogPrompt = (input: ProjectInput, analysis: any) => {
+    return `Build the product catalog system for "${input.name}" e-commerce platform.
+
+PROJECT DESCRIPTION: "${input.description}"
+
+PRODUCT MANAGEMENT FEATURES:
+1. Create Product model for ${input.name}
+2. Implement product creation and editing interface
+3. Build product category system
+4. Add product image upload and management
+5. Create inventory tracking for ${input.name} products
+6. Implement product search and filtering
+7. Build product detail pages
+
+${analysis.features.includes('payment_processing') ? 
+  'PRICING FEATURES:\n- Product pricing and discounts\n- Tax calculation\n- Currency support' : ''}
+
+Focus on ${input.name} business requirements and e-commerce needs described in the project.`;
+  };
+
+  const generateCartCheckoutPrompt = (input: ProjectInput, analysis: any) => {
+    return `Implement shopping cart and checkout system for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+CART & CHECKOUT FEATURES:
+1. Build shopping cart functionality for ${input.name}
+2. Implement add/remove items from cart
+3. Create cart quantity management
+4. Build checkout flow for ${input.name} customers
+5. Implement order processing and confirmation
+6. Add order history and tracking
+
+${analysis.features.includes('payment_processing') ? 
+  'PAYMENT INTEGRATION:\n- Stripe payment processing\n- Payment security and validation\n- Payment confirmation emails' : ''}
+
+Make the checkout process specific to ${input.name} business model and user needs.`;
+  };
+
+  const generateCMSPrompt = (input: ProjectInput, analysis: any) => {
+    return `Build the content management system for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+CMS FEATURES TO IMPLEMENT:
+1. Create content/post model for ${input.name}
+2. Build content creation and editing interface
+3. Implement rich text editor for ${input.name} content
+4. Add content publishing and draft management
+5. Create content categorization and tagging
+6. Build content listing and archive pages
+
+${analysis.features.includes('commenting_system') ? 
+  'ENGAGEMENT FEATURES:\n- Comment system for content\n- Comment moderation\n- User engagement tracking' : ''}
+
+Focus on ${input.name} content strategy and audience engagement needs.`;
+  };
+
+  const generateCommentSystemPrompt = (input: ProjectInput, analysis: any) => {
+    return `Implement commenting system for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+COMMENT SYSTEM FEATURES:
+1. Create comment model for ${input.name}
+2. Build comment submission interface
+3. Implement comment display and threading
+4. Add comment moderation for ${input.name}
+5. Create reply functionality
+6. Implement comment voting/rating if needed
+
+Focus on community engagement for ${input.name} and content interaction.`;
+  };
+
+  const generateDashboardPrompt = (input: ProjectInput, analysis: any) => {
+    return `Build analytics dashboard for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+DASHBOARD FEATURES:
+1. Create data visualization components for ${input.name}
+2. Implement charts and graphs for key metrics
+3. Build real-time data updates for dashboard
+4. Add filtering and date range selection
+5. Create responsive dashboard layout
+6. Implement data export functionality
+
+Focus on ${input.name} specific metrics and business intelligence needs.`;
+  };
+
+  const generateSocialPrompt = (input: ProjectInput, analysis: any) => {
+    return `Implement social features for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SOCIAL FEATURES:
+1. Create user profile system for ${input.name}
+2. Build post creation and sharing
+3. Implement user follow/friend system
+4. Create activity feed for ${input.name} users
+5. Add social interactions (likes, shares, comments)
+6. Build notification system
+
+Focus on community building and user engagement for ${input.name}.`;
+  };
+
+  const generateBookingPrompt = (input: ProjectInput, analysis: any) => {
+    return `Build booking system for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+BOOKING FEATURES:
+1. Create appointment/booking model for ${input.name}
+2. Build calendar interface for ${input.name}
+3. Implement time slot management
+4. Add booking confirmation and notifications
+5. Create booking management dashboard
+6. Implement cancellation and rescheduling
+
+Focus on ${input.name} scheduling needs and appointment management.`;
+  };
+
+  const generateGenericPrompt = (input: ProjectInput, analysis: any) => {
+    return `Build the core functionality for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+BASED ON YOUR PROJECT DESCRIPTION, IMPLEMENT:
+1. Main features described in "${input.description}"
+2. Core business logic for ${input.name}
+3. User interface components for key features
+4. Data management and CRUD operations
+5. User workflows and interactions
+
+${analysis.features.length > 0 ? 
+  `DETECTED FEATURES TO FOCUS ON:\n${analysis.features.map(f => `- ${f.replace('_', ' ')}`).join('\n')}` : ''}
+
+Make this implementation specific to ${input.name} requirements and user needs.`;
+  };
+
+  const generateTeamCollaborationPrompt = (input: ProjectInput, analysis: any) => {
+    return `Implement team collaboration features for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+TEAM FEATURES:
+1. Create team/organization model for ${input.name}
+2. Build team member invitation system
+3. Implement role-based permissions
+4. Add team workspace for ${input.name}
+5. Create team activity tracking
+6. Build team communication features
+
+Focus on collaboration needs specific to ${input.name} workflow.`;
+  };
+
+  const generatePaymentPrompt = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    return `Implement payment processing for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+PAYMENT FEATURES:
+1. Set up Stripe payment gateway for ${input.name}
+2. Create checkout interface and payment forms
+3. Implement secure payment processing
+4. Add payment confirmation and receipts
+5. Create subscription management if needed
+6. Handle payment webhooks and notifications
+
+Focus on ${input.name} monetization strategy and payment security.`;
+  };
+
+  const generateRealTimePrompt = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    return `Implement real-time features for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+REAL-TIME FEATURES:
+1. Set up WebSocket connections for ${input.name}
+2. Implement live data synchronization
+3. Add real-time notifications
+4. Create live updates for user interfaces
+5. Build real-time collaboration features
+6. Optimize for performance and scalability
+
+Focus on ${input.name} real-time interaction needs and user experience.`;
+  };
+
+  const generateSearchPrompt = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    return `Build search functionality for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SEARCH FEATURES:
+1. Create search interface for ${input.name}
+2. Implement full-text search capabilities
+3. Add advanced filtering options
+4. Create search result display and pagination
+5. Implement search autocomplete and suggestions
+6. Add search analytics and optimization
+
+Focus on ${input.name} content discovery and user search needs.`;
+  };
+
   const generateIntelligentRoadmap = (input: ProjectInput, recommendations: Recommendations): RoadmapStep[] => {
+    console.log("=== GENERATING CUSTOM ROADMAP ===");
+    console.log("Project Name:", input.name);
+    console.log("Project Description:", input.description);
+    
+    const analysis = analyzeProjectDetails(input);
     const steps: RoadmapStep[] = [];
     let stepNumber = 1;
 
     // Always start with project setup
     steps.push({
       stepNumber: stepNumber++,
-      title: "Project Setup & Environment",
-      description: `Initialize ${input.platform} project with ${recommendations.recommendedTechStack.slice(0, 3).join(', ')}`,
+      title: `Setup ${input.name} Foundation`,
+      description: `Initialize ${input.name} as a ${input.platform} project with ${recommendations.recommendedTechStack.slice(0, 3).join(', ')}`,
       estimatedTime: "2-4 hours",
       isCompleted: false,
       dependencies: [],
       rescuePrompts: [
-        "**AI CODING AGENT RESCUE - PROJECT SETUP**: My project setup is failing. Help me debug initialization errors, dependency conflicts, and build configuration issues.",
-        "**AI CODING AGENT RESCUE - BUILD ERRORS**: Fix all build configuration errors in my project. I need complete working configuration files."
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} SETUP**: My ${input.name} project setup is failing. Help me debug initialization errors, dependency conflicts, and build configuration issues for this ${analysis.projectType} application.`,
+        `**AI CODING AGENT RESCUE - BUILD ERRORS**: Fix all build configuration errors in my ${input.name} project. I need complete working configuration files.`
       ],
-      startPrompt: generateSetupPrompt(input, recommendations),
+      startPrompt: generateCustomSetupPrompt(input, recommendations, analysis),
       validationChecklist: [
-        "Project builds without errors",
+        `${input.name} project builds without errors`,
         "Development server starts successfully",
         "Basic routing is functional",
-        "Git repository is initialized"
+        "Git repository is initialized with project structure"
       ]
     });
 
-    // Add authentication if needed
-    if (input.authenticationNeeds !== 'None') {
+    // Add authentication if needed or detected
+    if (input.authenticationNeeds !== 'None' || analysis.features.includes('user_authentication')) {
+      const authType = analysis.features.includes('social_authentication') ? 'Social OAuth' : input.authenticationNeeds;
       steps.push({
         stepNumber: stepNumber++,
-        title: `${input.authenticationNeeds} Authentication`,
-        description: `Implement ${input.authenticationNeeds.toLowerCase()} authentication system`,
-        estimatedTime: input.authenticationNeeds === 'Simple login' ? "3-5 hours" : "6-10 hours",
+        title: `${input.name} User Authentication System`,
+        description: `Implement ${authType.toLowerCase()} authentication for ${input.name} users based on project requirements`,
+        estimatedTime: authType.includes('OAuth') || authType.includes('Social') ? "4-6 hours" : "3-5 hours",
         isCompleted: false,
         dependencies: [1],
         rescuePrompts: [
-          "**AI CODING AGENT RESCUE - AUTH FLOW**: My authentication system is broken. Debug login/logout issues and session management.",
-          "**AI CODING AGENT RESCUE - LOGIN ERRORS**: Fix all login/register functionality errors with complete working forms."
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} AUTH**: My ${input.name} authentication system is broken. Debug login/logout issues and session management for this ${analysis.projectType} app.`,
+          `**AI CODING AGENT RESCUE - LOGIN ERRORS**: Fix all login/register functionality errors in ${input.name} with complete working forms.`
         ],
-        startPrompt: generateAuthPrompt(input, recommendations),
+        startPrompt: generateCustomAuthPrompt(input, recommendations, analysis),
         validationChecklist: [
-          "User registration works",
-          "User login/logout functional",
-          "Protected routes working",
+          `Users can register for ${input.name}`,
+          `User login/logout works in ${input.name}`,
+          "Protected routes working correctly",
           "Session persistence implemented"
         ]
       });
     }
 
-    // Add database layer if complex data
-    if (input.dataComplexity !== 'Static content') {
+    // Add custom project-specific steps
+    const customSteps = analysis.customSteps;
+    customSteps.forEach((customStep: any) => {
       steps.push({
         stepNumber: stepNumber++,
-        title: `${input.dataComplexity} Implementation`,
-        description: `Build ${input.dataComplexity.toLowerCase()} system with database schema and operations`,
-        estimatedTime: input.dataComplexity === 'Simple forms' ? "3-5 hours" : 
-                      input.dataComplexity === 'Database driven' ? "6-10 hours" : "10-15 hours",
+        title: customStep.title,
+        description: customStep.description,
+        estimatedTime: customStep.estimatedTime,
         isCompleted: false,
-        dependencies: stepNumber === 3 ? [1, 2] : [1],
+        dependencies: customStep.dependencies,
+        rescuePrompts: customStep.rescuePrompts,
+        startPrompt: customStep.startPrompt,
+        validationChecklist: customStep.validationChecklist
+      });
+    });
+
+    // Add feature-specific steps based on detected features
+    if (analysis.features.includes('payment_processing')) {
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `${input.name} Payment System`,
+        description: `Implement secure payment processing for ${input.name} using Stripe or similar payment gateway`,
+        estimatedTime: "4-6 hours",
+        isCompleted: false,
+        dependencies: [1],
         rescuePrompts: [
-          "**AI CODING AGENT RESCUE - DATABASE**: My database connections and schema are failing. Debug connection and ORM issues.",
-          "**AI CODING AGENT RESCUE - CRUD OPERATIONS**: Fix all CRUD operation errors and API endpoint issues."
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} PAYMENTS**: My ${input.name} payment integration is failing. Debug Stripe setup, webhook handling, and payment flow issues.`,
+          `**AI CODING AGENT RESCUE - CHECKOUT ERRORS**: Fix all payment processing errors in ${input.name} checkout system.`
         ],
-        startPrompt: generateDatabasePrompt(input, recommendations),
+        startPrompt: generatePaymentPrompt(input, recommendations, analysis),
         validationChecklist: [
-          "Database schema is properly designed",
-          "CRUD operations work correctly",
-          "Data validation is implemented",
-          "API endpoints are functional"
+          "Payment gateway is properly configured",
+          "Checkout process works end-to-end",
+          "Payment webhooks are handled correctly",
+          "Payment security is implemented"
         ]
       });
     }
 
-    // Analyze project description for specific features
-    const description = input.description.toLowerCase();
-    const features = extractFeaturesFromDescription(description);
-    
-    // Add feature-specific steps
-    features.forEach(feature => {
+    if (analysis.features.includes('real_time_updates')) {
       steps.push({
         stepNumber: stepNumber++,
-        title: feature.title,
-        description: feature.description,
-        estimatedTime: feature.estimatedTime,
+        title: `${input.name} Real-time Features`,
+        description: `Implement real-time updates and live data synchronization for ${input.name}`,
+        estimatedTime: "3-5 hours",
         isCompleted: false,
-        dependencies: feature.dependencies,
-        rescuePrompts: feature.rescuePrompts,
-        startPrompt: feature.startPrompt,
-        validationChecklist: feature.validationChecklist
+        dependencies: [1],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} REAL-TIME**: My ${input.name} real-time features are not working. Debug WebSocket connections and live data updates.`,
+          `**AI CODING AGENT RESCUE - WEBSOCKET ERRORS**: Fix all real-time communication issues in ${input.name}.`
+        ],
+        startPrompt: generateRealTimePrompt(input, recommendations, analysis),
+        validationChecklist: [
+          "Real-time updates work correctly",
+          "WebSocket connections are stable",
+          "Live data synchronization functional",
+          "Real-time UI updates responsive"
+        ]
       });
-    });
+    }
+
+    if (analysis.features.includes('search_functionality')) {
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `${input.name} Search System`,
+        description: `Build comprehensive search and filtering capabilities for ${input.name}`,
+        estimatedTime: "2-4 hours",
+        isCompleted: false,
+        dependencies: [1],
+        rescuePrompts: [
+          `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} SEARCH**: My ${input.name} search functionality is broken. Debug search queries, indexing, and filtering logic.`,
+          `**AI CODING AGENT RESCUE - SEARCH ERRORS**: Fix all search and filter issues in ${input.name}.`
+        ],
+        startPrompt: generateSearchPrompt(input, recommendations, analysis),
+        validationChecklist: [
+          "Search functionality works accurately",
+          "Filtering options are functional",
+          "Search results are properly formatted",
+          "Search performance is optimized"
+        ]
+      });
+    }
 
     // Add integrations if specified
     if (input.integrations.length > 0) {
