@@ -5,6 +5,7 @@ import { SolutionDashboard } from "@/components/solution-dashboard";
 import { CustomPromptGenerator } from "@/components/custom-prompt-generator";
 import { PromptTemplatesLibrary } from "@/components/prompt-templates-library";
 import { RoadmapCreatorV3 } from "@/components/roadmap-creator-v3";
+import { RoadmapCreatorStyled } from "@/components/roadmap-creator-styled";
 import { UserSettings } from "@/components/user-settings";
 import { SuccessModal } from "@/components/success-modal";
 import { CopyToast } from "@/components/copy-toast";
@@ -172,7 +173,7 @@ export default function Home() {
         )}
 
         {currentSection === "roadmap-creator" && (
-          <RoadmapCreatorV3 onBack={navigateToProblems} />
+          <RoadmapCreatorStyled onBack={navigateToProblems} />
         )}
 
         {currentSection === "settings" && (
