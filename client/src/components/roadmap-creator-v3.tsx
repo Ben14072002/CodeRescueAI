@@ -139,11 +139,17 @@ interface RoadmapStep {
     examples: string[];
     validation: string[];
     troubleshooting: string[];
+    expectedOutput: string;
+    testingInstructions: string[];
+    commonMistakes: string[];
+    optimizationTips: string[];
   };
   
   rescuePrompts: string[];
   isCompleted: boolean;
   completedAt?: Date;
+  timeSpent?: string;
+  notes?: string;
 }
 
 interface ProjectRoadmap {
@@ -1202,6 +1208,36 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
 `;
   };
 
+  // PHASE 4: SOPHISTICATED PROMPT ENHANCEMENT
+  const enhanceAIPrompt = (basePrompt: any, stepType: string, input: ProjectInput): any => {
+    return {
+      ...basePrompt,
+      expectedOutput: `Completed ${stepType} implementation with:
+- All required functionality working correctly
+- Proper error handling and validation
+- Clean, maintainable code structure
+- Documentation and comments where needed`,
+      testingInstructions: [
+        'Test all implemented functionality manually',
+        'Check for console errors in browser/terminal',
+        'Verify all validation rules work correctly',
+        'Test edge cases and error scenarios'
+      ],
+      commonMistakes: [
+        'Implementing features beyond the current step scope',
+        'Skipping proper error handling and validation',
+        'Not testing the implementation thoroughly',
+        'Proceeding to next steps before current step works'
+      ],
+      optimizationTips: [
+        'Follow coding best practices and conventions',
+        'Add helpful comments for complex logic',
+        'Use proper naming conventions for variables/functions',
+        'Keep code modular and reusable where possible'
+      ]
+    };
+  };
+
   // PHASE 3: GRANULAR ROADMAP BREAKDOWN
   const generateGranularRoadmap = async () => {
     if (!projectRecipe || !projectAnalysis) return;
@@ -1323,31 +1359,62 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
         dependencies: [],
         aiPrompt: {
           context: `You are building "${input.name}" - a ${analysis.projectType.toLowerCase()}. The project uses ${framework} for frontend and ${analysis.techStackRecommendations.find(t => t.category === 'backend')?.technology || 'Node.js'} for backend.`,
-          task: `Initialize the project structure for "${input.name}" using ${framework}${isNextJS ? ' with TypeScript' : ''}.`,
+          task: `Initialize the project structure for "${input.name}" using ${framework}${isNextJS ? ' with TypeScript' : ''}. Create ONLY the foundational structure - no features yet.`,
           constraints: [
             'ONLY create the initial project structure',
             'DO NOT add any features or components yet',
             'DO NOT install additional packages beyond the basic setup',
             'Focus on getting the development environment running',
-            'Use exact folder structure from the technical recipe'
+            'Use exact folder structure from the technical recipe',
+            'STOP after confirming dev server runs - do not proceed to next steps'
           ],
           examples: [
             isNextJS ? 
               'npx create-next-app@latest my-project --typescript --tailwind --eslint --app' :
               'npm create vite@latest my-project -- --template react-ts',
-            'Organize folders: /src, /components, /pages, /server',
-            'Verify npm run dev starts successfully'
+            'mkdir src/{components,pages,hooks,utils}',
+            'mkdir server/{routes,models,middleware}',
+            'Verify npm run dev starts on correct port'
           ],
           validation: [
             'Project folder structure matches requirements',
             'Development server starts without errors',
             'Basic routing works (shows default page)',
-            'TypeScript compilation works if applicable'
+            'TypeScript compilation works if applicable',
+            'All required directories exist'
           ],
           troubleshooting: [
             'If npm install fails: Clear cache with npm cache clean --force',
             'If port conflicts: Check if port 3000/5173 is already in use',
-            'If TypeScript errors: Ensure tsconfig.json is properly configured'
+            'If TypeScript errors: Ensure tsconfig.json is properly configured',
+            'If create command fails: Check Node.js version (requires 16+)',
+            'If permission errors: Run with sudo or check directory permissions'
+          ],
+          expectedOutput: `A fully functional ${framework} project with:
+- Clean project structure with src/, server/, and component folders
+- Working development server accessible at localhost:3000 or 5173
+- Default homepage displaying successfully
+- No build errors or TypeScript issues
+- All dependencies properly installed`,
+          testingInstructions: [
+            'Run npm run dev and verify server starts',
+            'Open localhost:3000 (Next.js) or localhost:5173 (Vite) in browser',
+            'Confirm default page loads without errors',
+            'Check browser console for any JavaScript errors',
+            'Verify hot reloading works by making a small text change'
+          ],
+          commonMistakes: [
+            'Installing extra packages during setup (wait for next steps)',
+            'Modifying default configuration files prematurely',
+            'Creating components or features before basic structure is confirmed',
+            'Skipping verification that dev server actually works',
+            'Using wrong Node.js version or missing dependencies'
+          ],
+          optimizationTips: [
+            'Use exact package manager recommended for the framework',
+            'Enable TypeScript strict mode for better error catching',
+            'Configure VS Code workspace settings for consistent formatting',
+            'Set up proper .gitignore to exclude node_modules and build files'
           ]
         },
         rescuePrompts: [
@@ -1388,6 +1455,29 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
             'If ESLint conflicts: Check for conflicting rules in config',
             'If Prettier not working: Verify VS Code extension is enabled',
             'If env variables not loading: Check .env file location and syntax'
+          ],
+          expectedOutput: `Development environment configured with:
+- ESLint configuration file with proper rules
+- Prettier configuration for consistent code formatting
+- .env.example file with all required environment variables
+- Git hooks for automated code quality checks`,
+          testingInstructions: [
+            'Run npm run lint to verify ESLint works',
+            'Format a file to test Prettier integration',
+            'Check .env.example contains all required variables',
+            'Make a commit to test pre-commit hooks'
+          ],
+          commonMistakes: [
+            'Conflicting ESLint and Prettier rules',
+            'Missing environment variables in .env.example',
+            'Incorrect file paths in configuration',
+            'Forgetting to install required dev dependencies'
+          ],
+          optimizationTips: [
+            'Use shared ESLint configs for consistency',
+            'Set up editor integration for real-time feedback',
+            'Document all environment variables with descriptions',
+            'Configure VS Code settings for automatic formatting'
           ]
         },
         rescuePrompts: [
@@ -1415,7 +1505,7 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
         difficulty: 'medium' as const,
         phase: 'Authentication System',
         dependencies: [startNumber - 1],
-        aiPrompt: {
+        aiPrompt: enhanceAIPrompt({
           context: `Building user authentication for ${input.name}. Use ${database} database with the exact schema from the technical recipe.`,
           task: 'Create user table with proper fields for authentication and profile data.',
           constraints: [
@@ -1442,7 +1532,7 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
             'If constraints fail: Verify field types match requirements',
             'If permissions error: Ensure database user has CREATE privileges'
           ]
-        },
+        }, 'User Database Schema', input),
         rescuePrompts: [
           `**DATABASE SETUP RESCUE**: My ${input.name} user database schema creation is failing. Debug database connection and table creation.`
         ],
@@ -3293,6 +3383,49 @@ ${recipe.deploymentGuide.configuration.map(config => `- ${config}`).join('\n')}
                                     {step.aiPrompt.troubleshooting.map((tip, i) => (
                                       <li key={i} className="flex items-start gap-2">
                                         <span className="text-orange-500 mt-1">⚠</span>
+                                        <span>{tip}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-700 mb-1">Expected Output:</h5>
+                                  <div className="text-sm text-gray-600 bg-white rounded p-2">
+                                    {step.aiPrompt.expectedOutput}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-700 mb-1">Testing Instructions:</h5>
+                                  <ul className="text-sm text-gray-600 bg-white rounded p-2 space-y-1">
+                                    {step.aiPrompt.testingInstructions.map((instruction, i) => (
+                                      <li key={i} className="flex items-start gap-2">
+                                        <span className="text-purple-500 mt-1">🧪</span>
+                                        <span>{instruction}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-700 mb-1">Common Mistakes:</h5>
+                                  <ul className="text-sm text-gray-600 bg-white rounded p-2 space-y-1">
+                                    {step.aiPrompt.commonMistakes.map((mistake, i) => (
+                                      <li key={i} className="flex items-start gap-2">
+                                        <span className="text-red-500 mt-1">⚠</span>
+                                        <span>{mistake}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-700 mb-1">Optimization Tips:</h5>
+                                  <ul className="text-sm text-gray-600 bg-white rounded p-2 space-y-1">
+                                    {step.aiPrompt.optimizationTips.map((tip, i) => (
+                                      <li key={i} className="flex items-start gap-2">
+                                        <span className="text-green-500 mt-1">💡</span>
                                         <span>{tip}</span>
                                       </li>
                                     ))}
