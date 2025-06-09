@@ -1334,32 +1334,67 @@ Deploy my ${projectInput.targetAudience} application to production. I need COMPL
 
                 {/* Integrated Rescue System */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-orange-500" />
-                      Need Rescue?
-                    </h4>
-                    <Button
-                      size="sm"
-                      onClick={() => onOpenRescue && onOpenRescue(`
-Project Context: ${projectInput.name}
-Current Step: ${activeStep.title}
-Tech Stack: ${recommendations?.recommendedTechStack.join(', ')}
-Experience Level: ${projectInput.experienceLevel}
-Target Audience: ${projectInput.targetAudience}
-Platform: ${projectInput.platform}
-
-Problem with: ${activeStep.title}
-                      `)}
-                      className="bg-orange-600 hover:bg-orange-700 text-white border-orange-600"
-                    >
-                      <Wrench className="h-4 w-4 mr-2" />
-                      Open Rescue Generator
-                    </Button>
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    <h4 className="font-semibold">Rescue Prompts</h4>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">
+                      AI Agent Ready
+                    </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Stuck on this step? Use the rescue generator to get custom prompts for your specific problem with pre-filled project context.
+                  
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Stuck on this step? These rescue prompts are pre-configured with your project context:
                   </p>
+                  
+                  <div className="space-y-3">
+                    {activeStep.rescuePrompts?.map((rescuePrompt, index) => (
+                      <Card key={index} className="bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <h5 className="font-medium text-orange-900 dark:text-orange-100 text-sm mb-2">
+                                Rescue Option {index + 1}
+                              </h5>
+                              <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg">
+                                <pre className="text-xs whitespace-pre-wrap font-mono text-slate-100 leading-relaxed">
+                                  {rescuePrompt}
+                                  
+{`
+PROJECT CONTEXT:
+- Name: ${projectInput.name}
+- Current Step: ${activeStep.title}
+- Tech Stack: ${recommendations?.recommendedTechStack.join(', ')}
+- Experience Level: ${projectInput.experienceLevel}
+- Target Audience: ${projectInput.targetAudience}
+- Platform: ${projectInput.platform}
+- Expected Users: ${projectInput.expectedUsers}
+`}
+                                </pre>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => copyPrompt(rescuePrompt + `
+
+PROJECT CONTEXT:
+- Name: ${projectInput.name}
+- Current Step: ${activeStep.title}
+- Tech Stack: ${recommendations?.recommendedTechStack.join(', ')}
+- Experience Level: ${projectInput.experienceLevel}
+- Target Audience: ${projectInput.targetAudience}
+- Platform: ${projectInput.platform}
+- Expected Users: ${projectInput.expectedUsers}
+`)}
+                              className="bg-orange-600 hover:bg-orange-700 text-white border-orange-600 shrink-0"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
 
                 <Separator />
