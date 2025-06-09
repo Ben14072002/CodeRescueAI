@@ -17,9 +17,10 @@ interface ProblemSelectionProps {
   onBack: () => void;
   onCustomPrompts?: () => void;
   onTemplates?: () => void;
+  onRoadmapCreator?: () => void;
 }
 
-export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplates }: ProblemSelectionProps) {
+export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplates, onRoadmapCreator }: ProblemSelectionProps) {
   const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
