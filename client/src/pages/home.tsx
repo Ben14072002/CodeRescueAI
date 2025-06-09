@@ -171,8 +171,8 @@ export default function Home() {
           <PromptTemplatesLibrary onBack={navigateToProblems} />
         )}
 
-        {currentSection === "roadmap-creator" && (
-          <RoadmapCreatorStyled onBack={navigateToProblems} />
+        {currentSection === "project-planner" && (
+          <ProjectPlanner onBack={navigateToProblems} />
         )}
 
         {currentSection === "settings" && (
