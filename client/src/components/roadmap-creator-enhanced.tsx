@@ -328,30 +328,317 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Generate sophisticated roadmap steps with enhanced prompts
-      const steps: RoadmapStep[] = [
-        {
-          stepNumber: 1,
-          title: "Project Setup & Environment",
-          description: `Initialize your ${projectInput.platform.toLowerCase()} project with ${recommendations.recommendedTechStack.slice(0, 3).join(', ')} stack.`,
-          estimatedTime: "2-4 hours",
-          isCompleted: false,
-          dependencies: [],
-          rescuePrompts: [
-            "**AI CODING AGENT RESCUE - PROJECT SETUP**: My project setup is failing. Help me debug initialization errors, dependency conflicts, and build configuration issues. Provide complete diagnostic commands and fix implementations.",
-            "**AI CODING AGENT RESCUE - BUILD ERRORS**: Fix all build configuration errors in my project. I need complete working configuration files and step-by-step resolution for TypeScript, bundler, and dependency issues.",
-            "**AI CODING AGENT RESCUE - DEPENDENCY CONFLICTS**: Resolve all package dependency conflicts and version incompatibilities. Provide exact package.json updates and installation commands that work."
-          ],
-          startPrompt: `**AI CODING ASSISTANT PROMPT - PROJECT SETUP**
+      // Generate intelligent roadmap based on project features
+      const steps: RoadmapStep[] = generateIntelligentRoadmap(projectInput, recommendations);
+      
+      setRoadmapSteps(steps);
+      setPhase('roadmap');
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Unable to generate roadmap. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
-I need help setting up a new ${projectInput.targetAudience} ${projectInput.platform.toLowerCase()} project. Please act as an expert ${projectInput.experienceLevel} developer and provide COMPLETE, EXECUTABLE code and commands.
+  const generateIntelligentRoadmap = (input: ProjectInput, recommendations: Recommendations): RoadmapStep[] => {
+    const steps: RoadmapStep[] = [];
+    let stepNumber = 1;
+
+    // Always start with project setup
+    steps.push({
+      stepNumber: stepNumber++,
+      title: "Project Setup & Environment",
+      description: `Initialize ${input.platform} project with ${recommendations.recommendedTechStack.slice(0, 3).join(', ')}`,
+      estimatedTime: "2-4 hours",
+      isCompleted: false,
+      dependencies: [],
+      rescuePrompts: [
+        "**AI CODING AGENT RESCUE - PROJECT SETUP**: My project setup is failing. Help me debug initialization errors, dependency conflicts, and build configuration issues. Provide complete diagnostic commands and fix implementations.",
+        "**AI CODING AGENT RESCUE - BUILD ERRORS**: Fix all build configuration errors in my project. I need complete working configuration files and step-by-step resolution for TypeScript, bundler, and dependency issues."
+      ],
+      startPrompt: generateSetupPrompt(input, recommendations),
+      validationChecklist: [
+        "Project builds without errors",
+        "Development server starts successfully",
+        "Basic routing is functional",
+        "Git repository is initialized"
+      ]
+    });
+
+    // Add authentication if needed
+    if (input.authenticationNeeds !== 'None') {
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `${input.authenticationNeeds} Authentication`,
+        description: `Implement ${input.authenticationNeeds.toLowerCase()} authentication system`,
+        estimatedTime: input.authenticationNeeds === 'Simple login' ? "3-5 hours" : "6-10 hours",
+        isCompleted: false,
+        dependencies: [1],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - AUTH FLOW**: My authentication system is broken. Debug login/logout issues, session management problems, and user state persistence.",
+          "**AI CODING AGENT RESCUE - LOGIN ERRORS**: Fix all login/register functionality errors. I need complete working forms, validation, and user feedback."
+        ],
+        startPrompt: generateAuthPrompt(input, recommendations),
+        validationChecklist: [
+          "User registration works",
+          "User login/logout functional",
+          "Protected routes working",
+          "Session persistence implemented"
+        ]
+      });
+    }
+
+    // Add database layer if complex data
+    if (input.dataComplexity !== 'Static content') {
+      steps.push({
+        stepNumber: stepNumber++,
+        title: `${input.dataComplexity} Implementation`,
+        description: `Build ${input.dataComplexity.toLowerCase()} system with database schema and operations`,
+        estimatedTime: input.dataComplexity === 'Simple forms' ? "3-5 hours" : 
+                      input.dataComplexity === 'Database driven' ? "6-10 hours" : "10-15 hours",
+        isCompleted: false,
+        dependencies: stepNumber === 3 ? [1, 2] : [1],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - DATABASE**: My database connections and schema are failing. Debug connection issues, migration errors, and ORM problems.",
+          "**AI CODING AGENT RESCUE - CRUD OPERATIONS**: Fix all CRUD operation errors and API endpoint issues. I need complete working database operations."
+        ],
+        startPrompt: generateDatabasePrompt(input, recommendations),
+        validationChecklist: [
+          "Database schema is properly designed",
+          "CRUD operations work correctly",
+          "Data validation is implemented",
+          "API endpoints are functional"
+        ]
+      });
+    }
+
+    // Analyze project description for specific features
+    const description = input.description.toLowerCase();
+    const features = extractFeaturesFromDescription(description);
+    
+    // Add feature-specific steps
+    features.forEach(feature => {
+      steps.push({
+        stepNumber: stepNumber++,
+        title: feature.title,
+        description: feature.description,
+        estimatedTime: feature.estimatedTime,
+        isCompleted: false,
+        dependencies: feature.dependencies,
+        rescuePrompts: feature.rescuePrompts,
+        startPrompt: feature.startPrompt,
+        validationChecklist: feature.validationChecklist
+      });
+    });
+
+    // Add integrations if specified
+    if (input.integrations.length > 0) {
+      steps.push({
+        stepNumber: stepNumber++,
+        title: "Third-party Integrations",
+        description: `Integrate ${input.integrations.join(', ')} services`,
+        estimatedTime: `${input.integrations.length * 3}-${input.integrations.length * 5} hours`,
+        isCompleted: false,
+        dependencies: Array.from({length: stepNumber - 2}, (_, i) => i + 1),
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - API INTEGRATIONS**: My third-party API integrations are failing. Debug connection issues, authentication errors, and response handling.",
+          "**AI CODING AGENT RESCUE - INTEGRATION AUTH**: Fix API authentication and authorization issues. I need complete working OAuth flows and API key management."
+        ],
+        startPrompt: generateIntegrationsPrompt(input, recommendations),
+        validationChecklist: [
+          "All integrations are connected",
+          "API authentication working",
+          "Error handling implemented",
+          "Rate limiting configured"
+        ]
+      });
+    }
+
+    // Add testing phase
+    steps.push({
+      stepNumber: stepNumber++,
+      title: "Testing & Quality Assurance",
+      description: "Implement comprehensive testing suite and quality checks",
+      estimatedTime: "4-8 hours",
+      isCompleted: false,
+      dependencies: Array.from({length: stepNumber - 2}, (_, i) => i + 1),
+      rescuePrompts: [
+        "**AI CODING AGENT RESCUE - TESTING**: My test suite is failing. Debug test configuration, mocking issues, and assertion problems.",
+        "**AI CODING AGENT RESCUE - TEST COVERAGE**: Fix test coverage gaps and implementation. I need complete working test files."
+      ],
+      startPrompt: generateTestingPrompt(input, recommendations),
+      validationChecklist: [
+        "Unit tests are passing",
+        "Integration tests working",
+        "Test coverage adequate",
+        "CI/CD pipeline functional"
+      ]
+    });
+
+    // Always end with deployment
+    steps.push({
+      stepNumber: stepNumber++,
+      title: "Production Deployment",
+      description: `Deploy to ${input.hostingType} with full production configuration`,
+      estimatedTime: "4-8 hours",
+      isCompleted: false,
+      dependencies: Array.from({length: stepNumber - 2}, (_, i) => i + 1),
+      rescuePrompts: [
+        "**AI CODING AGENT RESCUE - DEPLOYMENT**: My deployment is failing. Debug hosting issues, environment configuration, and build problems.",
+        "**AI CODING AGENT RESCUE - PRODUCTION**: Fix production environment setup. I need complete working deployment configuration."
+      ],
+      startPrompt: generateDeploymentPrompt(input, recommendations),
+      validationChecklist: [
+        "Application is accessible via public URL",
+        "SSL certificates are configured",
+        "Environment variables are properly set",
+        "CI/CD pipeline is working",
+        "Monitoring is in place"
+      ]
+    });
+
+    return steps;
+  };
+
+  const extractFeaturesFromDescription = (description: string) => {
+    const features = [];
+    
+    // Look for specific features in the description
+    const featurePatterns = [
+      {
+        keywords: ['chat', 'messaging', 'real-time', 'socket'],
+        title: 'Real-time Messaging System',
+        description: 'Implement chat functionality with real-time messaging',
+        estimatedTime: '8-12 hours',
+        dependencies: [1, 2, 3],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - REAL-TIME**: My WebSocket/real-time functionality is broken. Debug connection issues, message delivery, and state synchronization.",
+          "**AI CODING AGENT RESCUE - CHAT**: Fix chat interface and messaging system. I need complete working chat components and backend."
+        ],
+        startPrompt: "Build a complete real-time messaging system with WebSocket connections, message persistence, and user presence indicators.",
+        validationChecklist: [
+          "Real-time messaging works",
+          "Message persistence functional",
+          "User presence indicators working",
+          "WebSocket connections stable"
+        ]
+      },
+      {
+        keywords: ['dashboard', 'analytics', 'charts', 'graphs', 'metrics'],
+        title: 'Analytics Dashboard',
+        description: 'Create comprehensive analytics dashboard with charts and metrics',
+        estimatedTime: '6-10 hours',
+        dependencies: [1, 2, 3],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - DASHBOARD**: My analytics dashboard is not displaying data correctly. Debug chart rendering, data aggregation, and visualization issues.",
+          "**AI CODING AGENT RESCUE - CHARTS**: Fix chart components and data visualization. I need complete working dashboard with responsive charts."
+        ],
+        startPrompt: "Build a comprehensive analytics dashboard with interactive charts, real-time data updates, and customizable metrics visualization.",
+        validationChecklist: [
+          "Charts render correctly",
+          "Data aggregation working",
+          "Real-time updates functional",
+          "Responsive design implemented"
+        ]
+      },
+      {
+        keywords: ['payment', 'stripe', 'billing', 'subscription', 'checkout'],
+        title: 'Payment Processing System',
+        description: 'Implement secure payment processing and billing',
+        estimatedTime: '8-12 hours',
+        dependencies: [1, 2, 3],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - PAYMENTS**: My payment system is failing. Debug Stripe integration, webhook handling, and transaction processing.",
+          "**AI CODING AGENT RESCUE - BILLING**: Fix billing and subscription management. I need complete working payment flows with error handling."
+        ],
+        startPrompt: "Implement a complete payment processing system with Stripe integration, subscription management, and secure checkout flows.",
+        validationChecklist: [
+          "Payment processing works",
+          "Webhooks are functional",
+          "Subscription management implemented",
+          "Security measures in place"
+        ]
+      },
+      {
+        keywords: ['file', 'upload', 'storage', 'media', 'image', 'document'],
+        title: 'File Management System',
+        description: 'Build file upload, storage, and management capabilities',
+        estimatedTime: '5-8 hours',
+        dependencies: [1, 2, 3],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - FILE UPLOAD**: My file upload system is broken. Debug upload handling, storage configuration, and file processing.",
+          "**AI CODING AGENT RESCUE - STORAGE**: Fix file storage and retrieval. I need complete working file management with proper validation."
+        ],
+        startPrompt: "Create a complete file management system with secure upload, cloud storage integration, and file processing capabilities.",
+        validationChecklist: [
+          "File uploads work correctly",
+          "Storage integration functional",
+          "File validation implemented",
+          "Download/retrieval working"
+        ]
+      },
+      {
+        keywords: ['search', 'filter', 'pagination', 'sort'],
+        title: 'Advanced Search & Filtering',
+        description: 'Implement comprehensive search and filtering functionality',
+        estimatedTime: '4-6 hours',
+        dependencies: [1, 2, 3],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - SEARCH**: My search functionality is not working. Debug search algorithms, indexing, and query optimization.",
+          "**AI CODING AGENT RESCUE - FILTERING**: Fix filtering and pagination. I need complete working search interface with proper performance."
+        ],
+        startPrompt: "Build an advanced search and filtering system with full-text search, faceted filtering, and optimized pagination.",
+        validationChecklist: [
+          "Search functionality works",
+          "Filters apply correctly",
+          "Pagination is functional",
+          "Performance is optimized"
+        ]
+      },
+      {
+        keywords: ['notification', 'email', 'push', 'alert'],
+        title: 'Notification System',
+        description: 'Create comprehensive notification and alerting system',
+        estimatedTime: '5-8 hours',
+        dependencies: [1, 2, 3],
+        rescuePrompts: [
+          "**AI CODING AGENT RESCUE - NOTIFICATIONS**: My notification system is failing. Debug email delivery, push notifications, and alert triggers.",
+          "**AI CODING AGENT RESCUE - ALERTS**: Fix notification delivery and user preferences. I need complete working notification system."
+        ],
+        startPrompt: "Implement a complete notification system with email, push notifications, and customizable user preferences.",
+        validationChecklist: [
+          "Email notifications work",
+          "Push notifications functional",
+          "User preferences respected",
+          "Delivery tracking implemented"
+        ]
+      }
+    ];
+
+    featurePatterns.forEach(pattern => {
+      if (pattern.keywords.some(keyword => description.includes(keyword))) {
+        features.push(pattern);
+      }
+    });
+
+    return features;
+  };
+
+  const generateSetupPrompt = (input: ProjectInput, recommendations: Recommendations) => {
+    return `**AI CODING ASSISTANT PROMPT - PROJECT SETUP**
+
+I need help setting up a new ${input.targetAudience} ${input.platform.toLowerCase()} project. Please act as an expert ${input.experienceLevel} developer and provide COMPLETE, EXECUTABLE code and commands.
 
 **PROJECT SPECIFICATIONS:**
-- Project Name: ${projectInput.name}
-- Target Users: ${projectInput.targetAudience} with ${projectInput.expectedUsers} expected users  
+- Project Name: ${input.name}
+- Target Users: ${input.targetAudience} with ${input.expectedUsers} expected users  
 - Tech Stack: ${recommendations.recommendedTechStack.join(', ')}
 - Complexity Level: ${recommendations.suggestedComplexity}
-- Design Requirements: ${projectInput.responsiveness}
+- Design Requirements: ${input.responsiveness}
 
 **SPECIFIC TASKS FOR AI AGENT:**
 1. Generate complete project initialization commands for ${recommendations.recommendedTechStack[0]} and ${recommendations.recommendedTechStack[1]}
@@ -364,25 +651,218 @@ I need help setting up a new ${projectInput.targetAudience} ${projectInput.platf
 **OUTPUT FORMAT REQUIRED:**
 - Provide exact terminal commands that I can copy-paste
 - Include complete file contents, not just snippets
-- Add comments explaining each step for ${projectInput.experienceLevel} developers
+- Add comments explaining each step for ${input.experienceLevel} developers
 - Structure response as: Commands → File Contents → Verification Steps
 
-**IMPORTANT:** This is for a ${projectInput.targetAudience} application expecting ${projectInput.expectedUsers}, so ensure scalability and best practices are included from the start.`,
-          validationChecklist: [
-            "Project builds without errors",
-            "Development server starts successfully",
-            "Basic routing is functional",
-            "Git repository is initialized"
-          ]
-        },
-        {
-          stepNumber: 2,
-          title: `${projectInput.authenticationNeeds} Authentication System`,
-          description: `Implement ${projectInput.authenticationNeeds.toLowerCase()} authentication for your ${projectInput.targetAudience} application.`,
-          estimatedTime: "4-8 hours",
-          isCompleted: false,
-          dependencies: [1],
-          rescuePrompts: [
+**IMPORTANT:** This is for a ${input.targetAudience} application expecting ${input.expectedUsers}, so ensure scalability and best practices are included from the start.`;
+  };
+
+  const generateAuthPrompt = (input: ProjectInput, recommendations: Recommendations) => {
+    return `**AI CODING ASSISTANT PROMPT - AUTHENTICATION SYSTEM**
+
+I need you to implement a complete ${input.authenticationNeeds} authentication system. Provide FULL, WORKING code that I can copy directly into my project.
+
+**PROJECT CONTEXT:**
+- App: ${input.name} (${input.targetAudience} application)
+- Expected Users: ${input.expectedUsers}
+- Platform: ${input.platform}
+- Auth Type: ${input.authenticationNeeds}
+- Design Style: ${input.designComplexity}
+
+**CRITICAL AI AGENT REQUIREMENTS:**
+✅ COMPLETE authentication system - no partial implementations
+✅ FULL login/register forms with working validation
+✅ COMPLETE protected route system with redirect logic
+✅ WORKING session management and user persistence
+✅ COMPLETE password security (hashing, salting, validation)
+✅ FULL user profile management interface
+
+**DELIVERABLE FORMAT:**
+📁 Complete file structure with exact paths
+🔧 Installation commands for dependencies
+📄 Complete component files (no TODO comments)
+⚙️ Configuration files with environment variables
+🔒 Security middleware and route protection
+📱 Responsive forms for ${input.responsiveness}
+🧪 Testing commands to verify functionality
+
+**CRITICAL OUTPUT CONSTRAINT:** Every code block must be complete and immediately executable. No placeholders, no "implement later", no pseudo-code.`;
+  };
+
+  const generateDatabasePrompt = (input: ProjectInput, recommendations: Recommendations) => {
+    return `**AI CODING ASSISTANT PROMPT - DATABASE & DATA MANAGEMENT**
+
+Build a complete ${input.dataComplexity} system for my application. I need COMPLETE, EXECUTABLE code that handles ${input.expectedUsers} users efficiently.
+
+**PROJECT REQUIREMENTS:**
+- Application: ${input.name} (${input.targetAudience})
+- Data Complexity: ${input.dataComplexity}
+- Database: ${recommendations.recommendedTechStack.find(tech => tech.includes('SQL') || tech.includes('MongoDB') || tech.includes('Database')) || 'PostgreSQL'}
+- User Scale: ${input.expectedUsers}
+- Performance Needs: ${input.performanceNeeds}
+
+**COMPLETE IMPLEMENTATION NEEDED:**
+1. Full database schema design with all tables/collections
+2. Complete database setup and connection configuration
+3. All CRUD operations with TypeScript interfaces
+4. Data validation schemas and error handling
+5. Database migrations and seeding scripts
+6. API endpoints with full request/response handling
+${input.dataComplexity === 'Real-time data' ? '7. WebSocket implementation for real-time features' : ''}
+${input.dataComplexity === 'Complex analytics' ? '7. Analytics queries and aggregation pipelines' : ''}
+
+**CRITICAL:** Provide complete, copy-paste ready code files with proper file structure and integration instructions.`;
+  };
+
+  const generateIntegrationsPrompt = (input: ProjectInput, recommendations: Recommendations) => {
+    return `**AI CODING ASSISTANT PROMPT - THIRD-PARTY INTEGRATIONS**
+
+Implement complete integrations for ${input.integrations.join(', ')} in my ${input.targetAudience} application. Provide FULL, WORKING integration code.
+
+**INTEGRATION SPECIFICATIONS:**
+- App: ${input.name} (${input.platform})
+- Services: ${input.integrations.join(', ')}
+- Budget Tier: ${input.budget}
+- User Scale: ${input.expectedUsers}
+- Performance: ${input.performanceNeeds}
+
+**COMPLETE INTEGRATION TASKS:**
+${input.integrations.map((integration, index) => `${index + 1}. ${integration}: Full API setup, authentication, error handling, and UI components`).join('\n')}
+
+**AI AGENT REQUIREMENTS:**
+- Complete API service classes with all methods
+- Full authentication setup (API keys, OAuth, webhooks)
+- Error handling with retry logic and fallbacks
+- Rate limiting and quota management implementation
+- Complete UI components for each integration
+- TypeScript interfaces for all API responses
+- Environment configuration and secrets management
+- Comprehensive testing setup and mock data`;
+  };
+
+  const generateTestingPrompt = (input: ProjectInput, recommendations: Recommendations) => {
+    return `**AI CODING ASSISTANT PROMPT - TESTING & QUALITY ASSURANCE**
+
+Create a comprehensive testing suite for my ${input.name} application. Provide COMPLETE, EXECUTABLE test files and configuration.
+
+**PROJECT CONTEXT:**
+- Application: ${input.name} (${input.targetAudience})
+- Tech Stack: ${recommendations.recommendedTechStack.join(', ')}
+- Complexity: ${recommendations.suggestedComplexity}
+- User Scale: ${input.expectedUsers}
+
+**COMPLETE TESTING IMPLEMENTATION:**
+1. Unit tests for all components and functions
+2. Integration tests for API endpoints
+3. End-to-end tests for critical user flows
+4. Performance tests for ${input.expectedUsers} load
+5. Security tests for authentication and data protection
+6. Complete test configuration and CI/CD setup
+
+**DELIVERABLES:**
+- Complete test files with 80%+ coverage
+- Test configuration files (Jest, Cypress, etc.)
+- CI/CD pipeline configuration
+- Performance benchmarking setup
+- Security audit configuration
+
+**CRITICAL:** All tests must be immediately runnable with provided commands.`;
+  };
+
+  const generateDeploymentPrompt = (input: ProjectInput, recommendations: Recommendations) => {
+    return `**AI CODING ASSISTANT PROMPT - PRODUCTION DEPLOYMENT**
+
+Deploy my ${input.targetAudience} application to production. I need COMPLETE deployment configuration and scripts that I can execute immediately.
+
+**DEPLOYMENT SPECIFICATIONS:**
+- Application: ${input.name} (${input.platform})
+- Hosting Platform: ${input.hostingType}
+- Expected Traffic: ${input.expectedUsers}
+- Performance Tier: ${input.performanceNeeds}
+- Budget Level: ${input.budget}
+- Maintenance Style: ${input.maintenance}
+
+**CRITICAL AI AGENT REQUIREMENTS:**
+✅ COMPLETE deployment configuration - no partial setups
+✅ FULL CI/CD pipeline with working builds and tests
+✅ COMPLETE environment and secrets management
+✅ WORKING SSL/TLS and domain configuration
+✅ COMPLETE database deployment with migrations
+✅ FULL monitoring, logging, and alerting system
+✅ COMPLETE backup and disaster recovery
+
+**EXECUTION FORMAT:**
+1. **INFRASTRUCTURE**: Complete hosting platform setup
+2. **CI/CD**: Full pipeline configuration with testing
+3. **DEPLOYMENT**: Production deployment scripts
+4. **MONITORING**: Complete observability stack
+5. **SECURITY**: SSL, secrets, and hardening
+6. **VERIFICATION**: Step-by-step deployment testing`;
+  };
+
+  const markStepComplete = (stepNumber: number) => {
+    setRoadmapSteps(prev => prev.map(step => 
+      step.stepNumber === stepNumber ? { ...step, isCompleted: true } : step
+    ));
+    
+    // Check if all steps are completed
+    const allCompleted = roadmapSteps.every(step => step.stepNumber === stepNumber || step.isCompleted);
+    if (allCompleted) {
+      setShowCongratsPopup(true);
+    }
+  };
+
+  const navigateToStep = (stepNumber: number) => {
+    setCurrentStep(stepNumber - 1);
+  };
+
+  const generateCustomRescue = async () => {
+    setIsGeneratingCustom(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const activeStep = roadmapSteps.find(step => step.stepNumber === currentStep + 1);
+      const contextualPrompt = `**AI CODING AGENT RESCUE - ${activeStep?.title?.toUpperCase()}**
+
+I'm stuck on ${activeStep?.title} in my ${projectInput.name} project. 
+
+**CURRENT CONTEXT:**
+- Project: ${projectInput.name} (${projectInput.targetAudience} ${projectInput.platform})
+- Current Phase: ${activeStep?.title}
+- Issue: ${customProblem}
+- Tech Stack: ${recommendations?.recommendedTechStack.join(', ')}
+- Experience Level: ${projectInput.experienceLevel}
+
+**SPECIFIC RESCUE REQUEST:**
+${customProblem}
+
+**AI AGENT REQUIREMENTS:**
+✅ IMMEDIATE debugging steps with exact commands
+✅ COMPLETE code fixes (not partial solutions)  
+✅ WORKING examples I can copy-paste directly
+✅ STEP-BY-STEP resolution with verification
+✅ PREVENTION strategies to avoid this issue again
+
+**CRITICAL CONSTRAINT:** Provide complete, executable solutions optimized for ${projectInput.experienceLevel} developers using modern ${recommendations?.recommendedTechStack[0]} best practices.
+
+**OUTPUT FORMAT:** 
+1. **IMMEDIATE FIXES** (copy-paste commands)
+2. **CODE SOLUTIONS** (complete file contents)
+3. **VERIFICATION** (test commands)
+4. **PREVENTION** (best practices)`;
+
+      setCustomSolution(contextualPrompt);
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Unable to generate custom rescue. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingCustom(false);
+    }
+  };
             "**AI CODING AGENT RESCUE - AUTH FLOW**: My authentication system is broken. Debug login/logout issues, session management problems, and user state persistence. Provide complete working auth implementation.",
             "**AI CODING AGENT RESCUE - LOGIN ERRORS**: Fix all login/register functionality errors. I need complete working forms, validation, and user feedback with proper error handling.",
             "**AI CODING AGENT RESCUE - SESSION ISSUES**: Resolve session management and user persistence problems. Provide complete session handling code with security best practices."
