@@ -107,6 +107,8 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
   const [customSolution, setCustomSolution] = useState('');
   const [isGeneratingCustom, setIsGeneratingCustom] = useState(false);
   const [showCongratsPopup, setShowCongratsPopup] = useState(false);
+  const [projectRecipe, setProjectRecipe] = useState<any>(null);
+  const [showRecipeDownload, setShowRecipeDownload] = useState(false);
   const { toast } = useToast();
 
   // Enhanced custom analysis engine
@@ -301,6 +303,11 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
       
       const customRecommendations = generateCustomAnalysis(projectInput);
       setRecommendations(customRecommendations);
+      
+      // Generate complete project recipe
+      const recipe = generateProjectRecipe(projectInput, customRecommendations);
+      setProjectRecipe(recipe);
+      
       setPhase('recommendations');
     } catch (error) {
       toast({
@@ -752,6 +759,343 @@ ${customProblem}
       title: "Custom Rescue Prompt Generated!",
       description: "Advanced AI coding assistant prompt ready to copy",
     });
+  };
+
+  // Complete Project Recipe Generator
+  const generateProjectRecipe = (input: ProjectInput, recommendations: Recommendations) => {
+    const recipe = {
+      overview: {
+        name: input.name,
+        description: input.description,
+        techStack: recommendations.recommendedTechStack,
+        estimatedTime: recommendations.estimatedTimeline,
+        targetAudience: input.targetAudience,
+        complexity: recommendations.suggestedComplexity,
+        userScale: input.expectedUsers
+      },
+      architecture: {
+        frontend: recommendations.recommendedTechStack.find(tech => 
+          tech.includes('React') || tech.includes('Vue') || tech.includes('Angular')
+        ) || 'React',
+        backend: recommendations.recommendedTechStack.find(tech => 
+          tech.includes('Node') || tech.includes('Express') || tech.includes('API')
+        ) || 'Node.js + Express',
+        database: recommendations.recommendedTechStack.find(tech => 
+          tech.includes('SQL') || tech.includes('MongoDB') || tech.includes('Database')
+        ) || 'PostgreSQL',
+        authentication: input.authenticationNeeds,
+        deployment: input.hostingType
+      },
+      fileStructure: generateFileStructure(input, recommendations),
+      databaseSchema: generateDatabaseSchema(input),
+      apiEndpoints: generateAPIEndpoints(input),
+      uiComponents: generateUIComponents(input),
+      dependencies: generateDependencies(recommendations),
+      deploymentStrategy: generateDeploymentStrategy(input),
+      timeline: generateDetailedTimeline(input, recommendations),
+      challenges: recommendations.potentialChallenges
+    };
+    
+    return recipe;
+  };
+
+  const generateFileStructure = (input: ProjectInput, recommendations: Recommendations) => {
+    const framework = recommendations.recommendedTechStack.find(tech => 
+      tech.includes('React') || tech.includes('Vue') || tech.includes('Next')
+    );
+    
+    if (framework?.includes('Next')) {
+      return {
+        root: [
+          'pages/',
+          'components/',
+          'lib/',
+          'public/',
+          'styles/',
+          'api/',
+          'utils/',
+          'types/',
+          'hooks/',
+          'context/',
+          'package.json',
+          'next.config.js',
+          'tsconfig.json',
+          '.env.local'
+        ],
+        details: {
+          'pages/': ['index.tsx', 'login.tsx', 'dashboard.tsx', '_app.tsx', '_document.tsx'],
+          'components/': ['Header.tsx', 'Sidebar.tsx', 'Layout.tsx', 'ui/'],
+          'api/': ['auth/', 'users/', 'data/'],
+          'lib/': ['auth.ts', 'db.ts', 'utils.ts'],
+          'types/': ['index.ts', 'api.ts', 'auth.ts']
+        }
+      };
+    }
+    
+    return {
+      root: [
+        'src/',
+        'public/',
+        'server/',
+        'package.json',
+        'vite.config.ts',
+        'tsconfig.json',
+        '.env'
+      ],
+      details: {
+        'src/': ['components/', 'pages/', 'hooks/', 'utils/', 'types/', 'App.tsx', 'main.tsx'],
+        'components/': ['ui/', 'layout/', 'forms/', 'common/'],
+        'server/': ['routes/', 'middleware/', 'models/', 'config/', 'index.ts'],
+        'server/routes/': ['auth.ts', 'users.ts', 'api.ts'],
+        'server/models/': ['User.ts', 'Session.ts']
+      }
+    };
+  };
+
+  const generateDatabaseSchema = (input: ProjectInput) => {
+    const schemas = {
+      users: {
+        id: 'Primary Key (UUID/Int)',
+        email: 'String (Unique)',
+        password: 'String (Hashed)',
+        name: 'String',
+        createdAt: 'DateTime',
+        updatedAt: 'DateTime',
+        role: 'Enum (user, admin)',
+        isActive: 'Boolean'
+      }
+    };
+
+    if (input.targetAudience === 'B2B') {
+      schemas.organizations = {
+        id: 'Primary Key',
+        name: 'String',
+        domain: 'String',
+        createdAt: 'DateTime',
+        ownerId: 'Foreign Key → users.id'
+      };
+      schemas.users.organizationId = 'Foreign Key → organizations.id';
+    }
+
+    if (input.dataComplexity.includes('analytics')) {
+      schemas.analytics = {
+        id: 'Primary Key',
+        userId: 'Foreign Key → users.id',
+        event: 'String',
+        properties: 'JSON',
+        timestamp: 'DateTime'
+      };
+    }
+
+    return schemas;
+  };
+
+  const generateAPIEndpoints = (input: ProjectInput) => {
+    const endpoints = [
+      {
+        method: 'POST',
+        path: '/api/auth/register',
+        description: 'User registration',
+        body: '{ email, password, name }',
+        response: '{ user, token }'
+      },
+      {
+        method: 'POST',
+        path: '/api/auth/login',
+        description: 'User authentication',
+        body: '{ email, password }',
+        response: '{ user, token }'
+      },
+      {
+        method: 'GET',
+        path: '/api/user/profile',
+        description: 'Get user profile',
+        auth: 'Required',
+        response: '{ user }'
+      }
+    ];
+
+    if (input.targetAudience === 'B2B') {
+      endpoints.push({
+        method: 'GET',
+        path: '/api/organizations',
+        description: 'List user organizations',
+        auth: 'Required',
+        response: '{ organizations[] }'
+      });
+    }
+
+    return endpoints;
+  };
+
+  const generateUIComponents = (input: ProjectInput) => {
+    const components = [
+      'Layout/Header',
+      'Layout/Sidebar', 
+      'Layout/Footer',
+      'Auth/LoginForm',
+      'Auth/RegisterForm',
+      'Common/Button',
+      'Common/Input',
+      'Common/Modal'
+    ];
+
+    if (input.designComplexity.includes('animations')) {
+      components.push('Animations/PageTransition', 'Animations/LoadingSpinner');
+    }
+
+    if (input.responsiveness === 'Mobile first') {
+      components.push('Mobile/BottomNav', 'Mobile/SwipeGestures');
+    }
+
+    return components;
+  };
+
+  const generateDependencies = (recommendations: Recommendations) => {
+    const deps = {
+      frontend: [],
+      backend: [],
+      development: []
+    };
+
+    if (recommendations.recommendedTechStack.includes('React')) {
+      deps.frontend.push('react', 'react-dom', 'react-router-dom');
+    }
+    if (recommendations.recommendedTechStack.includes('TypeScript')) {
+      deps.development.push('@types/react', '@types/node', 'typescript');
+    }
+    if (recommendations.recommendedTechStack.includes('Node.js')) {
+      deps.backend.push('express', 'cors', 'helmet');
+    }
+
+    return deps;
+  };
+
+  const generateDeploymentStrategy = (input: ProjectInput) => {
+    const strategy = {
+      hosting: input.hostingType,
+      cicd: 'GitHub Actions',
+      monitoring: 'Basic logging',
+      scaling: 'Manual',
+      backup: 'Daily automated'
+    };
+
+    if (input.performanceNeeds === 'High performance') {
+      strategy.scaling = 'Auto-scaling';
+      strategy.monitoring = 'Advanced metrics + alerts';
+    }
+
+    return strategy;
+  };
+
+  const generateDetailedTimeline = (input: ProjectInput, recommendations: Recommendations) => {
+    const baseHours = recommendations.suggestedComplexity === 'simple' ? 20 : 
+                     recommendations.suggestedComplexity === 'medium' ? 40 : 60;
+    
+    return {
+      setup: '2-4 hours',
+      authentication: input.authenticationNeeds === 'None' ? '0 hours' : '4-8 hours',
+      coreFeatures: `${Math.floor(baseHours * 0.6)}-${Math.floor(baseHours * 0.8)} hours`,
+      testing: `${Math.floor(baseHours * 0.15)}-${Math.floor(baseHours * 0.2)} hours`,
+      deployment: '4-8 hours',
+      total: `${baseHours}-${baseHours + 20} hours`
+    };
+  };
+
+  const downloadProjectRecipe = () => {
+    if (!projectRecipe || !recommendations) return;
+    
+    const markdown = generateRecipeMarkdown(projectRecipe);
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${projectInput.name.replace(/\s+/g, '-').toLowerCase()}-project-recipe.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Recipe Downloaded!",
+      description: "Complete project specification saved as markdown file",
+    });
+  };
+
+  const generateRecipeMarkdown = (recipe: any) => {
+    return `# ${recipe.overview.name} - Complete Project Recipe
+
+## Project Overview
+- **Description**: ${recipe.overview.description}
+- **Target Audience**: ${recipe.overview.targetAudience}
+- **User Scale**: ${recipe.overview.userScale}
+- **Complexity**: ${recipe.overview.complexity}
+- **Estimated Time**: ${recipe.overview.estimatedTime}
+
+## Architecture
+- **Frontend**: ${recipe.architecture.frontend}
+- **Backend**: ${recipe.architecture.backend}
+- **Database**: ${recipe.architecture.database}
+- **Authentication**: ${recipe.architecture.authentication}
+- **Deployment**: ${recipe.architecture.deployment}
+
+## Tech Stack
+${recipe.overview.techStack.map(tech => `- ${tech}`).join('\n')}
+
+## File Structure
+\`\`\`
+${recipe.fileStructure.root.map(item => `${item}`).join('\n')}
+\`\`\`
+
+### Detailed Structure
+${Object.entries(recipe.fileStructure.details).map(([folder, files]) => 
+  `**${folder}**\n${Array.isArray(files) ? files.map(file => `- ${file}`).join('\n') : '- ' + files}`
+).join('\n\n')}
+
+## Database Schema
+${Object.entries(recipe.databaseSchema).map(([table, fields]) => 
+  `### ${table}\n${Object.entries(fields).map(([field, type]) => `- **${field}**: ${type}`).join('\n')}`
+).join('\n\n')}
+
+## API Endpoints
+${recipe.apiEndpoints.map(endpoint => 
+  `### ${endpoint.method} ${endpoint.path}\n- **Description**: ${endpoint.description}\n- **Body**: ${endpoint.body || 'None'}\n- **Response**: ${endpoint.response}\n- **Auth**: ${endpoint.auth || 'None'}`
+).join('\n\n')}
+
+## UI Components
+${recipe.uiComponents.map(component => `- ${component}`).join('\n')}
+
+## Dependencies
+### Frontend
+${recipe.dependencies.frontend.map(dep => `- ${dep}`).join('\n')}
+
+### Backend
+${recipe.dependencies.backend.map(dep => `- ${dep}`).join('\n')}
+
+### Development
+${recipe.dependencies.development.map(dep => `- ${dep}`).join('\n')}
+
+## Timeline Breakdown
+- **Setup**: ${recipe.timeline.setup}
+- **Authentication**: ${recipe.timeline.authentication}
+- **Core Features**: ${recipe.timeline.coreFeatures}
+- **Testing**: ${recipe.timeline.testing}
+- **Deployment**: ${recipe.timeline.deployment}
+- **Total**: ${recipe.timeline.total}
+
+## Deployment Strategy
+- **Hosting**: ${recipe.deploymentStrategy.hosting}
+- **CI/CD**: ${recipe.deploymentStrategy.cicd}
+- **Monitoring**: ${recipe.deploymentStrategy.monitoring}
+- **Scaling**: ${recipe.deploymentStrategy.scaling}
+- **Backup**: ${recipe.deploymentStrategy.backup}
+
+## Potential Challenges
+${recipe.challenges.map(challenge => `- ${challenge}`).join('\n')}
+
+---
+*Generated by CodeBreaker AI Development Assistant*
+`;
   };
 
   if (phase === 'input') {
@@ -1278,6 +1622,92 @@ ${customProblem}
             </CardContent>
           </Card>
 
+          {/* Complete Project Recipe */}
+          {projectRecipe && (
+            <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-800">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+                    <Target className="h-5 w-5" />
+                    Complete Project Recipe
+                  </CardTitle>
+                  <Button
+                    onClick={downloadProjectRecipe}
+                    variant="outline"
+                    className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2 rotate-90" />
+                    Download Recipe
+                  </Button>
+                </div>
+                <CardDescription>
+                  Comprehensive project specification with architecture, database schema, API endpoints, and implementation guide
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-purple-700 dark:text-purple-300">Architecture</h4>
+                    <div className="text-sm space-y-1">
+                      <p><strong>Frontend:</strong> {projectRecipe.architecture.frontend}</p>
+                      <p><strong>Backend:</strong> {projectRecipe.architecture.backend}</p>
+                      <p><strong>Database:</strong> {projectRecipe.architecture.database}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-purple-700 dark:text-purple-300">Timeline</h4>
+                    <div className="text-sm space-y-1">
+                      <p><strong>Setup:</strong> {projectRecipe.timeline.setup}</p>
+                      <p><strong>Auth:</strong> {projectRecipe.timeline.authentication}</p>
+                      <p><strong>Core:</strong> {projectRecipe.timeline.coreFeatures}</p>
+                      <p><strong>Total:</strong> {projectRecipe.timeline.total}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-purple-700 dark:text-purple-300">Deployment</h4>
+                    <div className="text-sm space-y-1">
+                      <p><strong>Hosting:</strong> {projectRecipe.deploymentStrategy.hosting}</p>
+                      <p><strong>CI/CD:</strong> {projectRecipe.deploymentStrategy.cicd}</p>
+                      <p><strong>Scaling:</strong> {projectRecipe.deploymentStrategy.scaling}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
+                  <h4 className="font-semibold text-purple-700 dark:text-purple-300 mb-2">What's included in the complete recipe:</h4>
+                  <div className="grid md:grid-cols-2 gap-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      Complete file structure with exact paths
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      Database schema with relationships
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      API endpoints with specifications
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      UI component breakdown
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      Complete dependency lists
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      Deployment strategy and timeline
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="flex gap-3">
             <Button onClick={generateRoadmap} className="flex-1" disabled={isGenerating}>
               {isGenerating ? (
@@ -1327,63 +1757,91 @@ ${customProblem}
 
         <Progress value={progressPercentage} className="mb-6" />
 
-        <div className="grid lg:grid-cols-5 gap-6">
-          {/* Left Panel - Step List */}
+        <div className="grid lg:grid-cols-6 gap-6">
+          {/* Left Panel - Phase Overview */}
           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Roadmap Steps</CardTitle>
-                <CardDescription>
-                  Estimated Total: {recommendations?.estimatedTimeline}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[600px]">
-                  <div className="space-y-3">
-                    {roadmapSteps.map((step) => (
-                      <div
-                        key={step.stepNumber}
-                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                          step.stepNumber === activeStep.stepNumber
-                            ? 'border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-400'
-                            : step.isCompleted
-                            ? 'border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-400'
-                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                        }`}
-                        onClick={() => setCurrentStep(step.stepNumber - 1)}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`mt-1 ${
-                            step.isCompleted
-                              ? 'text-green-500'
-                              : step.stepNumber === activeStep.stepNumber
-                              ? 'text-blue-500'
-                              : 'text-gray-400 dark:text-gray-600'
-                          }`}>
-                            {step.isCompleted ? (
-                              <CheckCircle className="h-5 w-5" />
-                            ) : (
-                              <div className="h-5 w-5 rounded-full border-2 border-current" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-sm">
-                              Step {step.stepNumber}: {step.title}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {step.estimatedTime}
-                            </p>
+            <div className="space-y-4">
+              {/* Steps Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Development Phases</CardTitle>
+                  <CardDescription>
+                    Total: {recommendations?.estimatedTimeline}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      {roadmapSteps.map((step) => (
+                        <div
+                          key={step.stepNumber}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                            step.stepNumber === activeStep.stepNumber
+                              ? 'border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-400'
+                              : step.isCompleted
+                              ? 'border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-400'
+                              : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                          onClick={() => setCurrentStep(step.stepNumber - 1)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`mt-1 ${
+                              step.isCompleted
+                                ? 'text-green-500'
+                                : step.stepNumber === activeStep.stepNumber
+                                ? 'text-blue-500'
+                                : 'text-gray-400 dark:text-gray-600'
+                            }`}>
+                              {step.isCompleted ? (
+                                <CheckCircle className="h-5 w-5" />
+                              ) : (
+                                <div className="h-5 w-5 rounded-full border-2 border-current" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-sm">
+                                Phase {step.stepNumber}: {step.title}
+                              </h4>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {step.estimatedTime}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Project Recipe Quick Access */}
+              {projectRecipe && (
+                <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-purple-700 dark:text-purple-300">Complete Recipe</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button
+                      onClick={downloadProjectRecipe}
+                      variant="outline"
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2 rotate-90" />
+                      Download Full Spec
+                    </Button>
+                    <div className="text-xs space-y-1 text-purple-700 dark:text-purple-300">
+                      <p>• Complete file structure</p>
+                      <p>• Database schemas</p>
+                      <p>• API specifications</p>
+                      <p>• Deployment guide</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
 
-          {/* Right Panel - Active Step Details */}
+          {/* Center Panel - Current Step Details */}
           <div className="lg:col-span-3">
             <Card>
               <CardHeader>
