@@ -96,8 +96,10 @@ export function RoadmapCreatorStyled({ onBack }: RoadmapCreatorStyledProps) {
       }
 
       const analysis = await response.json();
+      console.log('Analysis received:', analysis);
       setProjectAnalysis(analysis);
       setCurrentPhase('analysis');
+      console.log('Phase changed to analysis');
     } catch (error) {
       toast({
         title: "Analysis Failed",
@@ -211,23 +213,36 @@ export function RoadmapCreatorStyled({ onBack }: RoadmapCreatorStyledProps) {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
-              {['Project Input', 'Analysis', 'Recipe', 'Roadmap'].map((step, index) => (
-                <div key={step} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    index === 0 ? 'bg-purple-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                  }`}>
-                    {index + 1}
+              {['Project Input', 'Analysis', 'Recipe', 'Roadmap'].map((step, index) => {
+                const stepPhases = ['input', 'analysis', 'recipe', 'roadmap'];
+                const currentStepIndex = stepPhases.indexOf(currentPhase);
+                const isActive = index === currentStepIndex;
+                const isCompleted = index < currentStepIndex;
+                
+                return (
+                  <div key={step} className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      isActive ? 'bg-purple-600 text-white' : 
+                      isCompleted ? 'bg-green-600 text-white' :
+                      'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {isCompleted ? '✓' : index + 1}
+                    </div>
+                    <span className={`ml-2 text-sm font-medium ${
+                      isActive ? 'text-purple-600 dark:text-purple-400' : 
+                      isCompleted ? 'text-green-600 dark:text-green-400' :
+                      'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {step}
+                    </span>
+                    {index < 3 && (
+                      <div className={`w-12 h-0.5 mx-4 ${
+                        isCompleted ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'
+                      }`}></div>
+                    )}
                   </div>
-                  <span className={`ml-2 text-sm font-medium ${
-                    index === 0 ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
-                    {step}
-                  </span>
-                  {index < 3 && (
-                    <div className="w-12 h-0.5 bg-gray-200 dark:bg-gray-700 mx-4"></div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
