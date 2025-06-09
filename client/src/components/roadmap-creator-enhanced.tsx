@@ -102,6 +102,11 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showCustomRescue, setShowCustomRescue] = useState(false);
+  const [customProblem, setCustomProblem] = useState('');
+  const [customSolution, setCustomSolution] = useState('');
+  const [isGeneratingCustom, setIsGeneratingCustom] = useState(false);
+  const [showCongratsPopup, setShowCongratsPopup] = useState(false);
   const { toast } = useToast();
 
   // Enhanced custom analysis engine
@@ -386,13 +391,36 @@ I need you to implement a complete ${projectInput.authenticationNeeds} authentic
 - Auth Type: ${projectInput.authenticationNeeds}
 - Design Style: ${projectInput.designComplexity}
 
-**REQUIRED DELIVERABLES:**
-1. Complete authentication setup using ${recommendations.recommendedTechStack.find(tech => tech.includes('Auth') || tech.includes('Passport') || tech.includes('Firebase')) || 'modern auth library'}
-2. Full login/register component code with form validation
-3. Protected route implementation with redirect logic
-4. User session management and persistence
-5. Password security implementation (hashing, validation)
-6. User profile management interface
+**CRITICAL AI AGENT REQUIREMENTS:**
+✅ COMPLETE authentication system - no partial implementations
+✅ FULL login/register forms with working validation
+✅ COMPLETE protected route system with redirect logic
+✅ WORKING session management and user persistence
+✅ COMPLETE password security (hashing, salting, validation)
+✅ FULL user profile management interface
+
+**AI CODING OPTIMIZATION STRATEGIES:**
+- REPLIT AI: Provide complete file replacements, not snippets
+- CURSOR AI: Include full context and complete implementations
+- WINDSURF AI: Structure as complete, deployable modules
+- LOVABLE AI: Focus on complete, visual components with full functionality
+
+**TECHNICAL SPECIFICATIONS:**
+1. Authentication Library: ${recommendations.recommendedTechStack.find(tech => tech.includes('Auth') || tech.includes('Passport') || tech.includes('Firebase')) || 'Firebase Auth/NextAuth/Passport'}
+2. Session Storage: ${projectInput.dataComplexity.includes('Database') ? 'Database sessions' : 'JWT tokens'}
+3. Security Level: Production-ready with ${projectInput.expectedUsers} user capacity
+4. UI Framework: ${recommendations.recommendedTechStack.find(tech => tech.includes('React') || tech.includes('Vue') || tech.includes('Angular')) || 'React'}
+
+**DELIVERABLE FORMAT:**
+📁 Complete file structure with exact paths
+🔧 Installation commands for dependencies
+📄 Complete component files (no TODO comments)
+⚙️ Configuration files with environment variables
+🔒 Security middleware and route protection
+📱 Responsive forms for ${projectInput.responsiveness}
+🧪 Testing commands to verify functionality
+
+**CRITICAL OUTPUT CONSTRAINT:** Every code block must be complete and immediately executable. No placeholders, no "implement later", no pseudo-code.
 7. Error handling for all auth scenarios
 
 **AI AGENT INSTRUCTIONS:**
@@ -552,40 +580,53 @@ Deploy my ${projectInput.targetAudience} application to production. I need COMPL
 - Budget Level: ${projectInput.budget}
 - Maintenance Style: ${projectInput.maintenance}
 
-**COMPLETE DEPLOYMENT PACKAGE NEEDED:**
-1. Full hosting platform setup (${projectInput.hostingType.toLowerCase()})
-2. Complete CI/CD pipeline configuration files
-3. Environment variables and secrets management
-4. SSL certificate setup and domain configuration
-5. Database deployment and migration scripts
-6. Monitoring, logging, and alerting setup
-7. Backup and disaster recovery implementation
-8. Performance optimization configuration
+**CRITICAL AI AGENT REQUIREMENTS:**
+✅ COMPLETE deployment configuration - no partial setups
+✅ FULL CI/CD pipeline with working builds and tests
+✅ COMPLETE environment and secrets management
+✅ WORKING SSL/TLS and domain configuration
+✅ COMPLETE database deployment with migrations
+✅ FULL monitoring, logging, and alerting system
+✅ COMPLETE backup and disaster recovery
 
-**AI AGENT DELIVERABLES:**
-- Complete deployment scripts (Docker, terraform, etc.)
-- CI/CD configuration files (GitHub Actions, GitLab CI, etc.)
-- Environment setup guides with exact commands
-- SSL and domain configuration instructions
-- Database deployment and backup scripts
-- Monitoring dashboard setup (analytics, error tracking)
-- Security configuration and best practices
-- Cost optimization strategies for ${projectInput.budget}
+**AI CODING OPTIMIZATION STRATEGIES:**
+- REPLIT AI: Provide complete deployment files, not templates
+- CURSOR AI: Include full production configuration context
+- WINDSURF AI: Structure as complete infrastructure-as-code
+- LOVABLE AI: Focus on complete, visual deployment dashboards
 
-**PLATFORM-SPECIFIC REQUIREMENTS:**
-- Optimize for ${projectInput.expectedUsers} concurrent users
-- Configure ${projectInput.performanceNeeds.toLowerCase()} performance settings
-- Set up ${projectInput.maintenance.toLowerCase()} maintenance workflows
-- Include auto-scaling and load balancing if needed
+**DEPLOYMENT DELIVERABLES:**
+📁 Complete deployment file structure
+🐳 Production-ready Docker configurations
+⚙️ Full CI/CD pipeline files (GitHub Actions/GitLab CI)
+🔐 Complete environment and secrets setup
+🌐 SSL certificate and domain configuration scripts
+💾 Database deployment and migration automation
+📊 Complete monitoring stack (logging, metrics, alerts)
+🔄 Backup automation and disaster recovery procedures
+💰 Cost optimization for ${projectInput.budget} budget
+🚀 Auto-scaling configuration for ${projectInput.expectedUsers} users
 
-**CRITICAL DELIVERABLES:**
-- Complete, executable deployment scripts
-- Step-by-step deployment checklist
-- Rollback procedures and disaster recovery plans
-- Cost monitoring and optimization setup
-- Security hardening and compliance configuration
+**PLATFORM-SPECIFIC OPTIMIZATION:**
+- ${projectInput.hostingType}: Complete infrastructure setup
+- Performance: ${projectInput.performanceNeeds} tier configuration
+- Maintenance: ${projectInput.maintenance} automation workflows
+- Scaling: Auto-scaling for ${projectInput.expectedUsers} capacity
 
-**OUTPUT FORMAT:** Provide complete configuration files, deployment scripts, and detailed step-by-step instructions that I can follow to deploy immediately.`,
+**CRITICAL OUTPUT CONSTRAINTS:**
+🎯 Every configuration file must be complete and deployable
+🎯 No placeholder values or TODO comments
+🎯 Include exact commands and scripts
+🎯 Provide verification steps for each component
+🎯 Production-ready security and performance settings
+
+**EXECUTION FORMAT:**
+1. **INFRASTRUCTURE**: Complete hosting platform setup
+2. **CI/CD**: Full pipeline configuration with testing
+3. **DEPLOYMENT**: Production deployment scripts
+4. **MONITORING**: Complete observability stack
+5. **SECURITY**: SSL, secrets, and hardening
+6. **VERIFICATION**: Step-by-step deployment testing`,
         validationChecklist: [
           "Application is accessible via public URL",
           "SSL certificates are configured",
@@ -617,17 +658,100 @@ Deploy my ${projectInput.targetAudience} application to production. I need COMPL
   };
 
   const markStepComplete = (stepNumber: number) => {
-    setRoadmapSteps(prev => 
-      prev.map(step => 
+    setRoadmapSteps(prev => {
+      const updated = prev.map(step => 
         step.stepNumber === stepNumber 
           ? { ...step, isCompleted: true }
           : step
-      )
-    );
+      );
+      
+      // Check if all steps are completed
+      const allCompleted = updated.every(step => step.isCompleted);
+      if (allCompleted) {
+        setShowCongratsPopup(true);
+      }
+      
+      return updated;
+    });
     
     if (stepNumber === currentStep + 1) {
       setCurrentStep(stepNumber);
     }
+  };
+
+  const generateCustomRescuePrompt = () => {
+    setIsGeneratingCustom(true);
+    
+    // Advanced prompting strategies for AI coding assistants
+    const promptStrategies = {
+      replit: "REPLIT AI AGENT INSTRUCTIONS",
+      cursor: "CURSOR AI CODING INSTRUCTIONS", 
+      windsurf: "WINDSURF AI DEVELOPMENT GUIDE",
+      lovable: "LOVABLE AI BUILD INSTRUCTIONS"
+    };
+
+    const basePrompt = `🔧 ${promptStrategies.replit} | ${promptStrategies.cursor} | ${promptStrategies.windsurf} | ${promptStrategies.lovable}
+
+**CRITICAL AI AGENT DIRECTIVE:** You are working with a professional developer who needs COMPLETE, EXECUTABLE code solutions. Do not provide incomplete snippets, pseudo-code, or placeholders.
+
+**PROBLEM STATEMENT:**
+${customProblem}
+
+**PROJECT CONTEXT:**
+- Project: ${projectInput.name}
+- Current Development Phase: ${roadmapSteps[currentStep]?.title || 'Development Phase'}
+- Tech Stack: ${recommendations?.recommendedTechStack.join(', ')}
+- Experience Level: ${projectInput.experienceLevel}
+- Target: ${projectInput.targetAudience} ${projectInput.platform}
+- Scale: ${projectInput.expectedUsers} users
+- Complexity: ${recommendations?.suggestedComplexity}
+
+**AI CODING ASSISTANT OPTIMIZATION STRATEGIES:**
+
+1. **COMPLETE FILE DELIVERY**: Provide full, working files that can be copied directly into the project
+2. **CONTEXT AWARENESS**: Reference the existing tech stack and project structure
+3. **PROGRESSIVE COMPLEXITY**: Build from simple to complex, ensuring each step works
+4. **ERROR PREVENTION**: Include comprehensive error handling and edge cases
+5. **PRODUCTION READY**: Code should be deployment-ready, not just proof-of-concept
+
+**REQUIRED DELIVERABLES:**
+✅ Complete, working code files (no partial implementations)
+✅ Exact file paths and folder structure
+✅ Installation commands for any new dependencies  
+✅ Configuration files (if needed)
+✅ Testing instructions to verify the solution works
+✅ Integration steps with existing codebase
+
+**AI AGENT EXECUTION FORMAT:**
+1. **FILE STRUCTURE**: Show complete directory structure
+2. **DEPENDENCIES**: List exact package.json additions or pip requirements
+3. **CODE FILES**: Provide full, complete files with proper imports/exports
+4. **CONFIGURATION**: Include environment variables, config files, etc.
+5. **INTEGRATION**: Step-by-step instructions to integrate with existing code
+6. **VERIFICATION**: Commands to test that the solution works
+
+**OPTIMIZATION FOR AI CODING PLATFORMS:**
+- REPLIT AI: Focus on complete file replacement and clear dependency management
+- CURSOR AI: Emphasize context-aware suggestions and incremental improvements  
+- WINDSURF AI: Provide comprehensive project-level guidance and architecture decisions
+- LOVABLE AI: Structure for rapid iteration and visual component development
+
+**CRITICAL SUCCESS FACTORS:**
+🎯 Solution must be immediately executable
+🎯 No TODO comments or incomplete implementations
+🎯 Include all necessary imports and dependencies
+🎯 Provide exact commands for testing
+🎯 Consider ${projectInput.experienceLevel} developer experience level
+
+**OUTPUT CONSTRAINT:** Every code block must be complete and ready to use. No placeholders, no "implement this later", no pseudo-code.`;
+
+    setCustomSolution(basePrompt);
+    setIsGeneratingCustom(false);
+    
+    toast({
+      title: "Custom Rescue Prompt Generated!",
+      description: "Advanced AI coding assistant prompt ready to copy",
+    });
   };
 
   if (phase === 'input') {
@@ -1399,6 +1523,84 @@ PROJECT CONTEXT:
 
                 <Separator />
 
+                {/* Custom Rescue Generator */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Wrench className="h-4 w-4 text-purple-500" />
+                      Custom Rescue Generator
+                    </h4>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowCustomRescue(!showCustomRescue)}
+                      className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                    >
+                      {showCustomRescue ? 'Hide' : 'Create Custom Prompt'}
+                    </Button>
+                  </div>
+                  
+                  {showCustomRescue && (
+                    <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800">
+                      <CardContent className="p-4 space-y-4">
+                        <div>
+                          <Label htmlFor="customProblem">Describe Your Specific Problem:</Label>
+                          <Textarea
+                            id="customProblem"
+                            placeholder="e.g., My authentication isn't working, users can't log in, getting 401 errors..."
+                            rows={3}
+                            value={customProblem}
+                            onChange={(e) => setCustomProblem(e.target.value)}
+                            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+                          />
+                        </div>
+                        
+                        <Button
+                          onClick={generateCustomRescuePrompt}
+                          disabled={!customProblem.trim() || isGeneratingCustom}
+                          className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          {isGeneratingCustom ? (
+                            <>
+                              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                              Generating Custom Prompt...
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="h-4 w-4 mr-2" />
+                              Generate AI-Optimized Rescue Prompt
+                            </>
+                          )}
+                        </Button>
+                        
+                        {customSolution && (
+                          <div className="mt-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <Label className="font-medium">Your Custom AI Agent Prompt:</Label>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => copyPrompt(customSolution)}
+                                className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                              >
+                                <Copy className="h-4 w-4 mr-2" />
+                                Copy
+                              </Button>
+                            </div>
+                            <div className="bg-slate-900 border border-slate-700 p-4 rounded-lg max-h-96 overflow-y-auto">
+                              <pre className="text-xs whitespace-pre-wrap font-mono text-slate-100 leading-relaxed">
+                                {customSolution}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                <Separator />
+
                 {/* Validation Checklist */}
                 <div>
                   <h4 className="font-semibold mb-3">Validation Checklist:</h4>
@@ -1415,6 +1617,62 @@ PROJECT CONTEXT:
             </Card>
           </div>
         </div>
+
+        {/* Congratulations Popup */}
+        {showCongratsPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="max-w-md mx-4 bg-white dark:bg-gray-900">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+                <CardTitle className="text-2xl text-green-600 dark:text-green-400">
+                  🎉 Project Complete!
+                </CardTitle>
+                <CardDescription className="text-lg">
+                  Congratulations on finishing your {projectInput.name} roadmap!
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center space-y-4">
+                <p className="text-muted-foreground">
+                  You've successfully completed all {roadmapSteps.length} development steps. 
+                  Your project is ready for the next phase!
+                </p>
+                
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                    Next Steps:
+                  </h4>
+                  <ul className="text-sm text-green-700 dark:text-green-200 space-y-1 text-left">
+                    <li>• Deploy your application to production</li>
+                    <li>• Set up monitoring and analytics</li>
+                    <li>• Gather user feedback</li>
+                    <li>• Plan your next feature roadmap</li>
+                  </ul>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCongratsPopup(false)}
+                    className="flex-1"
+                  >
+                    Continue Reviewing
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowCongratsPopup(false);
+                      onBack();
+                    }}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Start New Project
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     );
   }
