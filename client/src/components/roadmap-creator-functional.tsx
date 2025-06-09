@@ -56,7 +56,7 @@ export function FunctionalRoadmapCreator({ onBack }: FunctionalRoadmapCreatorPro
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [roadmapSteps, setRoadmapSteps] = useState<RoadmapStep[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentStep, setCurrentStep] = useState<number | null>(null);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [projectRecipe, setProjectRecipe] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -2047,7 +2047,7 @@ Congratulations! Your fully functional ${input.name} application is now deployed
     console.log("=== FUNCTIONAL ROADMAP COMPLETED ===");
     console.log("Total Steps:", steps.length);
     console.log("Estimated Total Time:", steps.reduce((acc, step) => {
-      const time = step.estimatedTime.match(/(\d+)/)?.[0] || 30;
+      const time = step.estimatedTime.match(/(\d+)/)?.[0] || "30";
       return acc + parseInt(time);
     }, 0) + " minutes");
     console.log("Strategy: Each step builds on previous working state");
@@ -2181,7 +2181,9 @@ This recipe produces a complete, production-ready application that users can imm
 
   const startExecution = () => {
     setPhase('execution');
-    setCurrentStep(1);
+    if (roadmapSteps.length > 0) {
+      setCurrentStep(1);
+    }
   };
 
   const markStepCompleted = (stepNumber: number) => {
@@ -2524,7 +2526,7 @@ This recipe produces a complete, production-ready application that users can imm
             </div>
             <div>
               <div className="text-2xl font-bold text-blue-600">{roadmapSteps.reduce((acc, step) => {
-                const time = step.estimatedTime.match(/(\d+)/)?.[0] || 30;
+                const time = step.estimatedTime.match(/(\d+)/)?.[0] || "30";
                 return acc + parseInt(time);
               }, 0)}</div>
               <div className="text-sm text-gray-600">Minutes to Working App</div>
