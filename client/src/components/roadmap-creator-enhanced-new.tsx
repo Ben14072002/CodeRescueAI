@@ -1948,6 +1948,1575 @@ TEST: POST /api/auth/login should return JWT token
 Stop here. Core features come next.`;
   };
 
+  // PROJECT-SPECIFIC MICRO-STEP GENERATORS
+  const generateEcommerceMicroSteps = (input: ProjectInput, recommendations: Recommendations, analysis: any, startingStepNumber: number) => {
+    const steps = [];
+    let stepNumber = startingStepNumber;
+
+    // Step 1: Product Model
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Create ${input.name} Product Model`,
+      description: `Define product data structure for ${input.name} - Model only`,
+      estimatedTime: "20 minutes",
+      isCompleted: false,
+      dependencies: [4],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} PRODUCT MODEL**: My ${input.name} product model creation is failing. Help me define the product schema.`,
+      ],
+      startPrompt: generateProductModelMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Product model file created",
+        "All product fields defined",
+        "Model exports properly",
+        "No syntax errors in model"
+      ]
+    });
+
+    // Step 2: Product Creation Form
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Product Creation Form`,
+      description: `Create product addition form for ${input.name} - Form only`,
+      estimatedTime: "25 minutes",
+      isCompleted: false,
+      dependencies: [2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} PRODUCT FORM**: My ${input.name} product creation form is broken. Help me create the product form component.`,
+      ],
+      startPrompt: generateProductFormMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Product form component created",
+        "All product fields render",
+        "Form validation works",
+        "Form submits without errors"
+      ]
+    });
+
+    // Step 3: Product API Endpoint
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Create ${input.name} Product API`,
+      description: `Build product CRUD endpoints for ${input.name} - API only`,
+      estimatedTime: "30 minutes",
+      isCompleted: false,
+      dependencies: [3, stepNumber - 2],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} PRODUCT API**: My ${input.name} product API is failing. Help me create the product endpoints.`,
+      ],
+      startPrompt: generateProductAPIMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Product endpoints created",
+        "CRUD operations work",
+        "Data validation implemented",
+        "API returns proper responses"
+      ]
+    });
+
+    // Step 4: Product Display/Listing
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Product Display`,
+      description: `Create product listing interface for ${input.name} - Display only`,
+      estimatedTime: "25 minutes",
+      isCompleted: false,
+      dependencies: [stepNumber - 2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} PRODUCT DISPLAY**: My ${input.name} product display is broken. Help me create the product listing component.`,
+      ],
+      startPrompt: generateProductDisplayMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Product listing component created",
+        "Products display correctly",
+        "Product details show properly",
+        "Responsive design works"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateTaskManagementMicroSteps = (input: ProjectInput, recommendations: Recommendations, analysis: any, startingStepNumber: number) => {
+    const steps = [];
+    let stepNumber = startingStepNumber;
+
+    // Step 1: Task Model
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Create ${input.name} Task Model`,
+      description: `Define task data structure for ${input.name} - Model only`,
+      estimatedTime: "18 minutes",
+      isCompleted: false,
+      dependencies: [4],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} TASK MODEL**: My ${input.name} task model creation is failing. Help me define the task schema.`,
+      ],
+      startPrompt: generateTaskModelMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Task model file created",
+        "Task fields defined correctly",
+        "Model exports properly",
+        "Status enums work correctly"
+      ]
+    });
+
+    // Step 2: Task Creation Form
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Task Creation Form`,
+      description: `Create task addition form for ${input.name} - Form only`,
+      estimatedTime: "22 minutes",
+      isCompleted: false,
+      dependencies: [2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} TASK FORM**: My ${input.name} task creation form is broken. Help me create the task form component.`,
+      ],
+      startPrompt: generateTaskFormMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Task form component created",
+        "Task fields render correctly",
+        "Form validation works",
+        "Task priorities selectable"
+      ]
+    });
+
+    // Step 3: Task List Display
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Task List`,
+      description: `Create task listing interface for ${input.name} - Display only`,
+      estimatedTime: "25 minutes",
+      isCompleted: false,
+      dependencies: [stepNumber - 2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} TASK LIST**: My ${input.name} task list is broken. Help me create the task listing component.`,
+      ],
+      startPrompt: generateTaskListMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Task list component created",
+        "Tasks display correctly",
+        "Task status can be updated",
+        "Task filtering works"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateGenericMicroSteps = (input: ProjectInput, recommendations: Recommendations, analysis: any, startingStepNumber: number) => {
+    const steps = [];
+    let stepNumber = startingStepNumber;
+
+    // Step 1: Core Data Model
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Create ${input.name} Core Data Model`,
+      description: `Define main data structure for ${input.name} - Model only`,
+      estimatedTime: "20 minutes",
+      isCompleted: false,
+      dependencies: [4],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} DATA MODEL**: My ${input.name} data model creation is failing. Help me define the core schema.`,
+      ],
+      startPrompt: generateCoreDataModelMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Core data model created",
+        "Required fields defined",
+        "Model exports properly",
+        "Data types are correct"
+      ]
+    });
+
+    // Step 2: Main Interface Component
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Main Interface`,
+      description: `Create primary user interface for ${input.name} - UI only`,
+      estimatedTime: "30 minutes",
+      isCompleted: false,
+      dependencies: [2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} INTERFACE**: My ${input.name} main interface is broken. Help me create the primary UI component.`,
+      ],
+      startPrompt: generateMainInterfaceMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Main interface component created",
+        "UI renders correctly",
+        "User interactions work",
+        "Responsive design implemented"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateCMSMicroSteps = (input: ProjectInput, recommendations: Recommendations, analysis: any, startingStepNumber: number) => {
+    const steps = [];
+    let stepNumber = startingStepNumber;
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Create ${input.name} Content Model`,
+      description: `Define content/post structure for ${input.name} - Model only`,
+      estimatedTime: "18 minutes",
+      isCompleted: false,
+      dependencies: [4],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} CONTENT MODEL**: My ${input.name} content model is failing.`,
+      ],
+      startPrompt: generateContentModelMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Content model created",
+        "Content fields defined",
+        "Publishing status works",
+        "Model exports properly"
+      ]
+    });
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Content Editor`,
+      description: `Create content creation interface for ${input.name} - Editor only`,
+      estimatedTime: "25 minutes",
+      isCompleted: false,
+      dependencies: [2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} EDITOR**: My ${input.name} content editor is broken.`,
+      ],
+      startPrompt: generateContentEditorMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Content editor created",
+        "Rich text editing works",
+        "Content can be saved",
+        "Preview functionality works"
+      ]
+    });
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Content Display`,
+      description: `Create content viewing interface for ${input.name} - Display only`,
+      estimatedTime: "20 minutes",
+      isCompleted: false,
+      dependencies: [stepNumber - 2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} CONTENT DISPLAY**: My ${input.name} content display is broken.`,
+      ],
+      startPrompt: generateContentDisplayMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Content display created",
+        "Published content shows",
+        "Content formatting works",
+        "Navigation between content works"
+      ]
+    });
+
+    return steps;
+  };
+
+  const generateDashboardMicroSteps = (input: ProjectInput, recommendations: Recommendations, analysis: any, startingStepNumber: number) => {
+    const steps = [];
+    let stepNumber = startingStepNumber;
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Create ${input.name} Data Analytics Model`,
+      description: `Define analytics data structure for ${input.name} - Model only`,
+      estimatedTime: "20 minutes",
+      isCompleted: false,
+      dependencies: [4],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} ANALYTICS MODEL**: My ${input.name} analytics model is failing.`,
+      ],
+      startPrompt: generateAnalyticsModelMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Analytics model created",
+        "Metrics fields defined",
+        "Time-series structure works",
+        "Model exports properly"
+      ]
+    });
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Chart Components`,
+      description: `Create data visualization components for ${input.name} - Charts only`,
+      estimatedTime: "30 minutes",
+      isCompleted: false,
+      dependencies: [2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} CHARTS**: My ${input.name} chart components are broken.`,
+      ],
+      startPrompt: generateChartComponentsMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Chart components created",
+        "Data visualization works",
+        "Charts render correctly",
+        "Interactive features work"
+      ]
+    });
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: `Build ${input.name} Dashboard Layout`,
+      description: `Create dashboard layout for ${input.name} - Layout only`,
+      estimatedTime: "25 minutes",
+      isCompleted: false,
+      dependencies: [stepNumber - 2, stepNumber - 1],
+      rescuePrompts: [
+        `**AI CODING AGENT RESCUE - ${input.name.toUpperCase()} DASHBOARD**: My ${input.name} dashboard layout is broken.`,
+      ],
+      startPrompt: generateDashboardLayoutMicroStep(input, recommendations, analysis),
+      validationChecklist: [
+        "Dashboard layout created",
+        "Charts display in grid",
+        "Responsive layout works",
+        "Dashboard navigation works"
+      ]
+    });
+
+    return steps;
+  };
+
+  // DETAILED MICRO-STEP PROMPT GENERATORS
+  const generateProductModelMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 'PostgreSQL';
+    
+    return `Create product model for "${input.name}" e-commerce platform.
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Define ONLY the product data structure.
+
+CREATE FILE: ${dbType === 'MongoDB' ? 'src/models/Product.js' : 'src/models/product.js'}
+\`\`\`javascript
+${dbType === 'MongoDB' ? 
+  `const mongoose = require('mongoose');
+
+const productSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200
+  },
+  description: {
+    type: String,
+    required: true,
+    maxlength: 2000
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: ['electronics', 'clothing', 'books', 'home', 'sports', 'other']
+  },
+  images: [{
+    type: String,
+    validate: {
+      validator: function(v) {
+        return /^https?:\\/\\/.+/.test(v);
+      },
+      message: 'Invalid image URL'
+    }
+  }],
+  inventory: {
+    quantity: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0
+    },
+    inStock: {
+      type: Boolean,
+      default: true
+    }
+  },
+  sku: {
+    type: String,
+    required: true,
+    unique: true,
+    uppercase: true
+  },
+  tags: [String],
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
+
+// Generate SKU automatically
+productSchema.pre('save', function(next) {
+  if (!this.sku) {
+    this.sku = this.name.replace(/[^A-Z0-9]/gi, '').toUpperCase().substring(0, 10) + Date.now().toString().slice(-4);
+  }
+  next();
+});
+
+module.exports = mongoose.model('Product', productSchema);` :
+  `const { pool } = require('../config/database');
+
+const createProductsTable = async () => {
+  const query = \`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(200) NOT NULL,
+      description TEXT NOT NULL,
+      price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
+      category VARCHAR(50) NOT NULL,
+      images TEXT[],
+      quantity INTEGER DEFAULT 0 CHECK (quantity >= 0),
+      in_stock BOOLEAN DEFAULT true,
+      sku VARCHAR(20) UNIQUE NOT NULL,
+      tags TEXT[],
+      is_active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+    CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active);
+  \`;
+  
+  try {
+    await pool.query(query);
+    console.log('${input.name} products table created');
+  } catch (error) {
+    console.error('Error creating products table:', error);
+  }
+};
+
+const generateSKU = (productName) => {
+  return productName.replace(/[^A-Z0-9]/gi, '').toUpperCase().substring(0, 10) + Date.now().toString().slice(-4);
+};
+
+module.exports = { createProductsTable, generateSKU };`}
+\`\`\`
+
+DO NOT:
+- Create product operations
+- Build product forms
+- Add product routes
+- Create product UI components
+
+OUTPUT: Product model with all required fields for ${input.name}
+TEST: Model should import without errors
+
+Stop here. Product form comes next.`;
+  };
+
+  const generateProductFormMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const framework = recommendations.recommendedTechStack.includes('Next.js') ? 'Next.js' : 'React';
+    
+    return `Create product creation form for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the product creation form component.
+
+CREATE FILE: src/components/ProductForm.${framework === 'Next.js' ? 'tsx' : 'jsx'}
+\`\`\`${framework === 'Next.js' ? 'typescript' : 'javascript'}
+${framework === 'Next.js' ? "import { useState } from 'react';" : "import React, { useState } from 'react';"}
+
+const ProductForm = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: 'electronics',
+    images: [''],
+    quantity: '',
+    tags: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const categories = ['electronics', 'clothing', 'books', 'home', 'sports', 'other'];
+
+  const handleChange = (e${framework === 'Next.js' ? ': React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>' : ''}) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleImageChange = (index${framework === 'Next.js' ? ': number' : ''}, value${framework === 'Next.js' ? ': string' : ''}) => {
+    const newImages = [...formData.images];
+    newImages[index] = value;
+    setFormData({ ...formData, images: newImages });
+  };
+
+  const addImageField = () => {
+    setFormData({
+      ...formData,
+      images: [...formData.images, '']
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors${framework === 'Next.js' ? ': any' : ''} = {};
+    
+    if (!formData.name || formData.name.length < 3) {
+      newErrors.name = 'Product name must be at least 3 characters';
+    }
+    
+    if (!formData.description || formData.description.length < 10) {
+      newErrors.description = 'Description must be at least 10 characters';
+    }
+    
+    if (!formData.price || isNaN(parseFloat(formData.price)) || parseFloat(formData.price) <= 0) {
+      newErrors.price = 'Price must be a valid number greater than 0';
+    }
+    
+    if (!formData.quantity || isNaN(parseInt(formData.quantity)) || parseInt(formData.quantity) < 0) {
+      newErrors.quantity = 'Quantity must be a valid number 0 or greater';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e${framework === 'Next.js' ? ': React.FormEvent' : ''}) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // API call will be implemented in next step
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        quantity: parseInt(formData.quantity),
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        images: formData.images.filter(img => img.trim())
+      };
+      
+      console.log('${input.name} product data:', productData);
+      alert('Product form works! API integration comes next.');
+      
+      // Reset form
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        category: 'electronics',
+        images: [''],
+        quantity: '',
+        tags: ''
+      });
+    } catch (error) {
+      console.error('Product creation error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Add Product to ${input.name}</h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Product Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Enter product name"
+          />
+          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            rows={4}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Product description"
+          />
+          {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Price ($)</label>
+            <input
+              type="number"
+              step="0.01"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+              placeholder="0.00"
+            />
+            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Category</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            value={formData.quantity}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="0"
+          />
+          {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Product Images</label>
+          {formData.images.map((image, index) => (
+            <input
+              key={index}
+              type="url"
+              value={image}
+              onChange={(e) => handleImageChange(index, e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500 mb-2"
+              placeholder="Image URL"
+            />
+          ))}
+          <button
+            type="button"
+            onClick={addImageField}
+            className="text-blue-600 text-sm hover:underline"
+          >
+            + Add another image
+          </button>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Tags (comma separated)</label>
+          <input
+            type="text"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="tag1, tag2, tag3"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Adding Product...' : 'Add Product'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default ProductForm;
+\`\`\`
+
+DO NOT:
+- Connect to API endpoints
+- Add image upload functionality
+- Implement actual product creation
+- Add advanced validation
+
+OUTPUT: Functional product form with validation for ${input.name}
+TEST: Form should render, validate inputs, and show success message
+
+Stop here. Product API comes next.`;
+  };
+
+  const generateProductAPIMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 'PostgreSQL';
+    
+    return `Create product API endpoints for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the product CRUD API endpoints.
+
+CREATE FILE: src/routes/products.js
+\`\`\`javascript
+const express = require('express');
+${dbType === 'MongoDB' ? 
+  "const Product = require('../models/Product');" : 
+  "const { pool, generateSKU } = require('../models/product');"}
+const router = express.Router();
+
+// GET all products
+router.get('/', async (req, res) => {
+  try {
+    const { category, search, page = 1, limit = 10 } = req.query;
+    
+${dbType === 'MongoDB' ? 
+  `    let query = { isActive: true };
+    
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ];
+    }
+    
+    const products = await Product.find(query)
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .sort({ createdAt: -1 });
+    
+    const total = await Product.countDocuments(query);` :
+  `    let whereClause = 'WHERE is_active = true';
+    let queryParams = [];
+    let paramIndex = 1;
+    
+    if (category && category !== 'all') {
+      whereClause += \` AND category = $\${paramIndex}\`;
+      queryParams.push(category);
+      paramIndex++;
+    }
+    
+    if (search) {
+      whereClause += \` AND (name ILIKE $\${paramIndex} OR description ILIKE $\${paramIndex} OR $\${paramIndex} = ANY(tags))\`;
+      queryParams.push(\`%\${search}%\`);
+      paramIndex++;
+    }
+    
+    const offset = (page - 1) * limit;
+    const query = \`
+      SELECT * FROM products 
+      \${whereClause} 
+      ORDER BY created_at DESC 
+      LIMIT $\${paramIndex} OFFSET $\${paramIndex + 1}
+    \`;
+    
+    const countQuery = \`SELECT COUNT(*) FROM products \${whereClause}\`;
+    
+    queryParams.push(limit, offset);
+    
+    const products = await pool.query(query, queryParams);
+    const countResult = await pool.query(countQuery, queryParams.slice(0, -2));
+    const total = parseInt(countResult.rows[0].count);`}
+    
+    res.json({
+      success: true,
+      products: ${dbType === 'MongoDB' ? 'products' : 'products.rows'},
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        hasMore: page * limit < total
+      }
+    });
+    
+  } catch (error) {
+    console.error('${input.name} get products error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching products'
+    });
+  }
+});
+
+// GET single product
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+${dbType === 'MongoDB' ? 
+  `    const product = await Product.findById(id);` :
+  `    const query = 'SELECT * FROM products WHERE id = $1 AND is_active = true';
+    const result = await pool.query(query, [id]);
+    const product = result.rows[0];`}
+    
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      product
+    });
+    
+  } catch (error) {
+    console.error('${input.name} get product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching product'
+    });
+  }
+});
+
+// POST create product
+router.post('/', async (req, res) => {
+  try {
+    const { name, description, price, category, images, quantity, tags } = req.body;
+    
+    // Validation
+    if (!name || !description || !price || !category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, description, price, and category are required'
+      });
+    }
+    
+    if (price <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Price must be greater than 0'
+      });
+    }
+
+${dbType === 'MongoDB' ? 
+  `    const product = new Product({
+      name,
+      description,
+      price: parseFloat(price),
+      category,
+      images: images || [],
+      inventory: {
+        quantity: parseInt(quantity) || 0,
+        inStock: parseInt(quantity) > 0
+      },
+      tags: tags || []
+    });
+    
+    await product.save();` :
+  `    const sku = generateSKU(name);
+    
+    const query = \`
+      INSERT INTO products (name, description, price, category, images, quantity, in_stock, sku, tags)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    \`;
+    
+    const values = [
+      name,
+      description,
+      parseFloat(price),
+      category,
+      images || [],
+      parseInt(quantity) || 0,
+      parseInt(quantity) > 0,
+      sku,
+      tags || []
+    ];
+    
+    const result = await pool.query(query, values);
+    const product = result.rows[0];`}
+    
+    res.status(201).json({
+      success: true,
+      message: 'Product created successfully for ${input.name}',
+      product
+    });
+    
+  } catch (error) {
+    console.error('${input.name} create product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating product'
+    });
+  }
+});
+
+module.exports = router;
+\`\`\`
+
+UPDATE src/index.js - ADD these lines:
+\`\`\`javascript
+const productRoutes = require('./routes/products');
+
+// Routes
+app.use('/api/products', productRoutes);
+\`\`\`
+
+DO NOT:
+- Add authentication middleware
+- Create product UI components
+- Add image upload handling
+- Implement cart functionality
+
+OUTPUT: Working product CRUD endpoints for ${input.name}
+TEST: GET/POST /api/products should work correctly
+
+Stop here. Product display comes next.`;
+  };
+
+  const generateProductDisplayMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const framework = recommendations.recommendedTechStack.includes('Next.js') ? 'Next.js' : 'React';
+    
+    return `Create product display component for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the product listing/display component.
+
+CREATE FILE: src/components/ProductList.${framework === 'Next.js' ? 'tsx' : 'jsx'}
+\`\`\`${framework === 'Next.js' ? 'typescript' : 'javascript'}
+${framework === 'Next.js' ? "import { useState, useEffect } from 'react';" : "import React, { useState, useEffect } from 'react';"}
+
+${framework === 'Next.js' ? 
+  `interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  images: string[];
+  quantity?: number;
+  tags: string[];
+}` : ''}
+
+const ProductList = () => {
+  const [products, setProducts] = useState${framework === 'Next.js' ? '<Product[]>' : ''}([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const categories = ['all', 'electronics', 'clothing', 'books', 'home', 'sports', 'other'];
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        search: searchTerm,
+        category: selectedCategory,
+        page: currentPage.toString(),
+        limit: '12'
+      });
+      
+      const response = await fetch(\`/api/products?\${params}\`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setProducts(data.products);
+        setError('');
+      } else {
+        setError('Failed to load products');
+      }
+    } catch (err) {
+      setError('Error fetching products');
+      console.error('${input.name} fetch products error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [searchTerm, selectedCategory, currentPage]);
+
+  const handleSearch = (e${framework === 'Next.js' ? ': React.ChangeEvent<HTMLInputElement>' : ''}) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  const handleCategoryChange = (e${framework === 'Next.js' ? ': React.ChangeEvent<HTMLSelectElement>' : ''}) => {
+    setSelectedCategory(e.target.value);
+    setCurrentPage(1); // Reset to first page on category change
+  };
+
+  const formatPrice = (price${framework === 'Next.js' ? ': number' : ''}) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500 text-lg">{error}</p>
+        <button 
+          onClick={fetchProducts}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-center mb-6">${input.name} Products</h1>
+        
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          
+          <div className="md:w-48">
+            <select
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category === 'all' ? 'All Categories' : 
+                   category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Products Grid */}
+      {products.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">No products found</p>
+          <p className="text-gray-400 mt-2">Try adjusting your search or filter criteria</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.map((product${framework === 'Next.js' ? ': Product' : ''}) => (
+            <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              {/* Product Image */}
+              <div className="h-48 bg-gray-200 relative">
+                {product.images && product.images.length > 0 ? (
+                  <img
+                    src={product.images[0]}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/300x200?text=No+Image';
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    No Image
+                  </div>
+                )}
+                
+                {/* Category Badge */}
+                <div className="absolute top-2 left-2">
+                  <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                    {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Product Info */}
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2 line-clamp-2">{product.name}</h3>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-3">{product.description}</p>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-blue-600">
+                    {formatPrice(product.price)}
+                  </span>
+                  
+                  {product.quantity !== undefined && (
+                    <span className={\`text-sm px-2 py-1 rounded \${
+                      product.quantity > 0 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }\`}>
+                      {product.quantity > 0 ? \`\${product.quantity} in stock\` : 'Out of stock'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Tags */}
+                {product.tags && product.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {product.tags.slice(0, 3).map((tag, index) => (
+                      <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                    {product.tags.length > 3 && (
+                      <span className="text-xs text-gray-400">+{product.tags.length - 3} more</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProductList;
+\`\`\`
+
+DO NOT:
+- Add cart functionality
+- Implement product detail pages
+- Add product editing features
+- Create checkout process
+
+OUTPUT: Functional product listing with search and filter for ${input.name}
+TEST: Component should display products, search and filter should work
+
+Stop here. Additional features come next.`;
+  };
+
+  const generateTaskModelMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 'PostgreSQL';
+    
+    return `Create task model for "${input.name}" task management system.
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Define ONLY the task data structure.
+
+CREATE FILE: ${dbType === 'MongoDB' ? 'src/models/Task.js' : 'src/models/task.js'}
+\`\`\`javascript
+${dbType === 'MongoDB' ? 
+  `const mongoose = require('mongoose');
+
+const taskSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200
+  },
+  description: {
+    type: String,
+    maxlength: 1000
+  },
+  status: {
+    type: String,
+    enum: ['todo', 'in-progress', 'review', 'completed'],
+    default: 'todo'
+  },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'urgent'],
+    default: 'medium'
+  },
+  dueDate: {
+    type: Date
+  },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  tags: [String],
+  estimatedHours: {
+    type: Number,
+    min: 0
+  },
+  actualHours: {
+    type: Number,
+    min: 0,
+    default: 0
+  },
+  completedAt: {
+    type: Date
+  }
+}, {
+  timestamps: true
+});
+
+// Update completedAt when status changes to completed
+taskSchema.pre('save', function(next) {
+  if (this.isModified('status')) {
+    if (this.status === 'completed' && !this.completedAt) {
+      this.completedAt = new Date();
+    } else if (this.status !== 'completed') {
+      this.completedAt = undefined;
+    }
+  }
+  next();
+});
+
+module.exports = mongoose.model('Task', taskSchema);` :
+  `const { pool } = require('../config/database');
+
+const createTasksTable = async () => {
+  const query = \`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(200) NOT NULL,
+      description TEXT,
+      status VARCHAR(20) DEFAULT 'todo' CHECK (status IN ('todo', 'in-progress', 'review', 'completed')),
+      priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+      due_date TIMESTAMP,
+      assigned_to INTEGER REFERENCES users(id),
+      created_by INTEGER NOT NULL REFERENCES users(id),
+      tags TEXT[],
+      estimated_hours DECIMAL(5,2) CHECK (estimated_hours >= 0),
+      actual_hours DECIMAL(5,2) DEFAULT 0 CHECK (actual_hours >= 0),
+      completed_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+    CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+    CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to);
+    CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+  \`;
+  
+  try {
+    await pool.query(query);
+    console.log('${input.name} tasks table created');
+  } catch (error) {
+    console.error('Error creating tasks table:', error);
+  }
+};
+
+const updateCompletedAt = async (taskId, status) => {
+  const query = status === 'completed' 
+    ? 'UPDATE tasks SET completed_at = CURRENT_TIMESTAMP WHERE id = $1'
+    : 'UPDATE tasks SET completed_at = NULL WHERE id = $1';
+  
+  try {
+    await pool.query(query, [taskId]);
+  } catch (error) {
+    console.error('Error updating completed_at:', error);
+  }
+};
+
+module.exports = { createTasksTable, updateCompletedAt };`}
+\`\`\`
+
+DO NOT:
+- Create task operations
+- Build task forms
+- Add task routes
+- Create task UI components
+
+OUTPUT: Task model with status tracking for ${input.name}
+TEST: Model should import without errors
+
+Stop here. Task form comes next.`;
+  };
+
+  const generateCoreDataModelMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const dbType = recommendations.recommendedTechStack.includes('MongoDB') ? 'MongoDB' : 'PostgreSQL';
+    const modelName = input.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    
+    return `Create core data model for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Define ONLY the main data structure based on project description.
+
+CREATE FILE: ${dbType === 'MongoDB' ? `src/models/${modelName.charAt(0).toUpperCase() + modelName.slice(1)}.js` : `src/models/${modelName}.js`}
+\`\`\`javascript
+${dbType === 'MongoDB' ? 
+  `const mongoose = require('mongoose');
+
+const ${modelName}Schema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200
+  },
+  description: {
+    type: String,
+    maxlength: 2000
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'draft', 'published'],
+    default: 'active'
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  data: {
+    type: mongoose.Schema.Types.Mixed
+  },
+  tags: [String],
+  isPublic: {
+    type: Boolean,
+    default: false
+  }
+}, {
+  timestamps: true
+});
+
+module.exports = mongoose.model('${modelName.charAt(0).toUpperCase() + modelName.slice(1)}', ${modelName}Schema);` :
+  `const { pool } = require('../config/database');
+
+const create${modelName.charAt(0).toUpperCase() + modelName.slice(1)}Table = async () => {
+  const query = \`
+    CREATE TABLE IF NOT EXISTS ${modelName} (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(200) NOT NULL,
+      description TEXT,
+      status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'draft', 'published')),
+      created_by INTEGER NOT NULL REFERENCES users(id),
+      data JSONB,
+      tags TEXT[],
+      is_public BOOLEAN DEFAULT false,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_${modelName}_status ON ${modelName}(status);
+    CREATE INDEX IF NOT EXISTS idx_${modelName}_created_by ON ${modelName}(created_by);
+  \`;
+  
+  try {
+    await pool.query(query);
+    console.log('${input.name} ${modelName} table created');
+  } catch (error) {
+    console.error('Error creating ${modelName} table:', error);
+  }
+};
+
+module.exports = { create${modelName.charAt(0).toUpperCase() + modelName.slice(1)}Table };`}
+\`\`\`
+
+DO NOT:
+- Create data operations
+- Build forms
+- Add routes
+- Create UI components
+
+OUTPUT: Core data model for ${input.name}
+TEST: Model should import without errors
+
+Stop here. Main interface comes next.`;
+  };
+
+  const generateMainInterfaceMicroStep = (input: ProjectInput, recommendations: Recommendations, analysis: any) => {
+    const framework = recommendations.recommendedTechStack.includes('Next.js') ? 'Next.js' : 'React';
+    
+    return `Create main interface for "${input.name}".
+
+PROJECT DESCRIPTION: "${input.description}"
+
+SINGLE TASK: Build ONLY the primary user interface component.
+
+CREATE FILE: src/components/MainInterface.${framework === 'Next.js' ? 'tsx' : 'jsx'}
+\`\`\`${framework === 'Next.js' ? 'typescript' : 'javascript'}
+${framework === 'Next.js' ? "import { useState, useEffect } from 'react';" : "import React, { useState, useEffect } from 'react';"}
+
+const MainInterface = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // API call will be implemented later
+      console.log('${input.name} data fetch - API integration pending');
+      
+      // Simulate data for now
+      setTimeout(() => {
+        setData([
+          { id: 1, title: 'Sample Item 1', description: 'Description for item 1', status: 'active' },
+          { id: 2, title: 'Sample Item 2', description: 'Description for item 2', status: 'draft' }
+        ]);
+        setLoading(false);
+      }, 1000);
+      
+    } catch (err) {
+      setError('Error loading data');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSearch = (e${framework === 'Next.js' ? ': React.ChangeEvent<HTMLInputElement>' : ''}) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredData = data.filter(item => 
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <span className="ml-2 text-gray-600">Loading ${input.name}...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500 text-lg">{error}</p>
+        <button 
+          onClick={fetchData}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-center mb-4">${input.name}</h1>
+        <p className="text-gray-600 text-center max-w-2xl mx-auto">
+          Welcome to ${input.name} - your solution for managing and organizing your work efficiently.
+        </p>
+      </div>
+
+      {/* Search */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-lg"
+        />
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mb-8 flex flex-wrap gap-4 justify-center">
+        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+          Create New
+        </button>
+        <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+          Import Data
+        </button>
+        <button className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+          Settings
+        </button>
+      </div>
+
+      {/* Data Display */}
+      {filteredData.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-6xl text-gray-300 mb-4">📝</div>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">No Items Found</h3>
+          <p className="text-gray-500">
+            {searchTerm ? 'Try adjusting your search terms' : 'Get started by creating your first item'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredData.map((item) => (
+            <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+                <span className={\`px-2 py-1 text-xs rounded \${
+                  item.status === 'active' ? 'bg-green-100 text-green-800' :
+                  item.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-gray-100 text-gray-800'
+                }\`}>
+                  {item.status}
+                </span>
+              </div>
+              
+              <p className="text-gray-600 mb-4">{item.description}</p>
+              
+              <div className="flex gap-2">
+                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  View
+                </button>
+                <button className="text-green-600 hover:text-green-800 text-sm font-medium">
+                  Edit
+                </button>
+                <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="mt-12 text-center text-gray-500">
+        <p>Powered by ${input.name} - Built for productivity</p>
+      </div>
+    </div>
+  );
+};
+
+export default MainInterface;
+\`\`\`
+
+DO NOT:
+- Connect to real APIs
+- Implement actual CRUD operations
+- Add complex state management
+- Create additional components
+
+OUTPUT: Functional main interface for ${input.name}
+TEST: Component should render with sample data and search functionality
+
+Stop here. API integration comes next.`;
+  };
+
   const generateIntelligentRoadmap = (input: ProjectInput, recommendations: Recommendations): RoadmapStep[] => {
     console.log("=== GENERATING GRANULAR ROADMAP ===");
     console.log("Project Name:", input.name);
@@ -2136,21 +3705,29 @@ Stop here. Core features come next.`;
       });
     }
 
-    // Add custom project-specific steps
-    const customSteps = analysis.customSteps;
-    customSteps.forEach((customStep: any) => {
-      steps.push({
-        stepNumber: stepNumber++,
-        title: customStep.title,
-        description: customStep.description,
-        estimatedTime: customStep.estimatedTime,
-        isCompleted: false,
-        dependencies: customStep.dependencies,
-        rescuePrompts: customStep.rescuePrompts,
-        startPrompt: customStep.startPrompt,
-        validationChecklist: customStep.validationChecklist
-      });
-    });
+    // PHASE 3: PROJECT-SPECIFIC CORE FEATURES
+    // Generate micro-steps based on detected project type
+    switch (analysis.projectType) {
+      case 'ecommerce':
+        steps.push(...generateEcommerceMicroSteps(input, recommendations, analysis, stepNumber));
+        stepNumber += 4; // Account for e-commerce micro-steps
+        break;
+      case 'task_management':
+        steps.push(...generateTaskManagementMicroSteps(input, recommendations, analysis, stepNumber));
+        stepNumber += 3; // Account for task management micro-steps
+        break;
+      case 'content_management':
+        steps.push(...generateCMSMicroSteps(input, recommendations, analysis, stepNumber));
+        stepNumber += 3; // Account for CMS micro-steps
+        break;
+      case 'dashboard':
+        steps.push(...generateDashboardMicroSteps(input, recommendations, analysis, stepNumber));
+        stepNumber += 3; // Account for dashboard micro-steps
+        break;
+      default:
+        steps.push(...generateGenericMicroSteps(input, recommendations, analysis, stepNumber));
+        stepNumber += 2; // Account for generic micro-steps
+    }
 
     // Add feature-specific steps based on detected features
     if (analysis.features.includes('payment_processing')) {
