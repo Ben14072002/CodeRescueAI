@@ -3,35 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Copy, CheckCircle, Star, Database, Lock, Palette, Server, AlertTriangle, Gift } from "lucide-react";
+import { ArrowLeft, Copy, CheckCircle, Star, AlertTriangle, Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface PromptTemplate {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  prompts: {
-    name: string;
-    text: string;
-    explanation: string;
-  }[];
-  icon: any;
-  color: string;
-}
+import { aiAgentTemplates, type AIAgentTemplate } from "./ai-agent-templates";
 
 interface PromptTemplatesLibraryProps {
   onBack: () => void;
 }
 
-const TEMPLATE_CATEGORIES: PromptTemplate[] = [
-  {
-    id: 'secure-authentication-setup',
-    title: 'Secure Authentication Setup',
-    description: 'Build robust login systems with security best practices',
-    category: 'Authentication',
-    icon: Lock,
-    color: 'text-blue-500',
+const TEMPLATE_CATEGORIES: AIAgentTemplate[] = aiAgentTemplates;
     prompts: [
       {
         name: 'Enterprise Auth System with Zero-Trust Architecture',

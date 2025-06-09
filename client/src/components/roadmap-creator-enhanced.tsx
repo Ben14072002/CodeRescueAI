@@ -480,9 +480,9 @@ ${projectInput.dataComplexity === 'Complex analytics' ? '7. Analytics queries an
           isCompleted: false,
           dependencies: [1, 2, 3],
           rescuePrompts: [
-            "Debug API integration issues",
-            "Fix authentication problems",
-            "Resolve rate limiting errors"
+            "**AI CODING AGENT RESCUE - API INTEGRATIONS**: My third-party API integrations are failing. Debug connection issues, authentication errors, and response handling problems. Provide complete working integration code.",
+            "**AI CODING AGENT RESCUE - INTEGRATION AUTH**: Fix API authentication and authorization issues. I need complete working OAuth flows, API key management, and secure credential handling.",
+            "**AI CODING AGENT RESCUE - RATE LIMITING**: Resolve API rate limiting and quota management problems. Provide complete rate limiting solutions with retry logic and error handling."
           ],
           startPrompt: `**AI CODING ASSISTANT PROMPT - THIRD-PARTY INTEGRATIONS**
 
@@ -536,9 +536,9 @@ ${projectInput.integrations.map((integration, index) => `${index + 1}. ${integra
         isCompleted: false,
         dependencies: projectInput.integrations.length > 0 ? [1, 2, 3, 4] : [1, 2, 3],
         rescuePrompts: [
-          "Debug deployment failures",
-          "Fix CI/CD pipeline issues",
-          "Resolve hosting configuration problems"
+          "**AI CODING AGENT RESCUE - DEPLOYMENT**: My production deployment is failing. Debug hosting issues, configuration errors, and environment problems. Provide complete working deployment scripts and fixes.",
+          "**AI CODING AGENT RESCUE - CI/CD PIPELINE**: Fix all CI/CD pipeline failures and automation issues. I need complete working pipeline configurations and deployment automation.",
+          "**AI CODING AGENT RESCUE - HOSTING CONFIG**: Resolve hosting platform configuration and domain setup problems. Provide complete hosting configuration with SSL, monitoring, and security setup."
         ],
         startPrompt: `**AI CODING ASSISTANT PROMPT - PRODUCTION DEPLOYMENT**
 
