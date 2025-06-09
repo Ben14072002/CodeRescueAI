@@ -5,6 +5,7 @@ import { SolutionDashboard } from "@/components/solution-dashboard";
 import { CustomPromptGenerator } from "@/components/custom-prompt-generator";
 import { PromptTemplatesLibrary } from "@/components/prompt-templates-library";
 import { ProjectPlanner } from "@/components/project-planner";
+import { MyProjects } from "@/pages/my-projects";
 import { UserSettings } from "@/components/user-settings";
 import { SuccessModal } from "@/components/success-modal";
 import { CopyToast } from "@/components/copy-toast";
@@ -17,7 +18,7 @@ import { useTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/use-subscription";
 import codeBreakeLogo from "@assets/Design sans titre (25).png";
 
-type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "templates" | "project-planner" | "settings";
+type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "templates" | "project-planner" | "my-projects" | "settings";
 
 export default function Home() {
   const [currentSection, setCurrentSection] = useState<Section>("landing");
@@ -46,6 +47,7 @@ export default function Home() {
   const navigateToCustomPrompts = () => setCurrentSection("custom-prompts");
   const navigateToTemplates = () => setCurrentSection("templates");
   const navigateToProjectPlanner = () => setCurrentSection("project-planner");
+  const navigateToMyProjects = () => setCurrentSection("my-projects");
   const navigateToSettings = () => setCurrentSection("settings");
 
   const handleSuccess = () => {
