@@ -4,7 +4,7 @@ import { ProblemSelection } from "@/components/problem-selection";
 import { SolutionDashboard } from "@/components/solution-dashboard";
 import { CustomPromptGenerator } from "@/components/custom-prompt-generator";
 import { PromptTemplatesLibrary } from "@/components/prompt-templates-library";
-import { FunctionalRoadmapCreator } from "@/components/roadmap-creator-functional";
+import { RoadmapCreator } from "@/components/roadmap-creator-enhanced-new";
 import { UserSettings } from "@/components/user-settings";
 import { SuccessModal } from "@/components/success-modal";
 import { CopyToast } from "@/components/copy-toast";
@@ -172,8 +172,12 @@ export default function Home() {
         )}
 
         {currentSection === "roadmap-creator" && (
-          <FunctionalRoadmapCreator 
+          <RoadmapCreator 
             onBack={navigateToProblems} 
+            onOpenRescue={(context) => {
+              // Store context for custom prompt generator
+              navigateToCustomPrompts();
+            }}
           />
         )}
 
