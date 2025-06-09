@@ -200,7 +200,7 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
       complexityFactors.push('enterprise scalability');
     }
     if (input.designComplexity === 'Complex animations') {
-      if (complexity === 'medium') complexity = 'complex';
+      if (complexity !== 'complex') complexity = 'complex';
       complexityFactors.push('complex UI animations');
     }
 
@@ -219,9 +219,9 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
     reasoning.timelineReason = `${timelineText} estimated because you're ${input.experienceLevel} level working on ${complexity} project with ${input.projectTimeline} timeline preference.`;
 
     // Generate features based on requirements
-    const coreFeatures = [];
-    const optionalFeatures = [];
-    const challenges = [];
+    const coreFeatures: string[] = [];
+    const optionalFeatures: string[] = [];
+    const challenges: string[] = [];
 
     if (input.authenticationNeeds !== 'None') {
       coreFeatures.push(`${input.authenticationNeeds} authentication system`);
@@ -261,7 +261,7 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
     }
 
     return {
-      recommendedTechStack: [...new Set(techStack)], // Remove duplicates
+      recommendedTechStack: Array.from(new Set(techStack)), // Remove duplicates
       suggestedComplexity: complexity,
       estimatedTimeline: timelineText,
       coreFeatures,
@@ -417,7 +417,7 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
 
   if (phase === 'input') {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
             variant="ghost"
@@ -429,88 +429,366 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
             Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Roadmap Prompt Creator</h1>
-            <p className="text-muted-foreground">Generate a complete development roadmap with custom AI prompts</p>
+            <h1 className="text-2xl font-bold">Enhanced Roadmap Creator</h1>
+            <p className="text-muted-foreground">Generate a custom development roadmap with AI prompts tailored to your specific requirements</p>
           </div>
-          <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+          <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
             Pro Feature
           </Badge>
         </div>
 
-        <Card>
+        <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              Project Details
+              Enhanced Project Analysis
             </CardTitle>
             <CardDescription>
-              Tell us about your project and we'll create a personalized development roadmap
+              Provide detailed information about your project for personalized recommendations and custom AI prompts
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="projectName">Project Name</Label>
-              <Input
-                id="projectName"
-                placeholder="e.g., Todo App with Authentication"
-                value={projectInput.name}
-                onChange={(e) => setProjectInput(prev => ({ ...prev, name: e.target.value }))}
-              />
+          <CardContent className="space-y-8">
+            {/* Basic Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 border-b border-gray-200 dark:border-gray-700 pb-2">
+                Basic Information
+              </h3>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="projectName">Project Name</Label>
+                  <Input
+                    id="projectName"
+                    placeholder="e.g., Task Management Dashboard"
+                    value={projectInput.name}
+                    onChange={(e) => setProjectInput(prev => ({ ...prev, name: e.target.value }))}
+                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+                  />
+                </div>
+
+                <div>
+                  <Label>Your Experience Level</Label>
+                  <Select value={projectInput.experienceLevel} onValueChange={(value) => setProjectInput(prev => ({ ...prev, experienceLevel: value as any }))}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner (New to coding)</SelectItem>
+                      <SelectItem value="intermediate">Intermediate (Some experience)</SelectItem>
+                      <SelectItem value="advanced">Advanced (Experienced developer)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="projectDescription">Project Description <span className="text-orange-500">(Min 300 characters for best results)</span></Label>
+                <Textarea
+                  id="projectDescription"
+                  placeholder="Describe your project in detail. What will it do? Who is it for? What problems does it solve? What features do you envision? Include specific requirements, target users, and any technical preferences."
+                  rows={4}
+                  value={projectInput.description}
+                  onChange={(e) => setProjectInput(prev => ({ ...prev, description: e.target.value }))}
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+                />
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {projectInput.description.length}/300 characters
+                </p>
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="projectDescription">Project Description</Label>
-              <Textarea
-                id="projectDescription"
-                placeholder="Describe your project in detail. What features do you want? Who will use it? What problems does it solve? (200+ characters recommended)"
-                rows={6}
-                value={projectInput.description}
-                onChange={(e) => setProjectInput(prev => ({ ...prev, description: e.target.value }))}
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                {projectInput.description.length} characters
-              </p>
+            {/* Project Scope */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 border-b border-gray-200 dark:border-gray-700 pb-2">
+                Project Scope
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label>Target Audience</Label>
+                  <Select value={projectInput.targetAudience} onValueChange={(value) => setProjectInput(prev => ({ ...prev, targetAudience: value as any }))}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="B2B">B2B (Business customers)</SelectItem>
+                      <SelectItem value="B2C">B2C (General consumers)</SelectItem>
+                      <SelectItem value="Internal tool">Internal tool</SelectItem>
+                      <SelectItem value="Personal project">Personal project</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label>Platform</Label>
+                  <Select value={projectInput.platform} onValueChange={(value) => setProjectInput(prev => ({ ...prev, platform: value as any }))}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Web app">Web app</SelectItem>
+                      <SelectItem value="Mobile responsive">Mobile responsive</SelectItem>
+                      <SelectItem value="Native mobile">Native mobile</SelectItem>
+                      <SelectItem value="Desktop app">Desktop app</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label>Expected Users</Label>
+                  <Select value={projectInput.expectedUsers} onValueChange={(value) => setProjectInput(prev => ({ ...prev, expectedUsers: value as any }))}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1-100">1-100 users</SelectItem>
+                      <SelectItem value="100-1000">100-1000 users</SelectItem>
+                      <SelectItem value="1000+">1000+ users</SelectItem>
+                      <SelectItem value="Enterprise scale">Enterprise scale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label>Timeline</Label>
+                  <Select value={projectInput.projectTimeline} onValueChange={(value) => setProjectInput(prev => ({ ...prev, projectTimeline: value as any }))}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Weekend project">Weekend project</SelectItem>
+                      <SelectItem value="1-2 weeks">1-2 weeks</SelectItem>
+                      <SelectItem value="1-2 months">1-2 months</SelectItem>
+                      <SelectItem value="Long-term">Long-term</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <Label>Your Experience Level</Label>
-              <RadioGroup
-                value={projectInput.experienceLevel}
-                onValueChange={(value: any) => setProjectInput(prev => ({ ...prev, experienceLevel: value }))}
-                className="mt-2"
+            {/* Advanced Options Toggle */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <Button
+                variant="ghost"
+                onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                className="w-full justify-between hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="beginner" id="beginner" />
-                  <Label htmlFor="beginner">Beginner - New to web development</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="intermediate" id="intermediate" />
-                  <Label htmlFor="intermediate">Intermediate - Some experience building projects</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="advanced" id="advanced" />
-                  <Label htmlFor="advanced">Advanced - Experienced developer</Label>
-                </div>
-              </RadioGroup>
+                <span className="font-medium">Advanced Configuration Options</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAdvancedOptions ? 'rotate-180' : ''}`} />
+              </Button>
             </div>
 
-            <Button 
-              onClick={analyzeProject} 
-              disabled={isAnalyzing}
-              className="w-full"
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                  Analyzing Project...
-                </>
-              ) : (
-                <>
-                  <Lightbulb className="h-4 w-4 mr-2" />
-                  Analyze & Get Smart Recommendations
-                </>
-              )}
-            </Button>
+            {/* Advanced Options */}
+            {showAdvancedOptions && (
+              <div className="space-y-6 animate-in slide-in-from-top-2 duration-300">
+                {/* Technical Requirements */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-purple-600 dark:text-purple-400 border-b border-gray-200 dark:border-gray-700 pb-2">
+                    Technical Requirements
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Authentication</Label>
+                      <Select value={projectInput.authenticationNeeds} onValueChange={(value) => setProjectInput(prev => ({ ...prev, authenticationNeeds: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="None">No authentication</SelectItem>
+                          <SelectItem value="Simple login">Simple login</SelectItem>
+                          <SelectItem value="OAuth">OAuth (Google, GitHub)</SelectItem>
+                          <SelectItem value="Enterprise SSO">Enterprise SSO</SelectItem>
+                          <SelectItem value="Custom auth">Custom authentication</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Data Complexity</Label>
+                      <Select value={projectInput.dataComplexity} onValueChange={(value) => setProjectInput(prev => ({ ...prev, dataComplexity: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Static content">Static content</SelectItem>
+                          <SelectItem value="Simple forms">Simple forms</SelectItem>
+                          <SelectItem value="Database driven">Database driven</SelectItem>
+                          <SelectItem value="Real-time data">Real-time data</SelectItem>
+                          <SelectItem value="Complex analytics">Complex analytics</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Performance</Label>
+                      <Select value={projectInput.performanceNeeds} onValueChange={(value) => setProjectInput(prev => ({ ...prev, performanceNeeds: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Basic">Basic performance</SelectItem>
+                          <SelectItem value="Medium traffic">Medium traffic</SelectItem>
+                          <SelectItem value="High performance">High performance</SelectItem>
+                          <SelectItem value="Enterprise scale">Enterprise scale</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">Required Integrations</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {['Payment processing', 'Email services', 'Social media', 'Analytics', 'Third-party APIs', 'File storage', 'Push notifications', 'SMS/messaging'].map((integration) => (
+                        <div key={integration} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={integration}
+                            checked={projectInput.integrations.includes(integration)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setProjectInput(prev => ({ ...prev, integrations: [...prev.integrations, integration] }));
+                              } else {
+                                setProjectInput(prev => ({ ...prev, integrations: prev.integrations.filter(i => i !== integration) }));
+                              }
+                            }}
+                          />
+                          <Label htmlFor={integration} className="text-xs">{integration}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Design & UX */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-orange-600 dark:text-orange-400 border-b border-gray-200 dark:border-gray-700 pb-2">
+                    Design & User Experience
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Design Complexity</Label>
+                      <Select value={projectInput.designComplexity} onValueChange={(value) => setProjectInput(prev => ({ ...prev, designComplexity: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Minimal/functional">Minimal/functional</SelectItem>
+                          <SelectItem value="Standard UI">Standard UI</SelectItem>
+                          <SelectItem value="Custom branded">Custom branded</SelectItem>
+                          <SelectItem value="Complex animations">Complex animations</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Responsiveness</Label>
+                      <Select value={projectInput.responsiveness} onValueChange={(value) => setProjectInput(prev => ({ ...prev, responsiveness: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Desktop only">Desktop only</SelectItem>
+                          <SelectItem value="Mobile friendly">Mobile friendly</SelectItem>
+                          <SelectItem value="Mobile first">Mobile first</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Accessibility</Label>
+                      <Select value={projectInput.accessibility} onValueChange={(value) => setProjectInput(prev => ({ ...prev, accessibility: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Basic">Basic</SelectItem>
+                          <SelectItem value="WCAG compliant">WCAG compliant</SelectItem>
+                          <SelectItem value="Enterprise accessibility">Enterprise accessibility</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Deployment & Budget */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-cyan-600 dark:text-cyan-400 border-b border-gray-200 dark:border-gray-700 pb-2">
+                    Deployment & Budget
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Hosting Type</Label>
+                      <Select value={projectInput.hostingType} onValueChange={(value) => setProjectInput(prev => ({ ...prev, hostingType: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Shared hosting">Shared hosting</SelectItem>
+                          <SelectItem value="Cloud platform">Cloud platform</SelectItem>
+                          <SelectItem value="Self-hosted">Self-hosted</SelectItem>
+                          <SelectItem value="Don't know">Don't know</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Budget Range</Label>
+                      <Select value={projectInput.budget} onValueChange={(value) => setProjectInput(prev => ({ ...prev, budget: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Free/minimal">Free/minimal</SelectItem>
+                          <SelectItem value="Low budget">Low budget ($50-200)</SelectItem>
+                          <SelectItem value="Medium budget">Medium budget ($200-1000)</SelectItem>
+                          <SelectItem value="Enterprise budget">Enterprise budget ($1000+)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Maintenance</Label>
+                      <Select value={projectInput.maintenance} onValueChange={(value) => setProjectInput(prev => ({ ...prev, maintenance: value as any }))}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Set and forget">Set and forget</SelectItem>
+                          <SelectItem value="Occasional updates">Occasional updates</SelectItem>
+                          <SelectItem value="Active maintenance">Active maintenance</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button variant="outline" onClick={onBack} className="flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
+              <Button 
+                onClick={analyzeProject} 
+                disabled={isAnalyzing || !projectInput.name || !projectInput.description || projectInput.description.length < 300}
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                    Analyzing Project...
+                  </>
+                ) : (
+                  <>
+                    <Lightbulb className="h-4 w-4 mr-2" />
+                    Analyze & Get Smart Recommendations
+                  </>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -772,36 +1050,71 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
 
                 <Separator />
 
+                {/* Enhanced AI Prompt Display with High Contrast */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold">AI Assistant Prompt:</h4>
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-blue-500" />
+                      AI Assistant Prompt:
+                    </h4>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => copyPrompt(activeStep.startPrompt)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
                     >
                       <Copy className="h-4 w-4 mr-2" />
-                      Copy
+                      Copy Prompt
                     </Button>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <pre className="text-sm whitespace-pre-wrap font-mono">
+                  
+                  {/* High Contrast Prompt Box */}
+                  <div className="bg-slate-900 border border-slate-700 p-4 rounded-lg">
+                    <pre className="text-sm whitespace-pre-wrap font-mono text-slate-100 leading-relaxed">
                       {activeStep.startPrompt}
                     </pre>
+                  </div>
+                  
+                  {/* Prompt Explanation */}
+                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Lightbulb className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h5 className="font-medium text-blue-900 dark:text-blue-100 text-sm">Why This Prompt Works:</h5>
+                        <p className="text-blue-700 dark:text-blue-200 text-sm mt-1">
+                          This prompt provides specific context about your {projectInput.targetAudience} project, 
+                          includes your tech stack ({recommendations?.recommendedTechStack.slice(0, 3).join(', ')}), 
+                          and guides the AI with step-by-step instructions for {activeStep.title.toLowerCase()}.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <Separator />
 
+                {/* Integrated Rescue System */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold">Need Rescue?</h4>
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      Need Rescue?
+                    </h4>
                     <Button
                       size="sm"
-                      variant="outline"
-                      onClick={() => onOpenRescue?.(activeStep.title)}
+                      onClick={() => onOpenRescue && onOpenRescue(`
+Project Context: ${projectInput.name}
+Current Step: ${activeStep.title}
+Tech Stack: ${recommendations?.recommendedTechStack.join(', ')}
+Experience Level: ${projectInput.experienceLevel}
+Target Audience: ${projectInput.targetAudience}
+Platform: ${projectInput.platform}
+
+Problem with: ${activeStep.title}
+                      `)}
+                      className="bg-orange-600 hover:bg-orange-700 text-white border-orange-600"
                     >
-                      <ExternalLink className="h-4 w-4 mr-2" />
+                      <Wrench className="h-4 w-4 mr-2" />
                       Open Rescue Generator
                     </Button>
                   </div>
