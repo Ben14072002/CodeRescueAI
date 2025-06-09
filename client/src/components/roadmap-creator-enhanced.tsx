@@ -326,25 +326,36 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
           isCompleted: false,
           dependencies: [],
           rescuePrompts: [
-            "Help me troubleshoot project setup issues",
-            "Fix build configuration errors",
-            "Resolve dependency conflicts"
+            "**AI CODING AGENT RESCUE - PROJECT SETUP**: My project setup is failing. Help me debug initialization errors, dependency conflicts, and build configuration issues. Provide complete diagnostic commands and fix implementations.",
+            "**AI CODING AGENT RESCUE - BUILD ERRORS**: Fix all build configuration errors in my project. I need complete working configuration files and step-by-step resolution for TypeScript, bundler, and dependency issues.",
+            "**AI CODING AGENT RESCUE - DEPENDENCY CONFLICTS**: Resolve all package dependency conflicts and version incompatibilities. Provide exact package.json updates and installation commands that work."
           ],
-          startPrompt: `You are an expert ${projectInput.experienceLevel} developer setting up a new ${projectInput.targetAudience} ${projectInput.platform.toLowerCase()} project.
+          startPrompt: `**AI CODING ASSISTANT PROMPT - PROJECT SETUP**
 
-PROJECT CONTEXT:
-- Name: ${projectInput.name}
-- Target: ${projectInput.targetAudience} with ${projectInput.expectedUsers} expected users
+I need help setting up a new ${projectInput.targetAudience} ${projectInput.platform.toLowerCase()} project. Please act as an expert ${projectInput.experienceLevel} developer and provide COMPLETE, EXECUTABLE code and commands.
+
+**PROJECT SPECIFICATIONS:**
+- Project Name: ${projectInput.name}
+- Target Users: ${projectInput.targetAudience} with ${projectInput.expectedUsers} expected users  
 - Tech Stack: ${recommendations.recommendedTechStack.join(', ')}
-- Complexity: ${recommendations.suggestedComplexity}
+- Complexity Level: ${recommendations.suggestedComplexity}
+- Design Requirements: ${projectInput.responsiveness}
 
-SETUP REQUIREMENTS:
-1. Create project structure with ${recommendations.recommendedTechStack[0]} and ${recommendations.recommendedTechStack[1]}
-2. Configure development environment for ${projectInput.responsiveness} design
-3. Set up basic routing and component structure
-4. Initialize version control with proper .gitignore
+**SPECIFIC TASKS FOR AI AGENT:**
+1. Generate complete project initialization commands for ${recommendations.recommendedTechStack[0]} and ${recommendations.recommendedTechStack[1]}
+2. Create full directory structure with all necessary folders
+3. Write complete configuration files (package.json, tsconfig.json, etc.)
+4. Set up routing system with example routes
+5. Create starter components with proper TypeScript types
+6. Generate .gitignore file with all necessary exclusions
 
-Please provide step-by-step setup instructions with exact terminal commands and configuration files. Focus on best practices for ${projectInput.experienceLevel} developers working on ${projectInput.targetAudience} applications.`,
+**OUTPUT FORMAT REQUIRED:**
+- Provide exact terminal commands that I can copy-paste
+- Include complete file contents, not just snippets
+- Add comments explaining each step for ${projectInput.experienceLevel} developers
+- Structure response as: Commands → File Contents → Verification Steps
+
+**IMPORTANT:** This is for a ${projectInput.targetAudience} application expecting ${projectInput.expectedUsers}, so ensure scalability and best practices are included from the start.`,
           validationChecklist: [
             "Project builds without errors",
             "Development server starts successfully",
@@ -360,26 +371,40 @@ Please provide step-by-step setup instructions with exact terminal commands and 
           isCompleted: false,
           dependencies: [1],
           rescuePrompts: [
-            "Debug authentication flow issues",
-            "Fix login/logout functionality",
-            "Resolve session management problems"
+            "**AI CODING AGENT RESCUE - AUTH FLOW**: My authentication system is broken. Debug login/logout issues, session management problems, and user state persistence. Provide complete working auth implementation.",
+            "**AI CODING AGENT RESCUE - LOGIN ERRORS**: Fix all login/register functionality errors. I need complete working forms, validation, and user feedback with proper error handling.",
+            "**AI CODING AGENT RESCUE - SESSION ISSUES**: Resolve session management and user persistence problems. Provide complete session handling code with security best practices."
           ],
-          startPrompt: `You are a security-focused ${projectInput.experienceLevel} developer implementing ${projectInput.authenticationNeeds} authentication.
+          startPrompt: `**AI CODING ASSISTANT PROMPT - AUTHENTICATION SYSTEM**
 
-PROJECT CONTEXT:
-- Application: ${projectInput.name} (${projectInput.targetAudience})
-- Users: ${projectInput.expectedUsers}
+I need you to implement a complete ${projectInput.authenticationNeeds} authentication system. Provide FULL, WORKING code that I can copy directly into my project.
+
+**PROJECT CONTEXT:**
+- App: ${projectInput.name} (${projectInput.targetAudience} application)
+- Expected Users: ${projectInput.expectedUsers}
 - Platform: ${projectInput.platform}
-- Auth Method: ${projectInput.authenticationNeeds}
+- Auth Type: ${projectInput.authenticationNeeds}
+- Design Style: ${projectInput.designComplexity}
 
-AUTHENTICATION REQUIREMENTS:
-1. Implement ${projectInput.authenticationNeeds} using ${recommendations.recommendedTechStack.find(tech => tech.includes('Auth') || tech.includes('Passport')) || 'secure authentication library'}
-2. Create login/register forms with ${projectInput.designComplexity.toLowerCase()} styling
-3. Set up protected routes and user session management
-4. Implement password security and validation
-5. Add user profile management functionality
+**REQUIRED DELIVERABLES:**
+1. Complete authentication setup using ${recommendations.recommendedTechStack.find(tech => tech.includes('Auth') || tech.includes('Passport') || tech.includes('Firebase')) || 'modern auth library'}
+2. Full login/register component code with form validation
+3. Protected route implementation with redirect logic
+4. User session management and persistence
+5. Password security implementation (hashing, validation)
+6. User profile management interface
+7. Error handling for all auth scenarios
 
-Provide complete code examples with security best practices for ${projectInput.experienceLevel} developers. Include error handling and user feedback mechanisms.`,
+**AI AGENT INSTRUCTIONS:**
+- Write complete, production-ready code files
+- Include all imports and dependencies needed
+- Add TypeScript types for everything
+- Provide exact installation commands for packages
+- Include CSS/styling for ${projectInput.designComplexity.toLowerCase()} design
+- Add comprehensive error handling and user feedback
+- Structure for ${projectInput.expectedUsers} scale
+
+**CRITICAL:** Give me complete files I can copy-paste, not code snippets. Include file paths and explain integration steps clearly.`,
           validationChecklist: [
             "Users can register and login successfully",
             "Password validation is implemented",
@@ -395,27 +420,47 @@ Provide complete code examples with security best practices for ${projectInput.e
           isCompleted: false,
           dependencies: [1, 2],
           rescuePrompts: [
-            "Debug database connection issues",
-            "Fix CRUD operation errors",
-            "Resolve data validation problems"
+            "**AI CODING AGENT RESCUE - DATABASE**: My database connections and schema are failing. Debug connection issues, migration errors, and ORM problems. Provide complete working database setup.",
+            "**AI CODING AGENT RESCUE - CRUD OPERATIONS**: Fix all CRUD operation errors and API endpoint issues. I need complete working database operations with proper error handling and validation.",
+            "**AI CODING AGENT RESCUE - DATA VALIDATION**: Resolve data validation and schema problems. Provide complete validation schemas, error handling, and data integrity solutions."
           ],
-          startPrompt: `You are a backend specialist implementing ${projectInput.dataComplexity} for a ${projectInput.targetAudience} application.
+          startPrompt: `**AI CODING ASSISTANT PROMPT - DATABASE & DATA MANAGEMENT**
 
-PROJECT SPECIFICATIONS:
-- Application: ${projectInput.name}
-- Data Type: ${projectInput.dataComplexity}
-- Database: ${recommendations.recommendedTechStack.find(tech => tech.includes('SQL') || tech.includes('MongoDB')) || 'appropriate database'}
-- Scale: ${projectInput.expectedUsers}
+Build a complete ${projectInput.dataComplexity} system for my application. I need COMPLETE, EXECUTABLE code that handles ${projectInput.expectedUsers} users efficiently.
 
-DATA IMPLEMENTATION TASKS:
-1. Design database schema for ${projectInput.dataComplexity.toLowerCase()}
-2. Set up database connections and migrations
-3. Create CRUD operations with proper validation
-4. Implement data relationships and constraints
-5. Add data backup and recovery procedures
-${projectInput.dataComplexity === 'Real-time data' ? '6. Configure WebSocket connections for real-time updates' : ''}
+**PROJECT REQUIREMENTS:**
+- Application: ${projectInput.name} (${projectInput.targetAudience})
+- Data Complexity: ${projectInput.dataComplexity}
+- Database: ${recommendations.recommendedTechStack.find(tech => tech.includes('SQL') || tech.includes('MongoDB') || tech.includes('Database')) || 'modern database solution'}
+- User Scale: ${projectInput.expectedUsers}
+- Performance Needs: ${projectInput.performanceNeeds}
 
-Provide detailed implementation with schema designs, API endpoints, and data validation. Focus on scalability for ${projectInput.expectedUsers} and best practices for ${projectInput.experienceLevel} developers.`,
+**COMPLETE IMPLEMENTATION NEEDED:**
+1. Full database schema design with all tables/collections
+2. Complete database setup and connection configuration
+3. All CRUD operations with TypeScript interfaces
+4. Data validation schemas and error handling
+5. Database migrations and seeding scripts
+6. API endpoints with full request/response handling
+${projectInput.dataComplexity === 'Real-time data' ? '7. WebSocket implementation for real-time features' : ''}
+${projectInput.dataComplexity === 'Complex analytics' ? '7. Analytics queries and aggregation pipelines' : ''}
+
+**AI AGENT DELIVERABLES:**
+- Complete database schema files
+- Full ORM/ODM configuration (Prisma, Mongoose, etc.)
+- All model definitions with relationships
+- Complete API route files with validation
+- Environment setup and configuration files
+- Migration scripts and database seeders
+- TypeScript types for all data structures
+
+**OPTIMIZATION REQUIREMENTS:**
+- Structure for ${projectInput.expectedUsers} scale
+- Implement ${projectInput.performanceNeeds.toLowerCase()} performance optimizations
+- Add proper indexing and query optimization
+- Include connection pooling and caching strategies
+
+**CRITICAL:** Provide complete, copy-paste ready code files with proper file structure and integration instructions.`,
           validationChecklist: [
             "Database schema is properly designed",
             "CRUD operations work correctly",
@@ -439,25 +484,45 @@ Provide detailed implementation with schema designs, API endpoints, and data val
             "Fix authentication problems",
             "Resolve rate limiting errors"
           ],
-          startPrompt: `You are an integration specialist adding ${projectInput.integrations.join(', ')} to a ${projectInput.targetAudience} application.
+          startPrompt: `**AI CODING ASSISTANT PROMPT - THIRD-PARTY INTEGRATIONS**
 
-PROJECT DETAILS:
-- Application: ${projectInput.name}
-- Platform: ${projectInput.platform}
-- Integrations: ${projectInput.integrations.join(', ')}
-- Budget: ${projectInput.budget}
+Implement complete integrations for ${projectInput.integrations.join(', ')} in my ${projectInput.targetAudience} application. Provide FULL, WORKING integration code.
 
-INTEGRATION REQUIREMENTS:
-${projectInput.integrations.map((integration, index) => `${index + 1}. Implement ${integration} with proper error handling and user feedback`).join('\n')}
+**INTEGRATION SPECIFICATIONS:**
+- App: ${projectInput.name} (${projectInput.platform})
+- Services: ${projectInput.integrations.join(', ')}
+- Budget Tier: ${projectInput.budget}
+- User Scale: ${projectInput.expectedUsers}
+- Performance: ${projectInput.performanceNeeds}
 
-For each integration:
-- Set up API connections and authentication
-- Handle rate limiting and error scenarios
-- Implement user-friendly interfaces
-- Add proper logging and monitoring
-- Test thoroughly in development environment
+**COMPLETE INTEGRATION TASKS:**
+${projectInput.integrations.map((integration, index) => `${index + 1}. ${integration}: Full API setup, authentication, error handling, and UI components`).join('\n')}
 
-Provide step-by-step integration guides with code examples, API documentation references, and testing strategies for ${projectInput.experienceLevel} developers.`,
+**AI AGENT REQUIREMENTS:**
+- Complete API service classes with all methods
+- Full authentication setup (API keys, OAuth, webhooks)
+- Error handling with retry logic and fallbacks
+- Rate limiting and quota management implementation
+- Complete UI components for each integration
+- TypeScript interfaces for all API responses
+- Environment configuration and secrets management
+- Comprehensive testing setup and mock data
+
+**DELIVERABLES NEEDED:**
+- Complete service files for each integration
+- Configuration files and environment setup
+- UI components with loading states and error handling
+- API wrapper classes with proper typing
+- Integration test suites
+- Documentation for API limits and best practices
+
+**INTEGRATION-SPECIFIC OPTIMIZATIONS:**
+- Handle ${projectInput.expectedUsers} concurrent users
+- Implement ${projectInput.performanceNeeds.toLowerCase()} caching strategies
+- Add monitoring and analytics for integration health
+- Include cost optimization for ${projectInput.budget} budget
+
+**CRITICAL:** Provide complete, production-ready code files that I can copy directly into my project with clear integration steps.`,
           validationChecklist: projectInput.integrations.map(integration => `${integration} is working correctly`)
         });
       }
@@ -475,25 +540,52 @@ Provide step-by-step integration guides with code examples, API documentation re
           "Fix CI/CD pipeline issues",
           "Resolve hosting configuration problems"
         ],
-        startPrompt: `You are a DevOps engineer deploying a ${projectInput.targetAudience} application to ${projectInput.hostingType}.
+        startPrompt: `**AI CODING ASSISTANT PROMPT - PRODUCTION DEPLOYMENT**
 
-DEPLOYMENT CONTEXT:
-- Application: ${projectInput.name}
-- Platform: ${projectInput.platform}
-- Hosting: ${projectInput.hostingType}
-- Scale: ${projectInput.expectedUsers}
-- Budget: ${projectInput.budget}
+Deploy my ${projectInput.targetAudience} application to production. I need COMPLETE deployment configuration and scripts that I can execute immediately.
 
-DEPLOYMENT TASKS:
-1. Set up ${projectInput.hostingType.toLowerCase()} hosting environment
-2. Configure domain and SSL certificates
-3. Set up environment variables and secrets
-4. Implement CI/CD pipeline for automated deployments
-5. Configure monitoring and logging
-6. Set up backup and disaster recovery
-7. Optimize for ${projectInput.performanceNeeds.toLowerCase()} performance
+**DEPLOYMENT SPECIFICATIONS:**
+- Application: ${projectInput.name} (${projectInput.platform})
+- Hosting Platform: ${projectInput.hostingType}
+- Expected Traffic: ${projectInput.expectedUsers}
+- Performance Tier: ${projectInput.performanceNeeds}
+- Budget Level: ${projectInput.budget}
+- Maintenance Style: ${projectInput.maintenance}
 
-Provide complete deployment instructions with configuration files, environment setup, and monitoring tools. Include cost optimization strategies for ${projectInput.budget} budget.`,
+**COMPLETE DEPLOYMENT PACKAGE NEEDED:**
+1. Full hosting platform setup (${projectInput.hostingType.toLowerCase()})
+2. Complete CI/CD pipeline configuration files
+3. Environment variables and secrets management
+4. SSL certificate setup and domain configuration
+5. Database deployment and migration scripts
+6. Monitoring, logging, and alerting setup
+7. Backup and disaster recovery implementation
+8. Performance optimization configuration
+
+**AI AGENT DELIVERABLES:**
+- Complete deployment scripts (Docker, terraform, etc.)
+- CI/CD configuration files (GitHub Actions, GitLab CI, etc.)
+- Environment setup guides with exact commands
+- SSL and domain configuration instructions
+- Database deployment and backup scripts
+- Monitoring dashboard setup (analytics, error tracking)
+- Security configuration and best practices
+- Cost optimization strategies for ${projectInput.budget}
+
+**PLATFORM-SPECIFIC REQUIREMENTS:**
+- Optimize for ${projectInput.expectedUsers} concurrent users
+- Configure ${projectInput.performanceNeeds.toLowerCase()} performance settings
+- Set up ${projectInput.maintenance.toLowerCase()} maintenance workflows
+- Include auto-scaling and load balancing if needed
+
+**CRITICAL DELIVERABLES:**
+- Complete, executable deployment scripts
+- Step-by-step deployment checklist
+- Rollback procedures and disaster recovery plans
+- Cost monitoring and optimization setup
+- Security hardening and compliance configuration
+
+**OUTPUT FORMAT:** Provide complete configuration files, deployment scripts, and detailed step-by-step instructions that I can follow to deploy immediately.`,
         validationChecklist: [
           "Application is accessible via public URL",
           "SSL certificates are configured",
