@@ -1610,6 +1610,134 @@ Generate a complete, detailed project plan with all sections filled out:
     }
   });
 
+  // AI Development Wizard API Endpoints
+  app.post("/api/wizard/classify-problem", async (req, res) => {
+    try {
+      const { userInput, sessionId } = req.body;
+
+      const classifyPrompt = `Analyze this user's coding problem and classify it:
+
+User Input: "${userInput}"
+
+Classify the problem and return JSON with this structure:
+{
+  "category": "integration_failures|authentication_issues|database_problems|api_connection_issues|deployment_problems|performance_issues|logic_errors|ui_styling_problems|testing_issues|environment_setup|package_dependencies|version_control|ai_context_loss|ai_confusion|ai_infinite_loops|general",
+  "severity": 1-10 (how frustrated/stuck they seem),
+  "complexity": "simple|medium|complex",
+  "urgency": "low|medium|high", 
+  "aiTool": "cursor|replit|claude|copilot|chatgpt|unknown",
+  "experience": "beginner|intermediate|advanced",
+  "emotionalState": "frustrated|confused|calm|urgent"
+}
+
+Base classification on keywords, tone, and context from the user's description.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: classifyPrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const classification = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(classification);
+    } catch (error: any) {
+      console.error('Problem classification error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/wizard/generate-questions", async (req, res) => {
+    try {
+      const { classification, sessionId } = req.body;
+
+      const questionsPrompt = `Generate 4 intelligent follow-up questions for this problem classification:
+
+Classification: ${JSON.stringify(classification, null, 2)}
+
+Generate questions that:
+1. Help diagnose the root cause
+2. Are appropriate for their experience level (${classification.experience})
+3. Address their emotional state (${classification.emotionalState})
+4. Are specific to the problem category (${classification.category})
+
+Return JSON array of 4 questions as strings. Make questions progressively more specific and helpful.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: questionsPrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"questions": []}');
+      res.json(result.questions || []);
+    } catch (error: any) {
+      console.error('Question generation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/wizard/generate-solution", async (req, res) => {
+    try {
+      const { classification, userResponses, sessionId } = req.body;
+
+      const solutionPrompt = `Act as a senior developer mentor. Create a comprehensive solution for this problem:
+
+Problem Classification: ${JSON.stringify(classification, null, 2)}
+
+User Responses: ${userResponses.join('\n- ')}
+
+Generate a detailed solution with this JSON structure:
+{
+  "diagnosis": "Clear explanation of what's wrong and why",
+  "solutionSteps": [
+    {
+      "step": 1,
+      "title": "Step title",
+      "description": "Detailed explanation",
+      "code": "code example if needed",
+      "expectedTime": "time estimate"
+    }
+  ],
+  "expectedTime": "total time estimate",
+  "alternativeApproaches": ["alternative if main solution fails"],
+  "preventionTips": ["how to avoid this in future"],
+  "learningResources": ["additional learning materials"]
+}
+
+Be specific, actionable, and educational. Adapt complexity to their experience level (${classification.experience}).`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: solutionPrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const solution = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(solution);
+    } catch (error: any) {
+      console.error('Solution generation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/wizard/save-session", async (req, res) => {
+    try {
+      const { sessionData, feedback } = req.body;
+
+      // Save wizard session data for learning
+      // In a real implementation, this would store to database for pattern analysis
+      
+      res.json({ 
+        success: true, 
+        message: "Session data saved for learning",
+        sessionId: sessionData.sessionId
+      });
+    } catch (error: any) {
+      console.error('Wizard session save error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

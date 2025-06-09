@@ -189,22 +189,22 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplat
             <CardContent className="p-4 md:p-6 h-full flex flex-col">
               <div className="text-center mb-3 md:mb-4">
                 <div className="relative">
-                  <MessageCircle className="w-6 h-6 md:w-8 md:h-8 text-blue-400 mb-2 md:mb-3 mx-auto" />
+                  <Brain className="w-6 h-6 md:w-8 md:h-8 text-blue-400 mb-2 md:mb-3 mx-auto" />
                   {!isProUser && (
                     <Crown className="w-3 h-3 md:w-4 md:h-4 text-amber-400 absolute -top-1 -right-1" />
                   )}
                 </div>
                 <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2 text-blue-200">
-                  AI Project Planner
+                  AI Development Wizard
                 </h3>
               </div>
               <p className="text-blue-300 text-xs md:text-sm mb-3 md:mb-4 flex-grow">
-                Interactive brainstorming sessions to create detailed project plans and specifications
+                Interactive AI mentor that diagnoses any coding problem and guides you through step-by-step solutions
               </p>
               <div className="text-xs">
                 {isProUser ? (
                   <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
-                    <MessageCircle className="w-3 h-3 mr-1" />
+                    <Brain className="w-3 h-3 mr-1" />
                     {trialData?.isTrialActive ? "Available in Trial" : "Pro Feature"}
                   </Badge>
                 ) : (

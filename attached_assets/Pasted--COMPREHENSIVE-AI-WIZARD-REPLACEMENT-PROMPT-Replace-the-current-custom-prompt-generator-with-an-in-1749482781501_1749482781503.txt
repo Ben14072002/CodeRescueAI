@@ -1,0 +1,236 @@
+🔧 COMPREHENSIVE AI WIZARD REPLACEMENT PROMPT
+Replace the current custom prompt generator with an intelligent AI Development Wizard that learns and improves over time.
+
+STEP 1: REMOVE EXISTING FEATURES
+- Completely remove the planning/roadmap feature code
+- Remove the custom prompt generator (keep the rescue button/access point)
+- Clean up all related database schemas and files
+- Remove navigation items for removed features
+
+STEP 2: BUILD AI DEVELOPMENT WIZARD
+Replace custom prompt generator with comprehensive wizard system.
+
+WIZARD CORE CONCEPT:
+Interactive diagnostic tool that acts like a senior developer mentor, guiding users through ANY AI coding problem while teaching and learning from each interaction.
+
+WIZARD FEATURES TO IMPLEMENT:
+
+1. UNIVERSAL PROBLEM INTAKE
+Create adaptive intake form that handles any AI development issue:
+
+```javascript
+// Wizard can handle ANY problem type
+const problemTypes = [
+  'integration_failures', 'authentication_issues', 'database_problems',
+  'api_connection_issues', 'deployment_problems', 'performance_issues',
+  'logic_errors', 'ui_styling_problems', 'testing_issues', 
+  'environment_setup', 'package_dependencies', 'version_control',
+  'ai_context_loss', 'ai_confusion', 'ai_infinite_loops'
+];
+
+INTELLIGENT PROBLEM CLASSIFICATION
+Auto-classify problems from user input:
+
+javascriptfunction classifyProblem(userInput) {
+  return {
+    category: detectProblemCategory(userInput),
+    severity: assessFrustrationLevel(userInput), // 1-10 scale
+    complexity: estimateComplexity(userInput), // simple/medium/complex
+    urgency: detectTimePressure(userInput),
+    aiTool: identifyAITool(userInput), // cursor/replit/claude/etc
+    experience: inferUserLevel(userInput), // beginner/intermediate/advanced
+    emotionalState: assessUserMood(userInput) // frustrated/confused/calm
+  };
+}
+
+ADAPTIVE QUESTIONING SYSTEM
+Generate targeted follow-up questions based on problem classification:
+
+javascript// Questions adapt to problem type and user state
+function generateQuestions(problemClassification) {
+  const baseQuestions = [
+    "What were you trying to accomplish when this went wrong?",
+    "Which AI coding tool were you using?",
+    "How long have you been stuck on this?",
+    "Show me your current code and any error messages"
+  ];
+  
+  // Add specific questions based on problem type
+  const specificQuestions = getSpecificQuestions(problemClassification.category);
+  
+  // Adjust question complexity based on user experience
+  const adaptedQuestions = adaptToUserLevel(specificQuestions, problemClassification.experience);
+  
+  return [...baseQuestions, ...adaptedQuestions];
+}
+
+SENIOR DEVELOPER PERSONALITY
+Wizard tone: Professional, caring, confident senior developer
+
+javascriptconst wizardPersonality = {
+  tone: "senior_developer_mentor",
+  characteristics: [
+    "calm_and_confident",
+    "teaching_while_solving", 
+    "professional_care",
+    "pattern_recognition_expert"
+  ],
+  responseStyle: {
+    validation: "I can see why this is frustrating. This is a common pattern I've helped solve many times.",
+    analysis: "Looking at your code, I can see exactly what's happening here...",
+    solution: "Here's how we're going to fix this step by step...",
+    teaching: "Now that we've solved this, let me show you how to prevent it next time..."
+  }
+};
+
+COMPREHENSIVE SOLUTION ENGINE
+Generate step-by-step solutions with explanations:
+
+javascriptfunction generateSolution(problemData, userResponses) {
+  return {
+    diagnosis: explainRootCause(problemData),
+    solutionSteps: createStepByStepPlan(problemData),
+    expectedTime: estimateTimeToFix(problemData),
+    alternativeApproaches: suggestBackupPlans(problemData),
+    preventionTips: teachPreventionStrategies(problemData),
+    learningResources: recommendAdditionalLearning(problemData)
+  };
+}
+
+LEARNING AND INTELLIGENCE SYSTEM
+Wizard gets smarter with each use:
+
+DATABASE SCHEMA FOR LEARNING:
+javascriptconst wizardSessionSchema = {
+  sessionId: string,
+  userId: string,
+  problemClassification: object,
+  userResponses: array,
+  solutionProvided: object,
+  userFeedback: {
+    helpfulness: number, // 1-5 rating
+    timeToSolve: number, // actual time taken
+    successRate: boolean, // did solution work
+    additionalNotes: string
+  },
+  patterns: {
+    problemPattern: string,
+    solutionPattern: string,
+    userBehaviorPattern: string
+  },
+  improvements: {
+    betterQuestions: array,
+    improvedSolutions: array,
+    newPatterns: array
+  },
+  createdAt: date
+};
+
+// Learning algorithms
+function learnFromSession(sessionData) {
+  // Identify successful solution patterns
+  updateSuccessfulPatterns(sessionData);
+  
+  // Improve question quality based on what led to better diagnosis
+  optimizeQuestionStrategies(sessionData);
+  
+  // Enhance solution effectiveness based on user feedback
+  refineSolutionTemplates(sessionData);
+  
+  // Detect new problem patterns not previously seen
+  discoverNewPatterns(sessionData);
+}
+
+WIZARD UI/UX DESIGN
+Create professional, calming interface:
+
+LAYOUT:
+- Clean, professional design
+- Calming colors (blues, soft grays)
+- Progress indicators showing wizard steps
+- Chat-like interface for natural conversation
+- Real-time typing indicators for wizard responses
+
+INTERACTION FLOW:
+1. Welcome screen: "I'm here to help you get unstuck"
+2. Problem intake: Guided questions with adaptive follow-ups  
+3. Analysis phase: "Let me analyze what's happening..."
+4. Solution delivery: Step-by-step guidance with explanations
+5. Follow-up: Success confirmation + learning tips
+6. Feedback collection: Rate helpfulness + time saved
+
+WIZARD AVATAR:
+- Professional but friendly AI assistant icon
+- Consistent personality throughout interaction
+- Confidence-inspiring visual design
+
+FEEDBACK AND IMPROVEMENT LOOP
+Continuous learning system:
+
+javascript// After each session, collect learning data
+function collectLearningData(sessionId) {
+  return {
+    problemAccuracy: "Was the problem correctly identified?",
+    solutionEffectiveness: "Did the solution work?",
+    questionQuality: "Were the diagnostic questions helpful?",
+    userSatisfaction: "How satisfied was the user?",
+    timeEfficiency: "How quickly was the problem resolved?",
+    learningValue: "What did the user learn?"
+  };
+}
+
+// Use learning data to improve wizard
+function improveWizard(learningData) {
+  // Update problem recognition algorithms
+  // Refine solution templates
+  // Optimize question strategies
+  // Enhance response patterns
+}
+
+PREMIUM FEATURES
+Free vs Pro differentiation:
+
+FREE TIER:
+- 3 wizard sessions per month
+- Basic problem solving
+- Standard solutions
+
+PRO TIER:
+- Unlimited wizard sessions
+- Advanced diagnostic capabilities
+- Personalized learning based on your patterns
+- Session history and progress tracking
+- Priority wizard response time
+- Custom solution refinement
+- Prevention coaching
+IMPLEMENTATION PRIORITY:
+
+Basic wizard interface and conversation flow
+Problem classification and question generation
+Solution engine with step-by-step guidance
+Learning system and pattern recognition
+Advanced features and optimizations
+
+WIZARD SUCCESS CRITERIA:
+
+User can describe ANY AI coding problem and get helpful guidance
+Wizard asks intelligent follow-up questions
+Solutions are specific, actionable, and educational
+Users report feeling "guided and supported" not "given random prompts"
+Wizard demonstrably improves with usage (better questions, better solutions)
+High user satisfaction and conversion to Pro
+
+TECHNICAL REQUIREMENTS:
+
+Real-time chat interface
+Intelligent response generation
+Pattern recognition algorithms
+Learning data collection and analysis
+Progress tracking and session history
+Mobile-responsive design
+Fast response times (under 3 seconds)
+
+BUILD THIS AS THE NEW FLAGSHIP FEATURE - this wizard becomes what differentiates CodeBreaker from any other AI development tool.
+The wizard should feel like having a senior developer always available to help you through any problem while teaching you to become better at AI-assisted development.
+
+This transforms CodeBreaker from a prompt library into an intelligent AI development mentor that gets smarter over time!
