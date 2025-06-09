@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -22,7 +24,11 @@ import {
   Copy,
   Download,
   Sparkles,
-  Zap
+  Zap,
+  FolderOpen,
+  Plus,
+  Trash2,
+  Play
 } from "lucide-react";
 
 interface RoadmapCreatorProps {
@@ -30,7 +36,7 @@ interface RoadmapCreatorProps {
   onOpenRescue?: (context: string) => void;
 }
 
-type Phase = 'input' | 'recommendations' | 'customization' | 'roadmap';
+type Phase = 'projects' | 'input' | 'recommendations' | 'customization' | 'roadmap';
 
 interface ProjectInput {
   name: string;
@@ -105,7 +111,7 @@ interface ProjectRecipe {
 
 export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
   const { toast } = useToast();
-  const [phase, setPhase] = useState<Phase>('input');
+  const [phase, setPhase] = useState<Phase>('projects');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
@@ -117,6 +123,93 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
   const [customProblem, setCustomProblem] = useState("");
   const [customSolution, setCustomSolution] = useState("");
   const [isGeneratingCustom, setIsGeneratingCustom] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+
+  // Get user ID from localStorage (Firebase auth)
+  const getUserId = () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      return user.uid || user.id;
+    }
+    return null;
+  };
+
+  const userId = getUserId();
+
+  // Fetch user's projects
+  const { data: projectsData, isLoading: projectsLoading, refetch: refetchProjects } = useQuery({
+    queryKey: ['/api/projects', userId],
+    queryFn: async () => {
+      if (!userId) return { projects: [] };
+      const response = await apiRequest('GET', `/api/projects/${userId}`);
+      return response.json();
+    },
+    enabled: !!userId
+  });
+
+  const userProjects = projectsData?.projects || [];
+
+  // Project management functions
+  const saveProject = async (projectData: any) => {
+    if (!userId) return;
+    
+    try {
+      await apiRequest('POST', '/api/projects', {
+        userId,
+        projectName: projectData.name,
+        projectDetails: projectInput,
+        generatedRecipe: projectRecipe,
+        roadmapSteps: roadmapSteps
+      });
+      
+      toast({
+        title: "Project Saved",
+        description: "Your project has been saved successfully.",
+      });
+      
+      refetchProjects();
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Unable to save project. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadProject = (project: any) => {
+    setSelectedProject(project);
+    setProjectInput(project.projectDetails || projectInput);
+    setProjectRecipe(project.generatedRecipe);
+    setRoadmapSteps(project.roadmapSteps || []);
+    setRecommendations(project.generatedRecipe ? generateCustomAnalysis(project.projectDetails) : null);
+    
+    if (project.roadmapSteps && project.roadmapSteps.length > 0) {
+      setPhase('roadmap');
+    } else if (project.generatedRecipe) {
+      setPhase('recommendations');
+    } else {
+      setPhase('input');
+    }
+  };
+
+  const deleteProject = async (projectId: number) => {
+    try {
+      await apiRequest('DELETE', `/api/project/${projectId}`);
+      toast({
+        title: "Project Deleted",
+        description: "Project has been deleted successfully.",
+      });
+      refetchProjects();
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "Unable to delete project. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const [projectInput, setProjectInput] = useState<ProjectInput>({
     name: "",
@@ -159,6 +252,11 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
       setRecommendations(recs);
       setProjectRecipe(recipe);
       setPhase('recommendations');
+      
+      // Auto-save project after generating recommendations
+      if (userId && projectInput.name) {
+        saveProject(projectInput);
+      }
     } catch (error) {
       toast({
         title: "Analysis Failed",
@@ -1929,6 +2027,161 @@ ${customProblem}
       setIsGeneratingCustom(false);
     }
   };
+
+  if (phase === 'projects') {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Project Management</h1>
+            <p className="text-muted-foreground">Continue working on existing projects or start a new one</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Create New Project Card */}
+          <Card className="border-dashed border-2 hover:border-primary transition-colors cursor-pointer" onClick={() => setPhase('input')}>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-full bg-primary/10 p-3 mb-4">
+                <Plus className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Create New Project</h3>
+              <p className="text-muted-foreground text-sm">Start a new AI-powered roadmap with comprehensive project planning</p>
+            </CardContent>
+          </Card>
+
+          {/* Existing Projects */}
+          {projectsLoading ? (
+            <div className="lg:col-span-2 flex items-center justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : userProjects.length === 0 ? (
+            <div className="lg:col-span-2 flex flex-col items-center justify-center py-12 text-center">
+              <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="font-semibold text-lg mb-2">No Projects Yet</h3>
+              <p className="text-muted-foreground">Start your first project to see it here</p>
+            </div>
+          ) : (
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {userProjects.map((project: any) => {
+                const progress = project.projectProgress || { currentStep: 0, totalSteps: 0, completedSteps: [] };
+                const progressPercentage = progress.totalSteps > 0 
+                  ? Math.round((progress.completedSteps.length / progress.totalSteps) * 100) 
+                  : 0;
+                
+                return (
+                  <Card key={project.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{project.projectName}</CardTitle>
+                          <CardDescription className="text-sm mt-1">
+                            {project.projectDetails?.description?.substring(0, 80)}...
+                          </CardDescription>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteProject(project.id);
+                          }}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent className="space-y-4">
+                      {/* Progress Bar */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Progress</span>
+                          <span className="font-medium">{progressPercentage}%</span>
+                        </div>
+                        <Progress value={progressPercentage} className="h-2" />
+                        <div className="text-xs text-muted-foreground">
+                          {progress.completedSteps.length} of {progress.totalSteps} steps completed
+                        </div>
+                      </div>
+
+                      {/* Project Stats */}
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <div className="text-muted-foreground">Experience</div>
+                          <div className="font-medium capitalize">
+                            {project.projectDetails?.experienceLevel || 'Not set'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Platform</div>
+                          <div className="font-medium">
+                            {project.projectDetails?.platform || 'Not set'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div className="flex items-center gap-2">
+                        {progressPercentage === 100 ? (
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Completed
+                          </Badge>
+                        ) : progressPercentage > 0 ? (
+                          <Badge variant="secondary">
+                            <Clock className="h-3 w-3 mr-1" />
+                            In Progress
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">
+                            <Target className="h-3 w-3 mr-1" />
+                            Planning
+                          </Badge>
+                        )}
+                        
+                        <div className="text-xs text-muted-foreground ml-auto">
+                          {new Date(project.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <Button
+                        onClick={() => loadProject(project)}
+                        className="w-full"
+                        variant={progressPercentage > 0 ? "default" : "outline"}
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        {progressPercentage > 0 ? 'Continue Project' : 'Start Project'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {userProjects.length > 0 && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              {userProjects.length} project{userProjects.length !== 1 ? 's' : ''} found
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (phase === 'input') {
     return (
