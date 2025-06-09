@@ -1,0 +1,87 @@
+Rebuild the CodeBreaker Roadmap Creator feature to generate high-quality, project-specific recipes and roadmaps.
+
+CURRENT PROBLEM: The roadmap feature generates generic, unusable content that doesn't help users build real applications.
+
+REBUILD OBJECTIVE: Create a system that analyzes user projects deeply and generates detailed, actionable roadmaps with sophisticated AI prompts.
+
+REBUILD THIS FEATURE IN 4 PHASES - COMPLETE EACH PHASE FULLY BEFORE MOVING TO THE NEXT:
+
+PHASE 1: ENHANCED PROJECT ANALYSIS ENGINE
+Goal: Make the system actually understand what the user wants to build
+
+Tasks:
+1. Create intelligent project type detection from user description
+2. Extract specific features mentioned in project description  
+3. Analyze technical requirements and complexity
+4. Generate tech stack recommendations with reasoning
+
+Requirements:
+- Must reference user's actual project description in analysis
+- Must identify specific features (auth, real-time, payments, etc.)
+- Must provide reasoning for all recommendations
+- Must be completely custom to each project
+
+PHASE 2: DETAILED RECIPE GENERATION
+Goal: Create comprehensive project specifications users can follow
+
+Tasks:
+1. Generate complete technical architecture document
+2. Create detailed file structure for the project
+3. Design database schema based on project needs
+4. Create API endpoint specifications
+5. Add implementation timeline with reasoning
+
+Requirements:
+- Recipe must be 3-5 pages of detailed specifications
+- Must include exact file structures and database schemas
+- Must be downloadable as PDF/markdown
+- Must reference user's project name and requirements throughout
+
+PHASE 3: GRANULAR ROADMAP BREAKDOWN
+Goal: Break project into micro-tasks AI assistants can handle
+
+Tasks:
+1. Convert recipe into 15-25 micro-steps (15-30 minutes each)
+2. Organize steps into logical phases and dependencies
+3. Create step-by-step progression with clear validation
+4. Add time estimates and complexity ratings
+
+Requirements:
+- Each step must be single-focus (one file, one component, one feature)
+- Steps must build logically on previous steps
+- Must include clear success criteria for each step
+- Must prevent AI from building too much at once
+
+PHASE 4: SOPHISTICATED PROMPT GENERATION
+Goal: Create AI prompts that actually work and prevent confusion
+
+Tasks:
+1. Generate specific, contextual prompts for each roadmap step
+2. Include strict constraints to prevent scope creep
+3. Add project context and technical specifications
+4. Create validation criteria and troubleshooting guidance
+
+Requirements:
+- Prompts must reference user's actual project details
+- Must include explicit "DO NOT" constraints
+- Must be designed for AI coding assistants (Cursor, Replit, Claude)
+- Must prevent AI from adding unauthorized features
+
+IMPLEMENTATION APPROACH:
+
+Start with Phase 1 only. Focus on making the project analysis extremely smart and specific.
+
+Example of what we need:
+INPUT: "Build a todo app with team collaboration and real-time updates using React"
+CURRENT OUTPUT: Generic todo app roadmap
+REQUIRED OUTPUT: Specific roadmap for team collaboration todo app with real-time features, React components, WebSocket integration, team management, etc.
+
+Each phase should make the feature dramatically better. Don't try to build everything at once.
+
+PHASE 1 SUCCESS CRITERIA:
+- User enters project description
+- System generates detailed analysis that specifically references their project
+- Tech stack recommendations include reasoning
+- Feature list matches what user actually described
+
+Build Phase 1 completely, test it thoroughly, then ask for Phase 2 requirements.
