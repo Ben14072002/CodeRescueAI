@@ -226,48 +226,48 @@ export function ProjectPlanner({ onBack }: ProjectPlannerProps) {
     return `# ${projectName} - Project Plan
 
 ## Project Overview
-**Purpose:** ${projectPlan.overview?.purpose || 'Not specified'}
+**Purpose:** ${projectPlan.overview.purpose}
 
-**Target Users:** ${projectPlan.overview?.targetUsers || 'Not specified'}
+**Target Users:** ${projectPlan.overview.targetUsers}
 
 **Goals:**
-${projectPlan.overview?.goals?.map(goal => `- ${goal}`).join('\n') || '- No goals specified'}
+${projectPlan.overview.goals.map(goal => `- ${goal}`).join('\n')}
 
 ## Feature Specifications
 
 ### Essential Features
-${projectPlan.features?.essential?.map(feature => `- ${feature}`).join('\n') || '- No essential features specified'}
+${projectPlan.features.essential.map(feature => `- ${feature}`).join('\n')}
 
 ### Nice-to-Have Features
-${projectPlan.features?.niceToHave?.map(feature => `- ${feature}`).join('\n') || '- No nice-to-have features specified'}
+${projectPlan.features.niceToHave.map(feature => `- ${feature}`).join('\n')}
 
 ## Technical Recommendations
-**Architecture:** ${projectPlan.technical?.architecture || 'Not specified'}
+**Architecture:** ${projectPlan.technical.architecture}
 
 **Tech Stack:**
-${projectPlan.technical?.techStack?.map(tech => `- ${tech}`).join('\n') || '- No tech stack specified'}
+${projectPlan.technical.techStack.map(tech => `- ${tech}`).join('\n')}
 
 ## User Experience Design
 
 ### User Flows
-${projectPlan.userExperience?.userFlows?.map(flow => `- ${flow}`).join('\n') || '- No user flows specified'}
+${projectPlan.userExperience.userFlows.map(flow => `- ${flow}`).join('\n')}
 
 ### Interface Needs
-${projectPlan.userExperience?.interfaceNeeds?.map(need => `- ${need}`).join('\n') || '- No interface needs specified'}
+${projectPlan.userExperience.interfaceNeeds.map(need => `- ${need}`).join('\n')}
 
 ## Development Timeline
-**Total Estimate:** ${projectPlan.timeline?.totalEstimate || 'Not specified'}
+**Total Estimate:** ${projectPlan.timeline.totalEstimate}
 
 ### Phases
-${projectPlan.timeline?.phases?.map(phase => `**${phase.name}** (${phase.duration}): ${phase.description}`).join('\n\n') || 'No phases specified'}
+${projectPlan.timeline.phases.map(phase => `**${phase.name}** (${phase.duration}): ${phase.description}`).join('\n\n')}
 
 ## Potential Challenges
 
 ### Risks
-${projectPlan.challenges?.risks?.map(risk => `- ${risk}`).join('\n') || '- No risks identified'}
+${projectPlan.challenges.risks.map(risk => `- ${risk}`).join('\n')}
 
 ### Solutions
-${projectPlan.challenges?.solutions?.map(solution => `- ${solution}`).join('\n') || '- No solutions specified'}
+${projectPlan.challenges.solutions.map(solution => `- ${solution}`).join('\n')}
 `;
   };
 

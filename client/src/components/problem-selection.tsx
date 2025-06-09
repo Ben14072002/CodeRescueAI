@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown, Sparkles, Brain, Map, Wand2, BookOpen, Zap, MessageCircle, FileText } from "lucide-react";
+import { ArrowLeft, Search, Layers, Unlink, Compass, HelpCircle, RotateCcw, Edit, Crown, Sparkles, Brain, Map, Wand2, BookOpen, Zap, MessageCircle } from "lucide-react";
 import { problemData } from "@/lib/problem-data";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,10 +18,9 @@ interface ProblemSelectionProps {
   onCustomPrompts?: () => void;
   onTemplates?: () => void;
   onProjectPlanner?: () => void;
-  onMyProjects?: () => void;
 }
 
-export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplates, onProjectPlanner, onMyProjects }: ProblemSelectionProps) {
+export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplates, onProjectPlanner }: ProblemSelectionProps) {
   const [selectedProblem, setSelectedProblem] = useState<string | null>(null);
   const [customProblem, setCustomProblem] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -283,32 +282,6 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplat
                 <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
                   <Search className="w-3 h-3 mr-1" />
                   Free for Everyone
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* My Projects - Saved Plans */}
-          <Card
-            className="cursor-pointer transition-all bg-gradient-to-br from-orange-900/30 to-amber-900/30 border-orange-500/50 hover:border-orange-400 min-h-[140px] active:scale-95"
-            onClick={() => onMyProjects && onMyProjects()}
-          >
-            <CardContent className="p-4 md:p-6 h-full flex flex-col">
-              <div className="text-center mb-3 md:mb-4">
-                <div className="relative">
-                  <FileText className="w-6 h-6 md:w-8 md:h-8 text-orange-400 mb-2 md:mb-3 mx-auto" />
-                </div>
-                <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2 text-orange-200">
-                  My Projects
-                </h3>
-              </div>
-              <p className="text-orange-300 text-xs md:text-sm mb-3 md:mb-4 flex-grow">
-                View, download, and manage your saved project plans from previous AI sessions
-              </p>
-              <div className="text-xs">
-                <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 text-xs">
-                  <FileText className="w-3 h-3 mr-1" />
-                  Your Library
                 </Badge>
               </div>
             </CardContent>
