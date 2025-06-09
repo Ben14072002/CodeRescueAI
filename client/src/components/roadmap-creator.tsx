@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, CheckCircle, Clock, Code2, Lightbulb, Target, AlertTriangle, Copy, ExternalLink } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Code2, Lightbulb, Target, AlertTriangle, Copy, ExternalLink, ChevronDown, ArrowRight, MapPin, Users, Zap, Wrench } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RoadmapStep, RoadmapRecommendations } from '@shared/schema';
 
@@ -22,9 +23,32 @@ interface RoadmapCreatorProps {
 type Phase = 'input' | 'recommendations' | 'customization' | 'roadmap';
 
 interface ProjectInput {
+  // Basic Info
   name: string;
   description: string;
   experienceLevel: 'beginner' | 'intermediate' | 'advanced';
+  
+  // Project Scope
+  targetAudience: 'B2B' | 'B2C' | 'Internal tool' | 'Personal project';
+  platform: 'Web app' | 'Mobile responsive' | 'Native mobile' | 'Desktop app';
+  expectedUsers: '1-100' | '100-1000' | '1000+' | 'Enterprise scale';
+  projectTimeline: 'Weekend project' | '1-2 weeks' | '1-2 months' | 'Long-term';
+  
+  // Technical Requirements
+  authenticationNeeds: 'None' | 'Simple login' | 'OAuth' | 'Enterprise SSO' | 'Custom auth';
+  dataComplexity: 'Static content' | 'Simple forms' | 'Database driven' | 'Real-time data' | 'Complex analytics';
+  integrations: string[];
+  performanceNeeds: 'Basic' | 'Medium traffic' | 'High performance' | 'Enterprise scale';
+  
+  // Design Requirements
+  designComplexity: 'Minimal/functional' | 'Standard UI' | 'Custom branded' | 'Complex animations';
+  responsiveness: 'Desktop only' | 'Mobile friendly' | 'Mobile first';
+  accessibility: 'Basic' | 'WCAG compliant' | 'Enterprise accessibility';
+  
+  // Deployment Preferences
+  hostingType: 'Shared hosting' | 'Cloud platform' | 'Self-hosted' | 'Don\'t know';
+  budget: 'Free/minimal' | 'Low budget' | 'Medium budget' | 'Enterprise budget';
+  maintenance: 'Set and forget' | 'Occasional updates' | 'Active maintenance';
 }
 
 interface Recommendations {
@@ -44,10 +68,35 @@ interface Recommendations {
 export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
   const [phase, setPhase] = useState<Phase>('input');
   const [projectInput, setProjectInput] = useState<ProjectInput>({
+    // Basic Info
     name: '',
     description: '',
-    experienceLevel: 'intermediate'
+    experienceLevel: 'intermediate',
+    
+    // Project Scope
+    targetAudience: 'B2C',
+    platform: 'Web app',
+    expectedUsers: '100-1000',
+    projectTimeline: '1-2 months',
+    
+    // Technical Requirements
+    authenticationNeeds: 'Simple login',
+    dataComplexity: 'Database driven',
+    integrations: [],
+    performanceNeeds: 'Medium traffic',
+    
+    // Design Requirements
+    designComplexity: 'Standard UI',
+    responsiveness: 'Mobile friendly',
+    accessibility: 'Basic',
+    
+    // Deployment Preferences
+    hostingType: 'Cloud platform',
+    budget: 'Medium budget',
+    maintenance: 'Occasional updates'
   });
+
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [customizedProject, setCustomizedProject] = useState<any>(null);
   const [roadmapSteps, setRoadmapSteps] = useState<RoadmapStep[]>([]);
@@ -55,6 +104,172 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+
+  // Enhanced custom analysis engine
+  const generateCustomAnalysis = (input: ProjectInput): Recommendations => {
+    // Tech stack reasoning based on specific requirements
+    let techStack = [];
+    let reasoning = {
+      techStackReason: '',
+      complexityReason: '',
+      timelineReason: ''
+    };
+
+    // Frontend selection based on platform and complexity
+    if (input.platform.includes('Native mobile')) {
+      techStack.push('React Native');
+      reasoning.techStackReason += `React Native chosen because you specified ${input.platform}. `;
+    } else if (input.platform === 'Desktop app') {
+      techStack.push('Electron', 'React');
+      reasoning.techStackReason += `Electron + React chosen because you need ${input.platform} with ${input.designComplexity}. `;
+    } else {
+      techStack.push('React', 'Vite');
+      reasoning.techStackReason += `React chosen because you mentioned ${input.responsiveness} with ${input.designComplexity}. `;
+    }
+
+    // Backend selection based on data complexity and auth needs
+    if (input.dataComplexity === 'Real-time data') {
+      techStack.push('Node.js', 'Socket.io', 'Redis');
+      reasoning.techStackReason += `Node.js + Socket.io for real-time features you specified. `;
+    } else if (input.dataComplexity === 'Complex analytics') {
+      techStack.push('Node.js', 'PostgreSQL', 'ClickHouse');
+      reasoning.techStackReason += `PostgreSQL + ClickHouse because you need ${input.dataComplexity}. `;
+    } else if (input.dataComplexity !== 'Static content') {
+      techStack.push('Node.js', 'PostgreSQL');
+      reasoning.techStackReason += `Node.js + PostgreSQL for ${input.dataComplexity} you described. `;
+    }
+
+    // Authentication stack based on needs
+    if (input.authenticationNeeds === 'OAuth') {
+      techStack.push('Firebase Auth');
+      reasoning.techStackReason += `Firebase Auth for ${input.authenticationNeeds} integration. `;
+    } else if (input.authenticationNeeds === 'Enterprise SSO') {
+      techStack.push('Auth0', 'SAML');
+      reasoning.techStackReason += `Auth0 + SAML for ${input.authenticationNeeds} requirements. `;
+    } else if (input.authenticationNeeds !== 'None') {
+      techStack.push('Passport.js');
+      reasoning.techStackReason += `Passport.js for ${input.authenticationNeeds} system. `;
+    }
+
+    // Styling based on design complexity
+    if (input.designComplexity === 'Complex animations') {
+      techStack.push('Framer Motion', 'Tailwind CSS');
+    } else if (input.designComplexity === 'Custom branded') {
+      techStack.push('Styled Components', 'Tailwind CSS');
+    } else {
+      techStack.push('Tailwind CSS');
+    }
+
+    // Performance and deployment considerations
+    if (input.performanceNeeds === 'High performance' || input.expectedUsers === 'Enterprise scale') {
+      techStack.push('Redis', 'CDN', 'Docker');
+      reasoning.techStackReason += `Performance stack for ${input.expectedUsers} and ${input.performanceNeeds}. `;
+    }
+
+    // Cloud services based on hosting and integrations
+    if (input.hostingType === 'Cloud platform') {
+      if (input.integrations.includes('Payment processing')) {
+        techStack.push('Stripe');
+      }
+      if (input.integrations.includes('Email services')) {
+        techStack.push('SendGrid');
+      }
+      if (input.integrations.includes('File storage')) {
+        techStack.push('AWS S3');
+      }
+    }
+
+    // Determine complexity based on requirements
+    let complexity: 'simple' | 'medium' | 'complex' = 'medium';
+    let complexityFactors = [];
+
+    if (input.dataComplexity === 'Real-time data' || input.dataComplexity === 'Complex analytics') {
+      complexity = 'complex';
+      complexityFactors.push('real-time data processing');
+    }
+    if (input.integrations.length > 3) {
+      complexity = 'complex';
+      complexityFactors.push('multiple integrations');
+    }
+    if (input.authenticationNeeds === 'Enterprise SSO') {
+      complexity = 'complex';
+      complexityFactors.push('enterprise authentication');
+    }
+    if (input.performanceNeeds === 'Enterprise scale') {
+      complexity = 'complex';
+      complexityFactors.push('enterprise scalability');
+    }
+    if (input.designComplexity === 'Complex animations') {
+      if (complexity === 'medium') complexity = 'complex';
+      complexityFactors.push('complex UI animations');
+    }
+
+    reasoning.complexityReason = `${complexity.charAt(0).toUpperCase() + complexity.slice(1)} complexity because you mentioned ${complexityFactors.length > 0 ? complexityFactors.join(', ') : 'standard requirements with ' + input.targetAudience + ' focus'}.`;
+
+    // Calculate timeline based on complexity and experience
+    let baseWeeks = complexity === 'simple' ? 2 : complexity === 'medium' ? 6 : 12;
+    if (input.experienceLevel === 'beginner') baseWeeks *= 1.5;
+    if (input.experienceLevel === 'advanced') baseWeeks *= 0.7;
+    
+    if (input.projectTimeline === 'Weekend project') baseWeeks = Math.min(baseWeeks, 0.5);
+    else if (input.projectTimeline === '1-2 weeks') baseWeeks = Math.min(baseWeeks, 2);
+    else if (input.projectTimeline === '1-2 months') baseWeeks = Math.min(baseWeeks, 8);
+
+    const timelineText = baseWeeks < 1 ? 'Weekend project' : baseWeeks <= 2 ? '1-2 weeks' : baseWeeks <= 8 ? `${Math.ceil(baseWeeks)} weeks` : `${Math.ceil(baseWeeks/4)} months`;
+    reasoning.timelineReason = `${timelineText} estimated because you're ${input.experienceLevel} level working on ${complexity} project with ${input.projectTimeline} timeline preference.`;
+
+    // Generate features based on requirements
+    const coreFeatures = [];
+    const optionalFeatures = [];
+    const challenges = [];
+
+    if (input.authenticationNeeds !== 'None') {
+      coreFeatures.push(`${input.authenticationNeeds} authentication system`);
+    }
+    
+    if (input.dataComplexity !== 'Static content') {
+      coreFeatures.push(`${input.dataComplexity} management`);
+    }
+
+    if (input.integrations.includes('Payment processing')) {
+      coreFeatures.push('Payment processing integration');
+    }
+
+    if (input.platform === 'Mobile responsive' || input.responsiveness === 'Mobile first') {
+      coreFeatures.push('Mobile-responsive design');
+    }
+
+    // Add optional features based on integrations
+    input.integrations.forEach(integration => {
+      if (!coreFeatures.some(f => f.includes(integration))) {
+        optionalFeatures.push(`${integration} integration`);
+      }
+    });
+
+    // Identify challenges based on requirements
+    if (input.dataComplexity === 'Real-time data') {
+      challenges.push('Real-time data synchronization and WebSocket management');
+    }
+    if (input.performanceNeeds === 'High performance' || input.expectedUsers === 'Enterprise scale') {
+      challenges.push('Performance optimization and scalability architecture');
+    }
+    if (input.authenticationNeeds === 'Enterprise SSO') {
+      challenges.push('Enterprise SSO integration and security compliance');
+    }
+    if (input.platform === 'Native mobile') {
+      challenges.push('Cross-platform mobile development and app store deployment');
+    }
+
+    return {
+      recommendedTechStack: [...new Set(techStack)], // Remove duplicates
+      suggestedComplexity: complexity,
+      estimatedTimeline: timelineText,
+      coreFeatures,
+      optionalFeatures,
+      potentialChallenges: challenges,
+      reasoning
+    };
+  };
 
   const analyzeProject = async () => {
     if (!projectInput.name.trim() || !projectInput.description.trim()) {
@@ -66,10 +281,10 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
       return;
     }
 
-    if (projectInput.description.length < 50) {
+    if (projectInput.description.length < 300) {
       toast({
         title: "Description Too Short",
-        description: "Please provide a more detailed description (at least 50 characters) for better recommendations.",
+        description: "Please provide a more detailed description (at least 300 characters) for better recommendations.",
         variant: "destructive",
       });
       return;
@@ -78,24 +293,11 @@ export function RoadmapCreator({ onBack, onOpenRescue }: RoadmapCreatorProps) {
     setIsAnalyzing(true);
     
     try {
-      // Simulate AI analysis
+      // Generate custom analysis based on user input
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const mockRecommendations: Recommendations = {
-        recommendedTechStack: ['React', 'Node.js', 'MongoDB', 'Express'],
-        suggestedComplexity: 'medium',
-        estimatedTimeline: '15-20 hours',
-        coreFeatures: ['User authentication', 'CRUD operations', 'Dashboard'],
-        optionalFeatures: ['Real-time notifications', 'File uploads', 'Email integration'],
-        potentialChallenges: ['Authentication security', 'Database design', 'State management'],
-        reasoning: {
-          techStackReason: 'React provides excellent user interfaces, Node.js enables full-stack JavaScript development, and MongoDB offers flexible data storage.',
-          complexityReason: 'Based on the features described, this project requires authentication and data management which suggests medium complexity.',
-          timelineReason: 'Estimated based on typical development time for projects with similar scope and your experience level.'
-        }
-      };
-      
-      setRecommendations(mockRecommendations);
+      const customRecommendations = generateCustomAnalysis(projectInput);
+      setRecommendations(customRecommendations);
       setPhase('recommendations');
     } catch (error) {
       toast({
