@@ -1,0 +1,98 @@
+Remove the current roadmap feature completely and replace it with an AI Project Planner tool.
+
+STEP 1: REMOVE ROADMAP FEATURE
+- Delete all roadmap-related code and files
+- Remove roadmap navigation items
+- Remove roadmap database schemas
+- Clean up any roadmap references in the codebase
+
+STEP 2: BUILD AI PROJECT PLANNER REPLACEMENT
+Create a new "Project Planner" feature in the same location where roadmap was.
+
+FEATURE OVERVIEW: Interactive brainstorming tool that helps users create detailed project specifications through AI conversation.
+
+NEW FEATURE IMPLEMENTATION:
+
+1. CREATE PROJECT PLANNER PAGE
+Route: /project-planner (replace old roadmap route)
+Navigation: "Project Planner" (Pro feature)
+Access: Pro users only (same as roadmap was)
+
+2. PROJECT INPUT FORM
+Simple starting form:
+- Project Name (text input)
+- Project Description (textarea, 200+ characters)
+- Experience Level (Beginner/Intermediate/Advanced)
+- [Start Planning Session] button
+
+3. INTERACTIVE BRAINSTORMING INTERFACE
+Two-panel layout:
+- LEFT PANEL: Chat interface for AI conversation
+- RIGHT PANEL: Live project plan document building
+
+Chat Interface Features:
+- AI asks intelligent follow-up questions
+- User responds to flesh out project details
+- Smart question generation based on project type
+- Conversation flows naturally to gather all needed info
+
+4. AI CONVERSATION LOGIC
+AI should ask questions like:
+- "Who will use this application?"
+- "What's the main problem this solves?"
+- "What are the 3 most important features?"
+- "Do you need user authentication?"
+- "Will this be web-only or mobile responsive?"
+- "Any third-party integrations needed?"
+
+Questions should adapt based on user's previous answers.
+
+5. LIVE PROJECT PLAN GENERATION
+As user answers questions, build project plan in real-time:
+
+PROJECT PLAN SECTIONS:
+- Project Overview (purpose, goals, target users)
+- Feature Specifications (essential vs nice-to-have)
+- Technical Recommendations (tech stack, architecture)
+- User Experience Design (user flows, interface needs)
+- Development Timeline (phases, estimates)
+- Potential Challenges (risks, solutions)
+
+6. PLAN EXPORT FUNCTIONALITY
+- Download as PDF button
+- Download as Markdown button  
+- Save to user account
+- "My Project Plans" section in dashboard
+
+7. PLAN REFINEMENT
+Allow users to:
+- Edit any section of the generated plan
+- Ask follow-up questions to AI
+- Regenerate specific sections
+- Continue brainstorming session
+
+TECHNICAL REQUIREMENTS:
+- Use existing UI components and styling
+- Chat interface with message bubbles
+- Real-time plan updates as conversation progresses
+- Clean, professional document formatting
+- Mobile-responsive design
+- Integration with existing Pro user system
+
+CONVERSATION FLOW EXAMPLE:
+AI: "Let's plan your project! You mentioned building [project name]. Who is the main user of this app?"
+User: "Small business owners who need to track inventory"
+AI: "Great! What's the biggest inventory problem they face right now?"
+[Plan updates with "Target Users: Small business owners" and "Problem: Inventory tracking"]
+
+BUILD PRIORITY:
+1. Basic input form and navigation
+2. Chat interface functionality  
+3. AI question generation logic
+4. Live plan building
+5. Export/save functionality
+6. Plan editing capabilities
+
+REPLACE THE ROADMAP FEATURE COMPLETELY - this becomes the new flagship Pro feature that helps users plan projects before building them.
+
+Keep the same Pro access gates and pricing, just swap the functionality.

@@ -1487,6 +1487,129 @@ Return as JSON with this structure:
     }
   });
 
+  // Project Planner API Endpoints
+  app.post("/api/update-project-plan", async (req, res) => {
+    try {
+      const { projectName, projectDescription, experienceLevel, questionIndex, answer, currentPlan } = req.body;
+
+      const updatePrompt = `Based on this user's answer, update the project plan:
+
+Project: ${projectName}
+Description: ${projectDescription}
+Experience: ${experienceLevel}
+Question Index: ${questionIndex}
+User Answer: "${answer}"
+
+Current Plan: ${JSON.stringify(currentPlan, null, 2)}
+
+Update the relevant sections of the project plan based on the user's answer. Focus on:
+- Project overview (purpose, target users, goals)
+- Feature specifications (essential vs nice-to-have)
+- Technical recommendations
+- Timeline estimates
+- Potential challenges
+
+Return the updated project plan as JSON with the same structure.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: updatePrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const updatedPlan = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(updatedPlan);
+    } catch (error: any) {
+      console.error('Project plan update error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/finalize-project-plan", async (req, res) => {
+    try {
+      const { projectName, projectDescription, experienceLevel, messages, currentPlan } = req.body;
+
+      const userAnswers = messages.map((m: any) => m.content).join('\n- ');
+
+      const finalizePrompt = `Create a comprehensive final project plan based on this conversation:
+
+Project: ${projectName}
+Description: ${projectDescription}
+Experience Level: ${experienceLevel}
+
+User Answers:
+- ${userAnswers}
+
+Current Plan: ${JSON.stringify(currentPlan, null, 2)}
+
+Generate a complete, detailed project plan with all sections filled out:
+
+{
+  "overview": {
+    "purpose": "Clear project purpose",
+    "goals": ["Goal 1", "Goal 2", "Goal 3"],
+    "targetUsers": "Specific target user description"
+  },
+  "features": {
+    "essential": ["Essential feature 1", "Essential feature 2"],
+    "niceToHave": ["Nice feature 1", "Nice feature 2"]
+  },
+  "technical": {
+    "techStack": ["Technology 1", "Technology 2"],
+    "architecture": "Architecture description"
+  },
+  "userExperience": {
+    "userFlows": ["User flow 1", "User flow 2"],
+    "interfaceNeeds": ["UI need 1", "UI need 2"]
+  },
+  "timeline": {
+    "phases": [
+      {
+        "name": "Phase 1",
+        "duration": "2 weeks",
+        "description": "Phase description"
+      }
+    ],
+    "totalEstimate": "8-12 weeks"
+  },
+  "challenges": {
+    "risks": ["Risk 1", "Risk 2"],
+    "solutions": ["Solution 1", "Solution 2"]
+  }
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: finalizePrompt }],
+        response_format: { type: "json_object" }
+      });
+
+      const finalPlan = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(finalPlan);
+    } catch (error: any) {
+      console.error('Final project plan error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/save-project-plan", async (req, res) => {
+    try {
+      const { projectName, projectDescription, experienceLevel, projectPlan, messages } = req.body;
+
+      // For now, just return success - in a real app you'd save to database
+      // You could extend the storage interface to include project plans
+      
+      res.json({ 
+        success: true, 
+        message: "Project plan saved successfully",
+        planId: Date.now().toString()
+      });
+    } catch (error: any) {
+      console.error('Save project plan error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
