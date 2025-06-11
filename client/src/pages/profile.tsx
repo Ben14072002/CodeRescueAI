@@ -144,132 +144,139 @@ export default function Profile() {
                   <div className="h-4 bg-slate-700 rounded animate-pulse"></div>
                   <div className="h-4 bg-slate-700 rounded animate-pulse w-2/3"></div>
                 </div>
-              ) : subscription ? (
+              ) : (
                 <div className="space-y-4">
-                  {subscription.isTrialActive && subscription.trialEnd && (
+                  {isTrialActive && (
                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Star className="w-4 h-4 text-blue-400" />
                         <span className="font-medium text-blue-300">Free Trial Active</span>
                       </div>
                       <p className="text-sm text-blue-200">
-                        Your 3-day trial ends {formatDistanceToNow(new Date(subscription.trialEnd), { addSuffix: true })}
-                      </p>
-                      <p className="text-xs text-blue-300 mt-1">
-                        Trial ends on {format(new Date(subscription.trialEnd), 'MMM dd, yyyy \'at\' h:mm a')}
+                        {daysRemaining > 0 ? `${daysRemaining} days remaining` : 'Trial expires today'}
                       </p>
                     </div>
                   )}
 
-                  {subscription.isPaidPro && (
+                  {subscriptionData?.status === 'active' && (
                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Shield className="w-4 h-4 text-emerald-400" />
                         <span className="font-medium text-emerald-300">Pro Subscription</span>
                       </div>
                       <p className="text-sm text-emerald-200">
-                        ${subscription.tier === 'pro_yearly' ? '47.88/year' : '4.99/month'}
+                        ${subscriptionData.tier === 'pro_yearly' ? '47.88/year' : '4.99/month'}
                       </p>
                     </div>
                   )}
 
-                  {subscription.currentPeriodEnd && (
+                  {subscriptionData?.currentPeriodEnd && (
                     <div>
                       <label className="text-sm font-medium text-slate-300">
-                        {subscription.status === 'canceled' ? 'Access Until' : 'Next Billing'}
+                        {subscriptionData.status === 'canceled' ? 'Access Until' : 'Next Billing'}
                       </label>
                       <p className="text-white">
-                        {format(new Date(subscription.currentPeriodEnd), 'MMM dd, yyyy')}
+                        {format(new Date(subscriptionData.currentPeriodEnd), 'MMM dd, yyyy')}
                       </p>
                     </div>
                   )}
 
-                  {subscription.status === 'canceled' && (
+                  {subscriptionData?.status === 'canceled' && (
                     <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <AlertTriangle className="w-4 h-4 text-orange-400" />
                         <span className="font-medium text-orange-300">Subscription Canceled</span>
                       </div>
                       <p className="text-sm text-orange-200">
-                        You'll retain access until {subscription.currentPeriodEnd ? format(new Date(subscription.currentPeriodEnd), 'MMM dd, yyyy') : 'trial end'}
+                        You'll retain access until {subscriptionData.currentPeriodEnd ? format(new Date(subscriptionData.currentPeriodEnd), 'MMM dd, yyyy') : 'trial end'}
                       </p>
                     </div>
                   )}
+
+                  {!isTrialActive && !subscriptionData?.status && (
+                    <p className="text-slate-400">No active subscription</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-slate-400">No subscription information available</p>
               )}
             </CardContent>
           </Card>
         </div>
 
         {/* Subscription Actions */}
-        {subscription && (
-          <Card className="bg-slate-800/50 border-slate-600 mt-8">
-            <CardHeader>
-              <CardTitle className="text-white">Subscription Management</CardTitle>
-              <CardDescription>
-                Manage your subscription settings and billing
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4">
-                {canCancel && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" className="flex items-center gap-2">
-                        <X className="w-4 h-4" />
-                        Cancel Subscription
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-slate-800 border-slate-600">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">Cancel Subscription</AlertDialogTitle>
-                        <AlertDialogDescription className="text-slate-300">
-                          {subscription.isTrialActive 
-                            ? "Are you sure you want to cancel your trial? You'll lose access to Pro features immediately."
-                            : "Are you sure you want to cancel your subscription? You'll retain access until the end of your current billing period."
-                          }
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="bg-slate-700 text-white border-slate-600">
-                          Keep Subscription
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => cancelSubscriptionMutation.mutate()}
-                          disabled={cancelSubscriptionMutation.isPending}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          {cancelSubscriptionMutation.isPending ? "Canceling..." : "Yes, Cancel"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
+        <Card className="bg-slate-800/50 border-slate-600 mt-8">
+          <CardHeader>
+            <CardTitle className="text-white">Subscription Management</CardTitle>
+            <CardDescription>
+              Manage your subscription settings and billing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {canCancel && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="flex items-center gap-2">
+                      <X className="w-4 h-4" />
+                      Cancel Subscription
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-slate-800 border-slate-600">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-white">Cancel Subscription</AlertDialogTitle>
+                      <AlertDialogDescription className="text-slate-300">
+                        {isTrialActive 
+                          ? "Are you sure you want to cancel your trial? You'll lose access to Pro features immediately."
+                          : "Are you sure you want to cancel your subscription? You'll retain access until the end of your current billing period."
+                        }
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-slate-700 text-white border-slate-600">
+                        Keep Subscription
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => cancelSubscriptionMutation.mutate()}
+                        disabled={cancelSubscriptionMutation.isPending}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        {cancelSubscriptionMutation.isPending ? "Canceling..." : "Yes, Cancel"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
 
-                {canReactivate && (
-                  <Button
-                    onClick={() => reactivateSubscriptionMutation.mutate()}
-                    disabled={reactivateSubscriptionMutation.isPending}
-                    className="bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    {reactivateSubscriptionMutation.isPending ? "Reactivating..." : "Reactivate Subscription"}
-                  </Button>
-                )}
+              {canReactivate && (
+                <Button
+                  onClick={() => reactivateSubscriptionMutation.mutate()}
+                  disabled={reactivateSubscriptionMutation.isPending}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {reactivateSubscriptionMutation.isPending ? "Reactivating..." : "Reactivate Subscription"}
+                </Button>
+              )}
 
-                {!subscription.hasProAccess && (
-                  <Button
-                    onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    Start 3-Day Trial
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              {!isTrialActive && !subscriptionData?.status && (
+                <Button
+                  onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Start 3-Day Trial
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Back to Home */}
+        <div className="mt-8 text-center">
+          <Link href="/">
+            <Button variant="outline" className="border-slate-600 text-slate-300">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
