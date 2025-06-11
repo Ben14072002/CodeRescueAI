@@ -353,41 +353,60 @@ Return a JSON object with this structure:
       }
 
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      // Check if user is in trial period
-      const trialStatus = await storage.checkTrialStatus(user.id);
-      
-      if (trialStatus.isTrialActive && !user.stripeSubscriptionId) {
-        // Cancel trial immediately for users without Stripe subscription
-        await storage.expireTrial(user.id);
-        
+        // User not found - treat as already canceled/free tier
+        console.log("User not found for cancellation, treating as already free tier");
         res.json({ 
           success: true,
-          message: "Trial has been canceled immediately",
+          message: "Account reverted to free plan successfully.",
           cancelAtPeriodEnd: false,
           currentPeriodEnd: null
         });
         return;
       }
 
-      if (!user.stripeSubscriptionId) {
-        return res.status(400).json({ error: "No active subscription found to cancel" });
+      // Check if user is in trial period
+      const trialStatus = await storage.checkTrialStatus(user.id);
+      
+      // For any user without a Stripe subscription or in trial, cancel immediately and revert to free
+      if (!user.stripeSubscriptionId || trialStatus.isTrialActive) {
+        // Cancel trial/subscription immediately and revert to free tier
+        await storage.updateUserSubscription(user.id, {
+          subscriptionStatus: 'canceled',
+          subscriptionTier: 'free',
+          stripeSubscriptionId: null,
+          stripeCustomerId: null,
+          subscriptionCurrentPeriodEnd: null
+        });
+        
+        // Also expire trial if active
+        if (trialStatus.isTrialActive) {
+          await storage.expireTrial(user.id);
+        }
+        
+        res.json({ 
+          success: true,
+          message: "Subscription canceled immediately. Reverted to free plan.",
+          cancelAtPeriodEnd: false,
+          currentPeriodEnd: null
+        });
+        return;
       }
 
-      // For development/testing with mock subscription IDs
+      // For development/testing with mock subscription IDs - immediate cancellation
       if (user.stripeSubscriptionId.startsWith('sub_test_')) {
-        // Mock cancellation for testing
+        // Mock cancellation - immediate reversion to free for testing
         await storage.updateUserSubscription(user.id, {
-          subscriptionStatus: 'cancel_at_period_end'
+          subscriptionStatus: 'canceled',
+          subscriptionTier: 'free',
+          stripeSubscriptionId: null,
+          subscriptionCurrentPeriodEnd: null
         });
 
         res.json({ 
           success: true,
-          message: "Subscription will be cancelled at the end of the current period",
-          cancelAtPeriodEnd: true,
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+          message: "Subscription canceled immediately. Reverted to free plan.",
+          cancelAtPeriodEnd: false,
+          currentPeriodEnd: null
         });
         return;
       }

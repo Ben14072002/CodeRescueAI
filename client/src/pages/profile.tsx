@@ -25,14 +25,26 @@ export default function Profile() {
       const response = await apiRequest("POST", "/api/cancel-subscription", {
         userId: user?.uid
       });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.message || "Failed to cancel subscription");
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Subscription Canceled",
-        description: "Your subscription has been canceled. You'll retain access until the end of your current period.",
+        description: data.message || "Your subscription has been canceled successfully.",
       });
+      // Invalidate all subscription-related queries to force refresh
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription-status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trial-status'] });
       refreshSubscription();
+      
+      // Force page reload to ensure UI reflects free tier immediately
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     },
     onError: (error: any) => {
       toast({
