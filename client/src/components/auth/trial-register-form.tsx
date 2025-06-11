@@ -362,32 +362,6 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
               <CardTitle className="text-slate-100">Payment Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mb-4">
-                <div className="flex items-center text-amber-200 text-sm mb-2">
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  <span className="font-medium">Development Mode</span>
-                </div>
-                <p className="text-amber-300 text-xs mb-3">
-                  Your Stripe account is in live mode. For testing, you can skip payment setup.
-                </p>
-                <Button
-                  onClick={handlePaymentComplete}
-                  variant="outline"
-                  className="w-full border-amber-500 text-amber-200 hover:bg-amber-500/10"
-                >
-                  Skip Payment Setup (Development)
-                </Button>
-              </div>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-600" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-slate-800 px-2 text-slate-400">Or add payment method</span>
-                </div>
-              </div>
-              
               <PaymentForm 
                 onComplete={handlePaymentComplete}
                 onBack={onBack}
