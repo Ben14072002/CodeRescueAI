@@ -376,6 +376,22 @@ Return a JSON object with this structure:
         return res.status(400).json({ error: "No active subscription found to cancel" });
       }
 
+      // For development/testing with mock subscription IDs
+      if (user.stripeSubscriptionId.startsWith('sub_test_')) {
+        // Mock cancellation for testing
+        await storage.updateUserSubscription(user.id, {
+          subscriptionStatus: 'cancel_at_period_end'
+        });
+
+        res.json({ 
+          success: true,
+          message: "Subscription will be cancelled at the end of the current period",
+          cancelAtPeriodEnd: true,
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+        });
+        return;
+      }
+
       // Cancel subscription at period end using Stripe
       const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
         cancel_at_period_end: true,
