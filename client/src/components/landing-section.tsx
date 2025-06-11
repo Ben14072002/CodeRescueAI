@@ -149,7 +149,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
-      {/* Features Section - Detailed */}
+      {/* Features Section - Engaging & Digestible */}
       <section id="how-it-works" className="mb-20">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -157,185 +157,97 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
               Everything You Need to Get Unstuck
             </h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              See exactly what happens when you use each feature. No more guessing if it works.
+              Battle-tested strategies that get you coding again in minutes, not hours
             </p>
           </div>
 
-          {/* AI Development Wizard Detailed Explanation */}
-          <div className="mb-16">
-            <Card className="bg-purple-500/10 border-purple-500/20">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <div className="bg-purple-500/20 p-3 rounded-lg mr-4">
-                    <Brain className="w-8 h-8 text-purple-400" />
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Brain,
+                title: "AI Development Wizard",
+                description: "Personal senior developer that walks you through problems step-by-step",
+                highlight: "Avg. rescue time: 8 minutes",
+                color: "text-purple-400",
+                bgColor: "bg-purple-500/10",
+                borderColor: "border-purple-500/20",
+                example: "Example: 'React state not updating' → Get exact prompts to fix it"
+              },
+              {
+                icon: Bot,
+                title: "Free Prompt Library", 
+                description: "50+ battle-tested prompts for the most common coding problems",
+                highlight: "89% success rate",
+                color: "text-cyan-400",
+                bgColor: "bg-cyan-500/10",
+                borderColor: "border-cyan-500/20",
+                example: "Database failing? Get the exact prompt that fixes it in 94% of cases"
+              },
+              {
+                icon: Target,
+                title: "Smart Problem Detection",
+                description: "Instantly identifies what's wrong and creates a custom action plan",
+                highlight: "Works in 30 seconds",
+                color: "text-emerald-400",
+                bgColor: "bg-emerald-500/10",
+                borderColor: "border-emerald-500/20",
+                example: "Tell us what's stuck → Get personalized solution in under a minute"
+              }
+            ].map((feature, index) => (
+              <Card key={index} className={`${feature.bgColor} ${feature.borderColor} hover:scale-105 transition-all duration-200 group cursor-pointer`}>
+                <CardContent className="p-8 text-center">
+                  <div className={`${feature.bgColor} p-4 rounded-lg inline-block mb-6 group-hover:scale-110 transition-transform`}>
+                    <feature.icon className={`w-10 h-10 ${feature.color}`} />
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-slate-100">AI Development Wizard</h3>
-                    <p className="text-purple-400">Your Personal Senior Developer Mentor</p>
+                  <h3 className="text-xl font-semibold mb-3 text-slate-100">{feature.title}</h3>
+                  <p className="text-slate-400 mb-4 leading-relaxed">{feature.description}</p>
+                  
+                  <Badge className={`${feature.bgColor} ${feature.color} border-none mb-4`}>
+                    {feature.highlight}
+                  </Badge>
+                  
+                  <div className="bg-slate-900/50 p-4 rounded-lg mt-4">
+                    <p className="text-sm text-slate-300 italic">"{feature.example}"</p>
                   </div>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="text-lg font-semibold text-slate-100 mb-4">What Happens Step-by-Step:</h4>
-                    <ol className="space-y-3 text-slate-300">
-                      <li className="flex items-start">
-                        <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5">1</span>
-                        <div>
-                          <strong>Describe Your Problem:</strong> Tell the wizard what's stuck (e.g., "My React components won't update when state changes")
-                        </div>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5">2</span>
-                        <div>
-                          <strong>Smart Questioning:</strong> The wizard asks specific questions to understand your exact situation and tech stack
-                        </div>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5">3</span>
-                        <div>
-                          <strong>Diagnosis & Plan:</strong> Get a clear explanation of what's wrong and a step-by-step action plan
-                        </div>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5">4</span>
-                        <div>
-                          <strong>Precise Prompts:</strong> Receive exact prompts to copy-paste into your AI assistant to fix the issue
-                        </div>
-                      </li>
-                    </ol>
-                  </div>
-                  <div className="bg-slate-900/50 p-6 rounded-lg">
-                    <h4 className="text-lg font-semibold text-slate-100 mb-4">Real Example Output:</h4>
-                    <div className="text-sm text-slate-300 space-y-2">
-                      <p><strong className="text-purple-400">Problem:</strong> "React state not updating UI"</p>
-                      <p><strong className="text-purple-400">Diagnosis:</strong> Likely using object mutation instead of creating new state</p>
-                      <p><strong className="text-purple-400">Prompt for AI:</strong></p>
-                      <div className="bg-slate-800 p-3 rounded text-xs">
-                        "I need to fix React state updates. Show me how to properly update state when working with objects and arrays. Include before/after examples using setState or useState hook."
-                      </div>
-                      <p><strong className="text-purple-400">Expected Fix Time:</strong> 5-8 minutes</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
-          {/* Free Prompt Library Detailed Explanation */}
-          <div className="mb-16">
-            <Card className="bg-cyan-500/10 border-cyan-500/20">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <div className="bg-cyan-500/20 p-3 rounded-lg mr-4">
-                    <Bot className="w-8 h-8 text-cyan-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-slate-100">Free Prompt Library</h3>
-                    <p className="text-cyan-400">Battle-Tested Prompts That Actually Work</p>
-                  </div>
-                </div>
-                
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div>
-                    <h4 className="text-lg font-semibold text-slate-100 mb-4">What You Get:</h4>
-                    <ul className="space-y-2 text-slate-300">
-                      <li>• 50+ proven prompts for common issues</li>
-                      <li>• Organized by problem type (debugging, features, optimization)</li>
-                      <li>• Copy-paste ready templates</li>
-                      <li>• Success rate tracking for each prompt</li>
-                      <li>• Regular updates based on community feedback</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold text-slate-100 mb-4">Categories Include:</h4>
-                    <ul className="space-y-2 text-slate-300">
-                      <li>• Database Connection Issues</li>
-                      <li>• API Integration Problems</li>
-                      <li>• UI Component Bugs</li>
-                      <li>• Authentication Failures</li>
-                      <li>• Performance Optimization</li>
-                      <li>• Deployment Problems</li>
-                    </ul>
-                  </div>
-                  <div className="bg-slate-900/50 p-4 rounded-lg">
-                    <h4 className="text-sm font-semibold text-slate-100 mb-3">Sample Prompt:</h4>
-                    <div className="text-xs text-slate-300">
-                      <p className="text-cyan-400 mb-2"><strong>Problem:</strong> Database queries failing</p>
-                      <div className="bg-slate-800 p-2 rounded text-xs">
-                        "My database queries are failing. Help me debug this step by step: 1) Check connection string format 2) Validate SQL syntax 3) Test with simple query first 4) Show error handling best practices"
-                      </div>
-                      <p className="mt-2 text-emerald-400"><strong>Success Rate:</strong> 89% (127 uses)</p>
+          {/* Quick Process Overview */}
+          <div className="mt-16 text-center">
+            <h3 className="text-2xl font-bold mb-8 text-slate-100">How It Works</h3>
+            <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+              {[
+                { step: "1", text: "Describe your problem", time: "30 sec" },
+                { step: "2", text: "Get smart questions", time: "1 min" },
+                { step: "3", text: "Receive action plan", time: "2 min" },
+                { step: "4", text: "Follow prompts & ship", time: "5 min" }
+              ].map((phase, index) => (
+                <div key={index} className="flex items-center">
+                  <div className="flex flex-col items-center">
+                    <div className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">
+                      {phase.step}
                     </div>
+                    <p className="text-slate-100 font-medium">{phase.text}</p>
+                    <p className="text-slate-400 text-sm">{phase.time}</p>
                   </div>
+                  {index < 3 && (
+                    <ArrowRight className="w-6 h-6 text-slate-600 mx-4 hidden md:block" />
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           </div>
 
-          {/* Smart Problem Solving Process */}
-          <div className="mb-12">
-            <Card className="bg-amber-500/10 border-amber-500/20">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <div className="bg-amber-500/20 p-3 rounded-lg mr-4">
-                    <Lightbulb className="w-8 h-8 text-amber-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-slate-100">The Complete Rescue Process</h3>
-                    <p className="text-amber-400">From Stuck to Shipping in Under 10 Minutes</p>
-                  </div>
-                </div>
-                
-                <div className="grid md:grid-cols-4 gap-6">
-                  {[
-                    {
-                      step: "1",
-                      title: "Problem Detection",
-                      description: "Smart analysis identifies exactly what type of issue you're facing",
-                      time: "30 seconds"
-                    },
-                    {
-                      step: "2", 
-                      title: "Context Gathering",
-                      description: "Quick questions about your tech stack, project type, and what you've tried",
-                      time: "1-2 minutes"
-                    },
-                    {
-                      step: "3",
-                      title: "Solution Generation", 
-                      description: "AI generates personalized, step-by-step action plan with specific prompts",
-                      time: "2-3 minutes"
-                    },
-                    {
-                      step: "4",
-                      title: "Execution & Success",
-                      description: "Follow the prompts, track progress, get back to productive coding",
-                      time: "5-8 minutes"
-                    }
-                  ].map((phase, index) => (
-                    <div key={index} className="text-center">
-                      <div className="bg-amber-500 text-slate-900 rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                        {phase.step}
-                      </div>
-                      <h4 className="text-lg font-semibold text-slate-100 mb-2">{phase.title}</h4>
-                      <p className="text-sm text-slate-300 mb-2">{phase.description}</p>
-                      <Badge variant="outline" className="text-amber-400 border-amber-400">{phase.time}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center">
+          <div className="text-center mt-12">
             <Button 
               onClick={onGetStarted}
               size="lg"
               className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all shadow-lg"
             >
-              <ArrowRight className="w-5 h-5 mr-2" />
-              See It In Action - Start Free
+              <Play className="w-5 h-5 mr-2" />
+              Start Your First Rescue
             </Button>
             <p className="text-slate-400 mt-4">No credit card required • 3 free rescues monthly</p>
           </div>
