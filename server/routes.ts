@@ -615,11 +615,10 @@ Return a JSON object with this structure:
       if (user.stripeSubscriptionId) {
         try {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-          const stripeSubscription = subscription as any; // Type assertion for current_period_end
           subscriptionData = {
             tier: subscription.metadata?.plan || user.subscriptionTier || 'free',
             status: subscription.status,
-            currentPeriodEnd: stripeSubscription.current_period_end ? new Date(stripeSubscription.current_period_end * 1000) : null
+            currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null
           };
         } catch (stripeError) {
           console.error('Error fetching Stripe subscription:', stripeError);
