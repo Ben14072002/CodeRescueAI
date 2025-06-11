@@ -181,7 +181,7 @@ function TrialPaymentWrapper({ onComplete, onBack, userEmail, userName }: {
             <div className="text-xs text-purple-300 space-y-1">
               <div>• No charge for 3 days</div>
               <div>• Cancel anytime before trial ends</div>
-              <div>• Automatic conversion to Pro after trial ($9.99/month)</div>
+              <div>• Automatic conversion to Pro after trial (€4.99/month)</div>
               <div>• Secure payment processing by Stripe</div>
             </div>
           </CardContent>
@@ -346,7 +346,7 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
               <div className="text-xs text-purple-300 space-y-1">
                 <div>• No charge for 3 days</div>
                 <div>• Cancel anytime before trial ends</div>
-                <div>• Automatic conversion to Pro after trial ($9.99/month)</div>
+                <div>• Automatic conversion to Pro after trial (€4.99/month)</div>
                 <div>• Secure payment processing by Stripe</div>
               </div>
             </CardContent>

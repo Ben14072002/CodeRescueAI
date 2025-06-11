@@ -171,7 +171,7 @@ export function CostCalculator() {
             </CardHeader>
             <CardContent className="text-center">
               <div className="text-4xl md:text-6xl font-bold text-emerald-400 mb-2">
-                $9.99
+                €4.99
               </div>
               <p className="text-slate-400 mb-4 text-sm">unlimited AI rescues</p>
               {savings > 0 ? (
