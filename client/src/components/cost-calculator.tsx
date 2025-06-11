@@ -41,13 +41,14 @@ export function CostCalculator() {
   };
   
   const current = scenarios[scenario];
+  const proPlanCost = 4.99;
   const checkpointCost = 0.25;
   const costPerSession = checkpointCost * current.checkpoints;
   const monthlyCost = costPerSession * current.sessions;
   const yearlyCost = monthlyCost * 12;
-  const savings = Math.max(0, monthlyCost - 9.99);
-  const roiPercentage = savings > 0 ? Math.round((savings / 9.99) * 100) : 0;
-  const breakEvenSessions = Math.ceil(9.99 / costPerSession);
+  const savings = Math.max(0, monthlyCost - proPlanCost);
+  const roiPercentage = savings > 0 ? Math.round((savings / proPlanCost) * 100) : 0;
+  const breakEvenSessions = Math.ceil(proPlanCost / costPerSession);
   
   useEffect(() => {
     setAnimateCounter(true);
@@ -241,18 +242,18 @@ export function CostCalculator() {
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-emerald-400 mb-2">
-                    $119.88
+                    ${(proPlanCost * 12).toFixed(2)}
                   </div>
                   <p className="text-slate-400 text-sm">CodeBreaker Pro cost</p>
                 </div>
               </div>
-              {yearlyCost > 119.88 && (
+              {yearlyCost > (proPlanCost * 12) && (
                 <div className="mt-6 p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
                   <div className="text-emerald-300 font-bold text-xl">
-                    Net Savings: ${(yearlyCost - 119.88).toFixed(0)}/year
+                    Net Savings: ${(yearlyCost - (proPlanCost * 12)).toFixed(0)}/year
                   </div>
                   <p className="text-emerald-400 text-sm mt-1">
-                    That's enough for {Math.floor((yearlyCost - 119.88) / 5)} premium coffee drinks!
+                    That's enough for {Math.floor((yearlyCost - (proPlanCost * 12)) / 5)} premium coffee drinks!
                   </p>
                 </div>
               )}
