@@ -1,0 +1,96 @@
+Test the complete Pro subscription workflow to ensure Google Auth and Stripe trial system work correctly.
+
+TESTING WORKFLOW:
+
+STEP 1: GOOGLE AUTH SIGNUP TEST
+Test Google authentication integration:
+1. Navigate to signup page
+2. Click "Sign up with Google" button
+3. Complete Google OAuth flow
+4. Verify user account created with Google email
+5. Check that user is redirected to trial signup flow
+
+STEP 2: TRIAL SUBSCRIPTION CREATION TEST
+Test Stripe trial setup:
+1. After Google signup, user should see Pro trial offer
+2. Enter test payment information (use Stripe test cards)
+3. Verify subscription created in Stripe with 3-day trial
+4. Confirm no immediate charge (trial period active)
+5. Check user dashboard shows "Trial Active: X days remaining"
+6. Verify Pro features are accessible during trial
+
+STEP 3: TRIAL CANCELLATION TEST
+Test cancellation during trial:
+1. Go to user profile/settings page
+2. Find "Cancel Subscription" option
+3. Click cancel and confirm cancellation
+4. Verify subscription immediately canceled in Stripe
+5. Check user reverts to free tier immediately
+6. Confirm Pro features are no longer accessible
+
+STEP 4: TRIAL EXPIRY AND BILLING TEST
+Test automatic billing after trial:
+1. Create new trial subscription
+2. Manually set trial end date to past (for testing)
+3. Trigger Stripe webhook or billing cycle
+4. Verify $4.99 charge processes successfully
+5. Check user status updates to "Pro Active"
+6. Confirm Pro features remain accessible
+
+STEP 5: ACTIVE SUBSCRIPTION CANCELLATION TEST
+Test cancellation after billing starts:
+1. With active paid subscription
+2. Cancel subscription via profile page
+3. Verify cancellation scheduled for period end
+4. Check user retains Pro access until end date
+5. Confirm access reverts to free after period ends
+
+SPECIFIC TESTS TO RUN:
+
+GOOGLE AUTH VERIFICATION:
+- Test with different Google accounts
+- Verify email addresses save correctly
+- Check profile information populates
+- Test sign-in flow for returning Google users
+
+STRIPE INTEGRATION CHECKS:
+- Verify webhook endpoints receive events
+- Test with different payment methods
+- Check subscription status updates correctly
+- Confirm billing cycle calculations
+
+ERROR HANDLING TESTS:
+- Test with invalid payment cards
+- Test cancellation failures
+- Test webhook delivery failures
+- Verify user sees appropriate error messages
+
+EDGE CASE TESTING:
+- Multiple signup attempts with same email
+- Canceling and re-subscribing
+- Trial expiry with failed payment
+- Account deletion with active subscription
+
+SUCCESS CRITERIA:
+✅ Google Auth signup works smoothly
+✅ Trial subscriptions create without immediate charge
+✅ Trial cancellation works immediately
+✅ Automatic billing triggers after 3 days
+✅ Pro features gate correctly based on subscription status
+✅ Active subscription cancellation retains access until period end
+✅ All Stripe webhooks process correctly
+✅ User dashboard shows accurate subscription status
+
+TESTING ENVIRONMENT:
+- Use Stripe test mode with test card numbers
+- Test on both desktop and mobile
+- Check all browser types (Chrome, Firefox, Safari)
+- Verify email notifications send correctly
+
+REPORT REQUIRED:
+For each test step, document:
+- ✅ PASS: Works as expected
+- ❌ FAIL: Issue found with specific details
+- ⚠️ WARNING: Minor issue that needs attention
+
+Test systematically and fix any issues before launch. The subscription flow must be bulletproof for revenue generation.
