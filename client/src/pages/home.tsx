@@ -215,12 +215,6 @@ export default function Home() {
       />
       
       <CopyToast show={showCopyToast} />
-      
-      {/* New Features Popup */}
-      <NewFeaturesPopup 
-        onExploreFeatures={handleExploreNewFeatures}
-        onDismiss={() => {}}
-      />
     </div>
   );
 }
