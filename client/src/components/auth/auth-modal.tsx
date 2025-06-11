@@ -67,7 +67,7 @@ export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md p-0 bg-transparent border-none">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-0 bg-transparent border-none">
         <VisuallyHidden>
           <DialogTitle>Authentication</DialogTitle>
           <DialogDescription>Sign in or create an account</DialogDescription>
