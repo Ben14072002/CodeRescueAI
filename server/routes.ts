@@ -1693,9 +1693,10 @@ Generate a detailed solution with this JSON structure:
     {
       "step": 1,
       "title": "Step title",
-      "description": "Detailed explanation",
+      "description": "Detailed explanation of what to do",
       "code": "code example if needed",
-      "expectedTime": "time estimate"
+      "expectedTime": "time estimate",
+      "aiPrompt": "Sophisticated prompt optimized for AI coding assistants (Replit AI, Cursor, Windsurf, Lovable) that would accomplish this exact step with detailed context and requirements"
     }
   ],
   "expectedTime": "total time estimate",
@@ -1703,6 +1704,14 @@ Generate a detailed solution with this JSON structure:
   "preventionTips": ["how to avoid this in future"],
   "learningResources": ["additional learning materials"]
 }
+
+CRITICAL: For each solutionStep, include an "aiPrompt" field containing a sophisticated, strategic prompt optimized for AI coding assistants. These prompts should:
+- Be specific and actionable for AI assistants
+- Include clear context and requirements
+- Follow best practices for AI prompt engineering
+- Be ready-to-use with Replit AI, Cursor, Windsurf, or Lovable
+- Include expected deliverables and technical specifications
+- Use strategic formatting for maximum AI comprehension
 
 Be specific, actionable, and educational. Adapt complexity to their experience level (${classification.experience}).`;
 

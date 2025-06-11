@@ -36,6 +36,7 @@ interface WizardSolution {
     description: string;
     code?: string;
     expectedTime: string;
+    aiPrompt?: string;
   }>;
   expectedTime: string;
   alternativeApproaches: string[];
@@ -282,7 +283,9 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
                 await sendWizardMessage(
                   `**Step ${step.step}: ${step.title}**\n${step.description}${
                     step.code ? `\n\`\`\`\n${step.code}\n\`\`\`` : ''
-                  }\n*Expected time: ${step.expectedTime}*`,
+                  }\n*Expected time: ${step.expectedTime}*${
+                    step.aiPrompt ? `\n\n**🤖 AI Assistant Prompt:**\n\`\`\`\n${step.aiPrompt}\n\`\`\`\n*Copy this prompt to use with Replit AI, Cursor, Windsurf, or Lovable for this step*` : ''
+                  }`,
                   800
                 );
               }, (i + 1) * 2000);
@@ -399,13 +402,13 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
         <Card className="h-[calc(100vh-200px)] flex flex-col">
           <CardContent className="flex-1 flex flex-col p-0">
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
                 >
-                  <div className={`flex items-start gap-3 max-w-[80%] ${
+                  <div className={`flex items-start gap-3 max-w-[85%] ${
                     message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
                   }`}>
                     {/* Avatar */}
@@ -434,6 +437,21 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
                       }`}>
                         {message.content}
                       </div>
+                      {/* Copy AI Prompt Button */}
+                      {message.type === 'wizard' && message.content.includes('🤖 AI Assistant Prompt:') && (
+                        <button
+                          onClick={() => {
+                            const promptMatch = message.content.match(/🤖 AI Assistant Prompt:\s*```\s*([\s\S]*?)\s*```/);
+                            if (promptMatch) {
+                              navigator.clipboard.writeText(promptMatch[1].trim());
+                              toast({ title: "AI Prompt copied to clipboard!" });
+                            }
+                          }}
+                          className="mt-2 px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                        >
+                          📋 Copy AI Prompt
+                        </button>
+                      )}
                       <div className={`text-xs mt-2 ${
                         message.type === 'wizard' 
                           ? 'text-gray-500 dark:text-gray-400' 
@@ -448,8 +466,8 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
               
               {/* Typing Indicator */}
               {isWizardTyping && (
-                <div className="flex justify-start">
-                  <div className="flex items-start gap-3">
+                <div className="flex justify-start mb-4">
+                  <div className="flex items-start gap-3 max-w-[85%]">
                     <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                       <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
