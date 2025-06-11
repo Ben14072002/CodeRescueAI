@@ -33,9 +33,9 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
         <div className="max-w-6xl mx-auto px-4">
           {/* Hero Badge */}
           <div className="mb-6">
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-4 py-2">
+            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-4 py-2 animate-pulse">
               <Zap className="w-4 h-4 mr-2" />
-              Used by 500+ developers this week
+              🎉 NEW: AI Development Wizard + Free Templates Available!
             </Badge>
           </div>
           
@@ -89,6 +89,82 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
         </div>
       </section>
+
+      {/* New Features Highlight Section */}
+      <section className="mb-20 bg-gradient-to-r from-primary/5 to-emerald-500/5 py-16 rounded-2xl">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 mb-4">
+              ✨ Just Released
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
+              Introducing Major Updates
+            </h2>
+            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+              Based on your feedback, we've built the most comprehensive AI development rescue platform
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: Brain,
+                title: "AI Development Wizard",
+                description: "Your personal senior developer mentor that provides step-by-step guidance when you're completely stuck",
+                color: "text-purple-400",
+                bgColor: "bg-purple-500/10",
+                borderColor: "border-purple-500/20"
+              },
+              {
+                icon: Bot,
+                title: "Free Prompt Library",
+                description: "Ready-to-use, battle-tested prompts for the most common AI coding problems",
+                color: "text-cyan-400", 
+                bgColor: "bg-cyan-500/10",
+                borderColor: "border-cyan-500/20"
+              },
+              {
+                icon: Target,
+                title: "Better Pricing",
+                description: "Now just $4.99/month for unlimited Pro features. Start with 3 free rescues monthly",
+                color: "text-emerald-400",
+                bgColor: "bg-emerald-500/10", 
+                borderColor: "border-emerald-500/20"
+              },
+              {
+                icon: Lightbulb,
+                title: "Smarter Problem Solving",
+                description: "Get personalized, context-aware guidance instead of generic prompts that don't work",
+                color: "text-amber-400",
+                bgColor: "bg-amber-500/10",
+                borderColor: "border-amber-500/20"
+              }
+            ].map((feature, index) => (
+              <Card key={index} className={`${feature.bgColor} ${feature.borderColor} hover:scale-105 transition-transform duration-200`}>
+                <CardContent className="p-6 text-center">
+                  <div className={`${feature.bgColor} p-3 rounded-lg inline-block mb-4`}>
+                    <feature.icon className={`w-8 h-8 ${feature.color}`} />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-3 text-slate-100">{feature.title}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              onClick={onGetStarted}
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all shadow-lg"
+            >
+              <ArrowRight className="w-5 h-5 mr-2" />
+              Try New Features Now
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Problem/Solution Section */}
       <section className="mb-20">
         <div className="max-w-6xl mx-auto px-4">
@@ -210,17 +286,17 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                quote: "Saved me 3 hours yesterday when Cursor got stuck in a loop. The prompts actually work!",
+                quote: "The new AI Development Wizard is incredible! It walked me through a complex database issue step-by-step. Saved 4 hours of debugging.",
                 author: "Sarah Chen",
                 role: "Frontend Developer"
               },
               {
-                quote: "Finally, a tool that understands AI assistant problems. Back to shipping features.",
+                quote: "Love the free prompt library. Finally have battle-tested prompts that actually work instead of generic suggestions.",
                 author: "Mike Rodriguez", 
                 role: "Full Stack Developer"
               },
               {
-                quote: "The step-by-step approach is genius. No more throwing random prompts at the wall.",
+                quote: "At $4.99/month, this is the best dev tool investment I've made. The personalized guidance beats any generic AI chat.",
                 author: "Alex Thompson",
                 role: "Senior Engineer"
               }
@@ -246,9 +322,14 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           <h2 className="text-3xl font-bold mb-4 text-slate-100">
             Simple, Developer-Friendly Pricing
           </h2>
-          <p className="text-xl text-slate-400 mb-12">
+          <p className="text-xl text-slate-400 mb-4">
             Start free, upgrade when you're ready to ship faster
           </p>
+          <div className="mb-12">
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+              🎉 Price Drop: Now just $4.99/month (was $9.99)
+            </Badge>
+          </div>
 
           <div className="grid md:grid-cols-2 gap-8">
             <Card className="surface-800 border-slate-700">
@@ -262,11 +343,11 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Basic problem detection
+                    Access to Free Prompt Library
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Standard solution library
+                    Basic problem detection
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
@@ -292,23 +373,23 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                 <ul className="text-left space-y-3 mb-8">
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
+                    Full AI Development Wizard access
+                  </li>
+                  <li className="flex items-center text-slate-300">
+                    <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
                     Unlimited AI rescues
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Advanced problem analysis
+                    Premium prompt templates
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Premium solution templates
+                    Personalized step-by-step guidance
                   </li>
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Priority email support
-                  </li>
-                  <li className="flex items-center text-slate-300">
-                    <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />
-                    Session history & analytics
+                    Priority support & session history
                   </li>
                 </ul>
                 <Button 
