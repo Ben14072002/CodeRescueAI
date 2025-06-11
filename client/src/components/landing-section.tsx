@@ -90,18 +90,74 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
         </div>
       </section>
 
-      {/* How It Actually Works - Detailed Section */}
-      <section className="mb-20 bg-gradient-to-r from-primary/5 to-emerald-500/5 py-16 rounded-2xl">
+
+
+      {/* Problem/Solution Section */}
+      <section className="mb-20">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 mb-4">
-              ✨ How It Actually Works
-            </Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
-              See Exactly What You Get
+              Every Developer's Nightmare
             </h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              Stop wondering if it works. Here's exactly what happens when you use each feature.
+              Sound familiar? You're not alone. Here's what CodeBreaker solves:
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            {/* Problem Side */}
+            <Card className="bg-red-500/10 border-red-500/20">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-red-400 mb-6">Before CodeBreaker</h3>
+                <ul className="space-y-4">
+                  {[
+                    "AI builds everything at once, creating chaos",
+                    "Can't connect two simple features together", 
+                    "Suggests the same broken solution repeatedly",
+                    "No clear plan, just random code generation",
+                    "Hours wasted in endless debug loops"
+                  ].map((problem, index) => (
+                    <li key={index} className="flex items-start text-slate-300">
+                      <span className="text-red-500 mr-3 mt-1">✗</span>
+                      {problem}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Solution Side */}
+            <Card className="bg-emerald-500/10 border-emerald-500/20">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-emerald-400 mb-6">With CodeBreaker</h3>
+                <ul className="space-y-4">
+                  {[
+                    "Break complex problems into manageable steps",
+                    "Get specific prompts that redirect AI focus",
+                    "Clear action plans with success criteria",
+                    "Progress tracking with built-in timers",
+                    "Back to productive coding in minutes"
+                  ].map((solution, index) => (
+                    <li key={index} className="flex items-start text-slate-300">
+                      <CheckCircle className="text-emerald-500 mr-3 mt-1 w-5 h-5 flex-shrink-0" />
+                      {solution}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+      {/* Features Section - Detailed */}
+      <section id="how-it-works" className="mb-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
+              Everything You Need to Get Unstuck
+            </h2>
+            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+              See exactly what happens when you use each feature. No more guessing if it works.
             </p>
           </div>
 
@@ -282,108 +338,6 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
               See It In Action - Start Free
             </Button>
             <p className="text-slate-400 mt-4">No credit card required • 3 free rescues monthly</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Problem/Solution Section */}
-      <section className="mb-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
-              Every Developer's Nightmare
-            </h2>
-            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              Sound familiar? You're not alone. Here's what CodeBreaker solves:
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            {/* Problem Side */}
-            <Card className="bg-red-500/10 border-red-500/20">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-red-400 mb-6">Before CodeBreaker</h3>
-                <ul className="space-y-4">
-                  {[
-                    "AI builds everything at once, creating chaos",
-                    "Can't connect two simple features together", 
-                    "Suggests the same broken solution repeatedly",
-                    "No clear plan, just random code generation",
-                    "Hours wasted in endless debug loops"
-                  ].map((problem, index) => (
-                    <li key={index} className="flex items-start text-slate-300">
-                      <span className="text-red-500 mr-3 mt-1">✗</span>
-                      {problem}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Solution Side */}
-            <Card className="bg-emerald-500/10 border-emerald-500/20">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-emerald-400 mb-6">With CodeBreaker</h3>
-                <ul className="space-y-4">
-                  {[
-                    "Break complex problems into manageable steps",
-                    "Get specific prompts that redirect AI focus",
-                    "Clear action plans with success criteria",
-                    "Progress tracking with built-in timers",
-                    "Back to productive coding in minutes"
-                  ].map((solution, index) => (
-                    <li key={index} className="flex items-start text-slate-300">
-                      <CheckCircle className="text-emerald-500 mr-3 mt-1 w-5 h-5 flex-shrink-0" />
-                      {solution}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-      {/* Features Section */}
-      <section id="how-it-works" className="mb-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
-              Everything You Need to Get Unstuck
-            </h2>
-            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              Battle-tested strategies used by hundreds of developers
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Target,
-                title: "Smart Problem Detection",
-                description: "Identify exactly what's wrong with your AI assistant in seconds",
-                color: "text-amber-500"
-              },
-              {
-                icon: Lightbulb,
-                title: "Proven Prompt Strategies", 
-                description: "Ready-to-use prompts that redirect AI back on track",
-                color: "text-purple-500"
-              },
-              {
-                icon: TrendingUp,
-                title: "Progress Tracking",
-                description: "Step-by-step action plans with built-in success metrics",
-                color: "text-emerald-500"
-              }
-            ].map((feature, index) => (
-              <Card key={index} className="surface-800 border-slate-700 hover:border-primary/50 transition-colors">
-                <CardContent className="p-8 text-center">
-                  <feature.icon className={`w-12 h-12 ${feature.color} mx-auto mb-4`} />
-                  <h3 className="text-xl font-semibold mb-4 text-slate-100">{feature.title}</h3>
-                  <p className="text-slate-400">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>
