@@ -340,21 +340,10 @@ Return a JSON object with this structure:
   app.post("/api/cancel-subscription", async (req, res) => {
     try {
       const { userId } = req.body;
+      console.log("Cancel subscription request for userId:", userId);
 
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
-      }
-
-      // Special handling for hardcoded Pro user
-      if (userId === "PYVvgDLO2RQYuFx4OVK1UMz7qVG3") {
-        // For the hardcoded Pro user, simulate subscription cancellation
-        res.json({ 
-          success: true,
-          message: "Please contact support@digitalduo.org to cancel your subscription",
-          cancelAtPeriodEnd: false,
-          currentPeriodEnd: null
-        });
-        return;
       }
 
       // Find user
@@ -367,8 +356,24 @@ Return a JSON object with this structure:
         return res.status(404).json({ error: "User not found" });
       }
 
-      if (!user.stripeSubscriptionId || user.stripeSubscriptionId === "sub_pro_monthly") {
-        return res.status(400).json({ error: "Please contact support@digitalduo.org to cancel your subscription" });
+      // Check if user is in trial period
+      const trialStatus = await storage.checkTrialStatus(user.id);
+      
+      if (trialStatus.isTrialActive && !user.stripeSubscriptionId) {
+        // Cancel trial immediately for users without Stripe subscription
+        await storage.expireTrial(user.id);
+        
+        res.json({ 
+          success: true,
+          message: "Trial has been canceled immediately",
+          cancelAtPeriodEnd: false,
+          currentPeriodEnd: null
+        });
+        return;
+      }
+
+      if (!user.stripeSubscriptionId) {
+        return res.status(400).json({ error: "No active subscription found to cancel" });
       }
 
       // Cancel subscription at period end using Stripe
