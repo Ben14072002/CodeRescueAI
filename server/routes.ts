@@ -16,15 +16,15 @@ const openai = new OpenAI({
 
 const PRICING_PLANS = {
   pro_monthly: {
-    priceId: 'price_1RVSwMK0aFmFV51v1PsSdU6r',
+    priceId: 'price_1RYjUZK0aFmFV51vgRokbSRm',
     name: 'Rescue Pro',
-    price: 9.99,
+    price: 4.99,
     interval: 'month'
   },
   pro_yearly: {
-    priceId: 'price_1RVSwMK0aFmFV51vTFAjTsQL',
+    priceId: 'price_1RYjUZK0aFmFV51vqZP19L2k',
     name: 'Rescue Pro',
-    price: 95.88,
+    price: 47.88,
     interval: 'year'
   }
 };
@@ -545,7 +545,7 @@ Return a JSON object with this structure:
 
       let customerId = user.stripeCustomerId;
       
-      // Create checkout session without pre-filled customer to allow email editing
+      // Create checkout session with 3-day trial
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -555,6 +555,14 @@ Return a JSON object with this structure:
           },
         ],
         mode: 'subscription',
+        subscription_data: {
+          trial_period_days: 3,
+          metadata: {
+            userId: user.id.toString(),
+            firebaseUid: userId.toString(),
+            plan: plan
+          }
+        },
         success_url: `${req.headers.origin || 'https://code-breaker.org'}/?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.origin || 'https://code-breaker.org'}/?upgrade=cancelled`,
         allow_promotion_codes: true,
@@ -615,11 +623,45 @@ Return a JSON object with this structure:
       if (user.stripeSubscriptionId) {
         try {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          
+          // Check if subscription is in trial
+          const isInTrial = subscription.status === 'trialing';
+          const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
+          const currentPeriodEnd = subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null;
+          
+          // Determine effective status
+          let effectiveStatus = subscription.status;
+          let isPaidPro = false;
+          let hasProAccess = false;
+          
+          if (isInTrial && trialEnd && trialEnd > new Date()) {
+            effectiveStatus = 'trial';
+            hasProAccess = true;
+            isPaidPro = false;
+          } else if (subscription.status === 'active') {
+            effectiveStatus = 'active';
+            hasProAccess = true;
+            isPaidPro = true;
+          }
+          
           subscriptionData = {
-            tier: subscription.metadata?.plan || user.subscriptionTier || 'free',
-            status: subscription.status,
-            currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null
+            tier: subscription.metadata?.plan || user.subscriptionTier || 'pro_monthly',
+            status: effectiveStatus,
+            isPaidPro,
+            isTrialActive: isInTrial && trialEnd && trialEnd > new Date(),
+            hasProAccess,
+            currentPeriodEnd,
+            trialEnd
           };
+          
+          console.log(`Subscription status for ${userId}:`, {
+            stripeStatus: subscription.status,
+            effectiveStatus,
+            isInTrial,
+            trialEnd,
+            hasProAccess
+          });
+          
         } catch (stripeError) {
           console.error('Error fetching Stripe subscription:', stripeError);
         }
@@ -929,17 +971,56 @@ Generate 3 strategic AI manipulation prompts that solve this specific problem wi
         break;
 
       case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
-        const subscription = event.data.object;
-        const customer = await stripe.customers.retrieve(subscription.customer as string);
+        console.log('Webhook: customer.subscription.updated received', event.data.object);
+        const updatedSubscription = event.data.object;
         
-        if (customer && !customer.deleted && customer.metadata.userId) {
-          const userId = parseInt(customer.metadata.userId);
+        // Find user by subscription ID stored in metadata
+        const firebaseUidFromSub = updatedSubscription.metadata?.firebaseUid;
+        if (firebaseUidFromSub) {
+          let user = await storage.getUserByEmail(`${firebaseUidFromSub}@firebase.temp`);
           
-          await storage.updateUserSubscription(userId, {
-            subscriptionStatus: subscription.status,
-            subscriptionCurrentPeriodEnd: new Date(subscription.current_period_end * 1000)
-          });
+          if (user) {
+            console.log('Updating subscription status for user:', user.id, 'Status:', updatedSubscription.status);
+            
+            await storage.updateUserSubscription(user.id, {
+              subscriptionStatus: updatedSubscription.status,
+              subscriptionCurrentPeriodEnd: new Date(updatedSubscription.current_period_end * 1000)
+            });
+            
+            console.log(`Subscription ${updatedSubscription.status} for user ${user.id}`);
+          }
+        }
+        break;
+
+      case 'customer.subscription.deleted':
+        console.log('Webhook: customer.subscription.deleted received', event.data.object);
+        const deletedSubscription = event.data.object;
+        
+        const firebaseUidFromDeleted = deletedSubscription.metadata?.firebaseUid;
+        if (firebaseUidFromDeleted) {
+          let user = await storage.getUserByEmail(`${firebaseUidFromDeleted}@firebase.temp`);
+          
+          if (user) {
+            console.log('Canceling subscription for user:', user.id);
+            
+            await storage.updateUserSubscription(user.id, {
+              subscriptionStatus: 'canceled',
+              subscriptionCurrentPeriodEnd: new Date(deletedSubscription.current_period_end * 1000)
+            });
+            
+            console.log('Subscription canceled for user:', user.id);
+          }
+        }
+        break;
+
+      case 'customer.subscription.trial_will_end':
+        console.log('Webhook: Trial ending soon', event.data.object);
+        const trialEndingSub = event.data.object;
+        
+        const firebaseUidFromTrial = trialEndingSub.metadata?.firebaseUid;
+        if (firebaseUidFromTrial) {
+          console.log(`Trial ending soon for Firebase UID: ${firebaseUidFromTrial}`);
+          // Could send email notification here
         }
         break;
 
