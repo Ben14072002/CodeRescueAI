@@ -331,7 +331,7 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplat
                 onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
               >
                 <Crown className="w-5 h-5 mr-2" />
-                Upgrade to Rescue Pro - €4.99/month
+                Upgrade to Rescue Pro - $4.99/month
               </Button>
             </div>
           ) : selectedProblem === "custom" ? (
