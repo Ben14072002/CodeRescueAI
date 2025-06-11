@@ -455,8 +455,8 @@ Return a JSON object with this structure:
       // Create monthly price
       const monthlyPrice = await stripe.prices.create({
         product: product.id,
-        unit_amount: 999, // $9.99 in cents
-        currency: 'usd',
+        unit_amount: 499, // €4.99 in cents
+        currency: 'eur',
         recurring: {
           interval: 'month',
         },
@@ -466,8 +466,8 @@ Return a JSON object with this structure:
       // Create yearly price (20% discount)
       const yearlyPrice = await stripe.prices.create({
         product: product.id,
-        unit_amount: 9588, // $95.88 in cents (20% discount)
-        currency: 'usd',
+        unit_amount: 4788, // €47.88 in cents (20% discount)
+        currency: 'eur',
         recurring: {
           interval: 'year',
         },
