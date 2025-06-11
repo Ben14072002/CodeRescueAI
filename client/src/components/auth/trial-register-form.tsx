@@ -282,8 +282,13 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
       await loginWithGoogle();
       // Move to payment step after Google signup
       setStep("payment");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Google signup failed:", err);
+      if (err.code === 'auth/unauthorized-domain') {
+        setValidationError("Domain not authorized. Please add your current domain to Firebase Console under Authentication > Settings > Authorized domains.");
+      } else {
+        setValidationError(err.message || "Google signup failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -437,6 +442,20 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
             <FaGoogle className="w-5 h-5 mr-2 text-red-400" />
             {isLoading ? "Creating account..." : "Continue with Google"}
           </Button>
+          
+          {validationError && validationError.includes('Domain not authorized') && (
+            <Alert className="bg-amber-900/20 border border-amber-500/30">
+              <AlertTriangle className="w-4 h-4" />
+              <AlertDescription className="text-amber-200 text-sm">
+                <div className="font-medium mb-2">Firebase Domain Not Authorized</div>
+                <div className="space-y-1 text-xs">
+                  <div>1. Go to Firebase Console → Authentication → Settings</div>
+                  <div>2. Add your Replit domain to "Authorized domains"</div>
+                  <div>3. Current domain: <code className="bg-amber-800/30 px-1 rounded">{window.location.origin}</code></div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
