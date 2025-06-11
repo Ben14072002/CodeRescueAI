@@ -1,0 +1,152 @@
+ NEW FEATURES POPUP PROMPT
+Create an animated popup that appears when users visit the website to announce the new features.
+
+POPUP REQUIREMENTS:
+
+1. TRIGGER CONDITIONS:
+- Show popup on first visit to homepage
+- Show once per user session (use sessionStorage)
+- Don't show if user has already seen it (use localStorage flag)
+- Option to manually trigger for testing
+
+2. POPUP DESIGN:
+- Modal overlay with dark semi-transparent background
+- Clean, modern popup centered on screen
+- White/light background with CodeBreaker branding colors
+- Close button (X) in top-right corner
+- Mobile responsive design
+
+3. POPUP CONTENT:
+```html
+HEADER:
+🎉 CodeBreaker Just Got Better!
+
+SUBTITLE:
+Major updates based on your feedback
+
+NEW FEATURES LIST:
+✨ AI Development Wizard
+Your personal senior developer mentor for when you're stuck
+
+📚 Free Prompt Library  
+Ready-to-use prompts for common AI coding problems
+
+💰 Better Pricing
+Now just $4.99/month for Pro features
+
+🚀 Smarter Problem Solving
+Get personalized guidance, not generic prompts
+
+FOOTER:
+[Explore New Features] [Maybe Later]
+
+ANIMATIONS:
+
+
+Popup slides in from center with smooth scale animation
+Fade-in background overlay
+Each feature item animates in with staggered delay (0.1s between each)
+Icons have subtle bounce/pulse effect
+Buttons have hover animations
+
+
+CSS ANIMATION SPECIFICATIONS:
+
+css/* Popup entrance */
+.popup-enter {
+  opacity: 0;
+  transform: scale(0.8);
+  animation: popupEnter 0.3s ease-out forwards;
+}
+
+/* Feature items stagger */
+.feature-item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideInUp 0.4s ease-out forwards;
+}
+
+/* Icon animations */
+.feature-icon {
+  animation: iconBounce 2s ease-in-out infinite;
+}
+
+FUNCTIONALITY:
+
+
+"Explore New Features" button → Close popup and highlight wizard in navigation
+"Maybe Later" button → Close popup, set flag to not show again today
+Click outside popup → Close popup
+ESC key → Close popup
+Auto-close after 30 seconds if no interaction
+
+
+TECHNICAL IMPLEMENTATION:
+
+javascript// Show popup logic
+function showNewFeaturesPopup() {
+  // Check if already shown
+  if (localStorage.getItem('newFeaturesPopupSeen') === 'true') {
+    return;
+  }
+  
+  // Check session storage for this session
+  if (sessionStorage.getItem('popupShownThisSession') === 'true') {
+    return;
+  }
+  
+  // Show popup after 2 second delay
+  setTimeout(() => {
+    displayPopup();
+    sessionStorage.setItem('popupShownThisSession', 'true');
+  }, 2000);
+}
+
+// Mark as permanently seen
+function markPopupAsSeen() {
+  localStorage.setItem('newFeaturesPopupSeen', 'true');
+}
+
+RESPONSIVE DESIGN:
+
+
+Desktop: 500px wide popup
+Tablet: 90% screen width, max 450px
+Mobile: 95% screen width, full height consideration
+Ensure text remains readable on all screen sizes
+
+
+ACCESSIBILITY:
+
+
+Focus management (focus popup when opened)
+ARIA labels for screen readers
+Keyboard navigation support
+High contrast colors for readability
+
+
+TESTING REQUIREMENTS:
+
+
+Test popup appears on first visit
+Test "don't show again" functionality works
+Test animations are smooth on all devices
+Test all close methods work (X, outside click, ESC)
+Test responsive design on various screen sizes
+
+STYLING NOTES:
+
+Use CodeBreaker brand colors
+Modern, clean design that matches current website
+Professional appearance (not too flashy)
+Clear visual hierarchy with proper spacing
+
+LAUNCH STRATEGY:
+
+Deploy popup with current website update
+Monitor click-through rates on "Explore New Features"
+Adjust timing/content based on user engagement
+
+Build this popup to create excitement about the new features while maintaining professional appearance and good user experience.
+
+This popup will create a great first impression for the new wizard and free library features!

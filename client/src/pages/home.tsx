@@ -12,6 +12,7 @@ import { CopyToast } from "@/components/copy-toast";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { UserDashboard } from "@/components/user-dashboard";
 import { TrialCountdown } from "@/components/trial-countdown";
+import { NewFeaturesPopup } from "@/components/new-features-popup";
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
 import { useTrial } from "@/hooks/use-trial";
@@ -49,6 +50,11 @@ export default function Home() {
   const navigateToProjectPlanner = () => setCurrentSection("project-planner");
   const navigateToAIWizard = () => setCurrentSection("ai-wizard");
   const navigateToSettings = () => setCurrentSection("settings");
+
+  const handleExploreNewFeatures = () => {
+    // Navigate to AI wizard to showcase the main new feature
+    setCurrentSection("ai-wizard");
+  };
 
   const handleSuccess = () => {
     setShowSuccessModal(true);

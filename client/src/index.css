@@ -45,6 +45,53 @@
   --cyan-500: 189 94% 43%; /* #06B6D4 */
 }
 
+/* New Features Popup Animations */
+@keyframes popup-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes icon-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+.animate-popup-enter {
+  animation: popup-enter 0.3s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.4s ease-out forwards;
+}
+
+.animate-icon-bounce {
+  animation: icon-bounce 2s ease-in-out infinite;
+}
+
 /* Chat message containment styles */
 .chat-message-content {
   word-wrap: break-word;
