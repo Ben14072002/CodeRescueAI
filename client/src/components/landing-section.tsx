@@ -288,7 +288,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                   <h3 className="text-2xl font-bold text-slate-100">Rescue Pro</h3>
                   <Badge className="bg-primary text-white">Most Popular</Badge>
                 </div>
-                <p className="text-4xl font-bold text-primary mb-6">€4.99<span className="text-lg text-slate-400">/month</span></p>
+                <p className="text-4xl font-bold text-primary mb-6">$4.99<span className="text-lg text-slate-400">/month</span></p>
                 <ul className="text-left space-y-3 mb-8">
                   <li className="flex items-center text-slate-300">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mr-3" />

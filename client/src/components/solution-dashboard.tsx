@@ -693,7 +693,7 @@ export function SolutionDashboard({ onBack, onNewSession, onSuccess, onCopy, onC
             </div>
 
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-center">
-              <div className="text-amber-300 font-semibold mb-1">Pro Plan - €4.99/month</div>
+              <div className="text-amber-300 font-semibold mb-1">Pro Plan - $4.99/month</div>
               <div className="text-xs text-slate-400">
                 Unlimited rescues + Custom prompt generation + Priority support
               </div>

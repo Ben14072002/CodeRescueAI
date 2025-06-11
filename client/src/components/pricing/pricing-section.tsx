@@ -150,7 +150,7 @@ export function PricingSection({ onSelectPlan }: PricingSectionProps) {
                   
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-slate-100">
-                      €{plan.price}
+                      ${plan.price}
                     </span>
                     {plan.price > 0 && (
                       <span className="text-slate-400">

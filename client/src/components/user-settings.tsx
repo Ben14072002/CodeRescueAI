@@ -240,7 +240,7 @@ export function UserSettings({ onBack }: UserSettingsProps) {
                     onClick={() => window.location.href = '/checkout?plan=pro_monthly'}
                   >
                     <Crown className="w-4 h-4 mr-2" />
-                    Upgrade to Pro - €4.99/month
+                    Upgrade to Pro - $4.99/month
                   </Button>
                   
                   <div className="text-sm text-slate-400">

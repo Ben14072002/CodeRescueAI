@@ -70,7 +70,7 @@ export function SignupChoice({ onTrialSignup, onFreeSignup, onBack }: SignupChoi
                 Payment method required • No charge during trial
               </p>
               <p className="text-xs text-slate-500">
-                €4.99/month after trial unless cancelled
+                $4.99/month after trial unless cancelled
               </p>
             </div>
           </CardContent>

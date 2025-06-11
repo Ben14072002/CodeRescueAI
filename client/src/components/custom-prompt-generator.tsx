@@ -292,7 +292,7 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
 
             <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 mb-6">
               <Crown className="w-4 h-4 mr-2" />
-              Pro Feature - €4.99/month
+              Pro Feature - $4.99/month
             </Badge>
             <div className="space-y-2">
               <Button 
