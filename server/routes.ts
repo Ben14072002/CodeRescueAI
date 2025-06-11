@@ -1704,15 +1704,31 @@ Generate a detailed solution with this JSON structure:
   "learningResources": ["additional learning materials"]
 }
 
-CRITICAL: For each solutionStep, include an "aiPrompt" field containing a sophisticated, strategic prompt optimized for AI coding assistants. These prompts should:
-- Be specific and actionable for AI assistants
-- Include clear context and requirements
-- Follow best practices for AI prompt engineering
-- Be ready-to-use with Replit AI, Cursor, Windsurf, or Lovable
-- Include expected deliverables and technical specifications
-- Use strategic formatting for maximum AI comprehension
+CRITICAL: For each solutionStep, include an "aiPrompt" field containing a sophisticated, strategic prompt using proven methodologies:
 
-Be specific, actionable, and educational. Adapt complexity to their experience level (${classification.experience}).`;
+**PROMPT ENGINEERING STRATEGIES TO USE:**
+1. **Chain-of-Thought Reasoning**: Include "Let's think step by step" and explicit reasoning paths
+2. **Role Assignment**: Assign specific expert roles (e.g., "You are a senior full-stack developer with 10+ years experience")
+3. **Context Priming**: Provide detailed background, constraints, and current state
+4. **Output Specification**: Define exact format, structure, and deliverables expected
+5. **Error Prevention**: Include common pitfalls to avoid and validation steps
+6. **Progressive Disclosure**: Break complex tasks into smaller, manageable components
+
+**PROMPT STRUCTURE TEMPLATE:**
+\`\`\`
+**ROLE**: [Specific expert role]
+**CONTEXT**: [Detailed background and current situation]
+**TASK**: [Specific, actionable objective]
+**CONSTRAINTS**: [Technical limitations, requirements, preferences]
+**THINKING**: Let's approach this step by step:
+1. [First consideration]
+2. [Second consideration]
+3. [Third consideration]
+**OUTPUT**: [Exact format and deliverables required]
+**VALIDATION**: [How to verify success]
+\`\`\`
+
+Each aiPrompt must be sophisticated, production-ready, and follow these proven patterns. Adapt complexity to their experience level (${classification.experience}).`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user

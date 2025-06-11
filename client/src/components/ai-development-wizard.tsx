@@ -399,16 +399,16 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
 
       {/* Chat Interface */}
       <div className="max-w-4xl mx-auto px-6 py-6">
-        <Card className="h-[calc(100vh-200px)] flex flex-col">
-          <CardContent className="flex-1 flex flex-col p-0">
+        <Card className="h-[calc(100vh-200px)] flex flex-col overflow-hidden">
+          <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
+                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex items-start gap-3 max-w-[85%] ${
+                  <div className={`flex items-start gap-3 max-w-[80%] ${
                     message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
                   }`}>
                     {/* Avatar */}
@@ -425,12 +425,12 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
                     </div>
                     
                     {/* Message Content */}
-                    <div className={`px-4 py-3 rounded-lg ${
+                    <div className={`px-4 py-3 rounded-lg word-wrap break-words ${
                       message.type === 'wizard'
                         ? 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                         : 'bg-blue-600 text-white'
                     }`}>
-                      <div className={`text-sm whitespace-pre-wrap ${
+                      <div className={`text-sm whitespace-pre-wrap chat-message-content ${
                         message.type === 'wizard' 
                           ? 'text-gray-900 dark:text-white' 
                           : 'text-white'

@@ -45,6 +45,24 @@
   --cyan-500: 189 94% 43%; /* #06B6D4 */
 }
 
+/* Chat message containment styles */
+.chat-message-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  hyphens: auto;
+}
+
+.chat-message-content pre,
+.chat-message-content code {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 /* Logo animations */
 @keyframes logoFadeIn {
   from {
