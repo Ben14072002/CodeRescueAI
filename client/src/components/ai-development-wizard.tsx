@@ -137,7 +137,23 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
                     <Button 
                       size="lg"
                       className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold"
-                      onClick={() => window.location.href = '/profile?upgrade=wizard'}
+                      onClick={async () => {
+                        try {
+                          const response = await fetch('/api/create-trial-checkout-session', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                              userId: user?.uid,
+                              email: user?.email,
+                              feature: 'wizard'
+                            })
+                          });
+                          const { url } = await response.json();
+                          window.location.href = url;
+                        } catch (error) {
+                          console.error('Trial checkout error:', error);
+                        }
+                      }}
                     >
                       <Crown className="w-5 h-5 mr-2" />
                       Start 3-Day Free Trial
@@ -146,7 +162,7 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
                       Get full access to AI Development Wizard + all Pro features
                     </p>
                     <p className="text-slate-400 text-xs">
-                      No credit card required • Cancel anytime • Then $4.99/month
+                      Credit card required • Cancel anytime • Then $4.99/month
                     </p>
                   </>
                 ) : (

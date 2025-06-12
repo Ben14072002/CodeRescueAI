@@ -30,6 +30,145 @@ const PRICING_PLANS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Stripe trial checkout session creation
+  app.post("/api/create-trial-checkout-session", async (req, res) => {
+    try {
+      const { userId, email, feature } = req.body;
+
+      if (!userId || !email) {
+        return res.status(400).json({ error: "User ID and email are required" });
+      }
+
+      // Create Stripe checkout session for trial signup
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        customer_email: email,
+        line_items: [{
+          price: PRICING_PLANS.pro_monthly.priceId,
+          quantity: 1,
+        }],
+        subscription_data: {
+          trial_period_days: 3,
+          metadata: {
+            userId: userId,
+            feature: feature || 'trial',
+            signupType: 'trial'
+          }
+        },
+        metadata: {
+          userId: userId,
+          feature: feature || 'trial',
+          signupType: 'trial'
+        },
+        success_url: `${req.headers.origin}/?trial=success`,
+        cancel_url: `${req.headers.origin}/?trial=cancelled`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error('Error creating trial checkout session:', error);
+      res.status(500).json({ error: 'Failed to create checkout session' });
+    }
+  });
+
+  // Stripe webhook endpoint for trial signup completion
+  app.post("/api/webhooks/stripe", async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'];
+      let event;
+
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET || '');
+      } catch (err) {
+        console.log(`Webhook signature verification failed.`, err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      // Handle the event
+      switch (event.type) {
+        case 'checkout.session.completed':
+          const session = event.data.object;
+          
+          // Handle trial signup completion
+          if (session.metadata?.signupType === 'trial') {
+            const userId = session.metadata.userId;
+            const feature = session.metadata.feature;
+            
+            try {
+              // Find user by Firebase UID
+              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              if (!user && !isNaN(parseInt(userId))) {
+                user = await storage.getUser(parseInt(userId));
+              }
+
+              if (user) {
+                // Start trial access immediately upon successful checkout
+                await storage.startTrial(user.id);
+                
+                // Update with Stripe customer and subscription info if available
+                if (session.customer && session.subscription) {
+                  await storage.updateUserSubscription(user.id, {
+                    stripeCustomerId: session.customer,
+                    stripeSubscriptionId: session.subscription,
+                    subscriptionStatus: 'trialing',
+                    subscriptionTier: 'trial'
+                  });
+                }
+                
+                console.log(`Trial access granted for user ${userId} (feature: ${feature})`);
+              }
+            } catch (error) {
+              console.error('Error processing trial signup:', error);
+            }
+          }
+          break;
+
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted':
+          // Handle subscription changes after trial
+          const subscription = event.data.object;
+          
+          if (subscription.metadata?.userId) {
+            const userId = subscription.metadata.userId;
+            
+            try {
+              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              if (!user && !isNaN(parseInt(userId))) {
+                user = await storage.getUser(parseInt(userId));
+              }
+
+              if (user) {
+                const status = subscription.status;
+                const tier = status === 'active' ? 'pro' : status === 'trialing' ? 'trial' : 'free';
+                
+                await storage.updateUserSubscription(user.id, {
+                  stripeSubscriptionId: subscription.id,
+                  subscriptionStatus: status,
+                  subscriptionTier: tier,
+                  subscriptionCurrentPeriodEnd: subscription.current_period_end ? 
+                    new Date(subscription.current_period_end * 1000) : null
+                });
+                
+                console.log(`Subscription updated for user ${userId}: ${status}`);
+              }
+            } catch (error) {
+              console.error('Error processing subscription update:', error);
+            }
+          }
+          break;
+
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
   // Trial system API routes
   app.get("/api/trial-status/:userId", async (req, res) => {
     try {
