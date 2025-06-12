@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Sparkles, Crown, Copy, CheckCircle, Brain, Zap, Star, Target, Code, Database, Bug, Server, Gauge, Shield, TestTube, Building } from "lucide-react";
+import { Loader2, Sparkles, Crown, Copy, CheckCircle, Brain, Zap, Star, Target, Code, Database, Bug, Server, Gauge, Shield, TestTube, Building, ArrowLeft, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useTrial } from "@/hooks/use-trial";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -134,7 +135,117 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
   
   const { user } = useAuth();
   const { isProUser, checkPremiumAccess } = useSubscription();
+  const { isTrialActive } = useTrial();
   const { toast } = useToast();
+
+  // Check if user has premium access (Pro subscription or active trial)
+  const hasAccess = checkPremiumAccess() || isTrialActive;
+
+  // Show access denied screen for users without premium access
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-slate-900 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <Button 
+              onClick={onBack}
+              variant="ghost" 
+              className="text-slate-400 hover:text-white mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </div>
+
+          <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/30">
+            <CardContent className="p-12 text-center">
+              <div className="mb-8">
+                <div className="relative inline-block">
+                  <Sparkles className="w-20 h-20 text-purple-400 mx-auto mb-4" />
+                  <Lock className="w-8 h-8 text-amber-400 absolute -top-2 -right-2 bg-slate-900 rounded-full p-1" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-100 mb-4">
+                  Custom Prompt Generator
+                </h1>
+                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 mb-6">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Premium Feature
+                </Badge>
+              </div>
+
+              <div className="max-w-2xl mx-auto mb-8">
+                <h2 className="text-xl font-semibold text-slate-100 mb-4">
+                  AI-Powered Custom Prompts
+                </h2>
+                <p className="text-slate-300 mb-6 leading-relaxed">
+                  Generate category-specific prompts tailored to your exact situation using advanced AI analysis. 
+                  Perfect for when you need precise control over your AI assistant interactions.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4 mb-8 text-sm">
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <Target className="w-5 h-5 text-purple-400 mb-2" />
+                    <div className="font-medium text-slate-100">Category-Specific</div>
+                    <div className="text-slate-400">Prompts tailored to your problem type</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <Brain className="w-5 h-5 text-blue-400 mb-2" />
+                    <div className="font-medium text-slate-100">AI Analysis</div>
+                    <div className="text-slate-400">Advanced OpenAI prompt generation</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <Zap className="w-5 h-5 text-emerald-400 mb-2" />
+                    <div className="font-medium text-slate-100">Instant Results</div>
+                    <div className="text-slate-400">Multiple variations to choose from</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <Star className="w-5 h-5 text-amber-400 mb-2" />
+                    <div className="font-medium text-slate-100">Copy & Paste</div>
+                    <div className="text-slate-400">Ready-to-use prompts with explanations</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {user ? (
+                  <>
+                    <Button 
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold"
+                      onClick={() => window.location.href = '/profile?upgrade=prompts'}
+                    >
+                      <Crown className="w-5 h-5 mr-2" />
+                      Start 3-Day Free Trial
+                    </Button>
+                    <p className="text-slate-400 text-sm">
+                      Get full access to Custom Prompt Generator + all Pro features
+                    </p>
+                    <p className="text-slate-400 text-xs">
+                      No credit card required • Cancel anytime • Then $4.99/month
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold"
+                      onClick={() => window.location.href = '/?signup=prompts'}
+                    >
+                      <Crown className="w-5 h-5 mr-2" />
+                      Sign Up & Start Free Trial
+                    </Button>
+                    <p className="text-slate-400 text-sm">
+                      Create account and get 3 days free access to all Pro features
+                    </p>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const generateCustomPrompts = async () => {
     if (!selectedCategory) {

@@ -71,7 +71,6 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
     return (
       <div className="min-h-screen bg-slate-900 p-4">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
           <div className="mb-8">
             <Button 
               onClick={onBack}
@@ -83,7 +82,6 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
             </Button>
           </div>
 
-          {/* Access Denied Content */}
           <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/30">
             <CardContent className="p-12 text-center">
               <div className="mb-8">
@@ -139,7 +137,7 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
                     <Button 
                       size="lg"
                       className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold"
-                      onClick={() => window.location.href = '/checkout?feature=wizard'}
+                      onClick={() => window.location.href = '/profile?upgrade=wizard'}
                     >
                       <Crown className="w-5 h-5 mr-2" />
                       Start 3-Day Free Trial
