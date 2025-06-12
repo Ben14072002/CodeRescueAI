@@ -87,8 +87,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For development, we'll skip signature verification if no webhook secret is provided
         if (!process.env.STRIPE_WEBHOOK_SECRET) {
           console.log('No webhook secret provided, skipping signature verification (development mode)');
+          // In development, body is already parsed as JSON
           event = req.body;
-          console.log('Raw webhook body:', JSON.stringify(req.body, null, 2));
           console.log('Webhook event type:', event?.type);
           console.log('Webhook event data:', JSON.stringify(event?.data?.object?.metadata || {}, null, 2));
         } else {
@@ -188,6 +188,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Webhook error:', error);
       res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Complete testing endpoint for all signup scenarios
+  app.post("/api/test-complete-signup", async (req, res) => {
+    try {
+      const { testType, userId } = req.body;
+      
+      if (testType === 'free_user') {
+        // Create a free user (no trial, no pro)
+        const user = await storage.createUser({
+          username: `freeuser_${userId.substring(0, 8)}`,
+          email: `${userId}@firebase.temp`,
+          role: "user"
+        });
+        
+        console.log(`✓ Created free user: ${user.id}`);
+        res.json({ 
+          success: true, 
+          message: `Free user created: ${userId}`,
+          userId: user.id,
+          userType: 'free',
+          hasTrialAccess: false,
+          hasProAccess: false
+        });
+        
+      } else if (testType === 'trial_user') {
+        // Create user and activate trial (simulating successful Stripe checkout)
+        const user = await storage.createUser({
+          username: `trialuser_${userId.substring(0, 8)}`,
+          email: `${userId}@firebase.temp`,
+          role: "user"
+        });
+        
+        // Activate trial
+        const updatedUser = await storage.startTrial(user.id);
+        
+        console.log(`✓ Created trial user: ${user.id} with 3-day trial`);
+        res.json({ 
+          success: true, 
+          message: `Trial user created and activated: ${userId}`,
+          userId: user.id,
+          userType: 'trial',
+          hasTrialAccess: true,
+          hasProAccess: true,
+          trialEndDate: updatedUser.trialEndDate
+        });
+        
+      } else if (testType === 'pro_user') {
+        // Create user with Pro subscription
+        const user = await storage.createUser({
+          username: `prouser_${userId.substring(0, 8)}`,
+          email: `${userId}@firebase.temp`,
+          role: "user"
+        });
+        
+        // Set Pro subscription
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+        
+        const updatedUser = await storage.updateUserSubscription(user.id, {
+          stripeCustomerId: `cus_test_${userId}`,
+          stripeSubscriptionId: `sub_test_${userId}`,
+          subscriptionStatus: 'active',
+          subscriptionTier: 'pro',
+          subscriptionCurrentPeriodEnd: endDate
+        });
+        
+        console.log(`✓ Created Pro user: ${user.id} with active subscription`);
+        res.json({ 
+          success: true, 
+          message: `Pro user created: ${userId}`,
+          userId: user.id,
+          userType: 'pro',
+          hasTrialAccess: false,
+          hasProAccess: true,
+          subscriptionEndDate: endDate
+        });
+        
+      } else {
+        res.status(400).json({ error: 'Invalid test type. Use: free_user, trial_user, or pro_user' });
+      }
+    } catch (error: any) {
+      console.error('Test signup error:', error);
+      res.status(500).json({ error: 'Test signup failed: ' + error.message });
     }
   });
 
