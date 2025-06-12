@@ -1,0 +1,94 @@
+KRITISCHER BUG: Free Users erhalten unerlaubt 3-Tage-Trial-Zugang
+
+PROBLEM: User die "Free" Version wählen bekommen trotzdem 3 Tage Premium-Zugang
+AUSWIRKUNG: Verlorener Umsatz - User können Premium-Features kostenlos nutzen
+
+SOFORTIGER FIX ERFORDERLICH:
+
+SCHRITT 1: SIGNUP-FLOW ANALYSE
+Überprüfe den Account-Erstellungsprozess:
+
+```javascript
+// Fehlerhafte Logik (vermutlich aktuell):
+function createAccount(email, password, planType) {
+  if (planType === "free") {
+    // BUG: Hier wird trotzdem Trial gewährt
+    user.trialStartDate = new Date();
+    user.trialEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+  }
+}
+
+// KORREKTE Logik:
+function createAccount(email, password, planType) {
+  if (planType === "free") {
+    user.subscriptionType = "free";
+    user.trialStartDate = null;
+    user.trialEndDate = null;
+    user.isPro = false;
+  } else if (planType === "trial") {
+    user.subscriptionType = "trial";
+    user.trialStartDate = new Date();
+    user.trialEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    user.isPro = true; // Während Trial
+  }
+}
+SCHRITT 2: USER-STATUS LOGIC FIX
+Korrigiere die Berechtigung-Überprüfung:
+javascript// Korrigiere diese Funktion:
+function hasProAccess(user) {
+  // FALSCH: if (user.trialEndDate > new Date()) return true;
+  
+  // RICHTIG:
+  if (user.subscriptionType === "free") return false;
+  if (user.subscriptionType === "pro") return true;
+  if (user.subscriptionType === "trial") {
+    return user.trialEndDate && new Date() < user.trialEndDate;
+  }
+  return false;
+}
+SCHRITT 3: SIGNUP-OPTIONEN KLARSTELLEN
+Stelle sicher, dass User explizit zwischen zwei Optionen wählen:
+htmlOPTION 1: "Start Free Account"
+- Sofortiger Zugang zu Prompt Library
+- Kein Trial, keine Premium-Features
+- Kann später Trial starten
+
+OPTION 2: "Start 3-Day Free Trial" 
+- Bezahlinformationen erforderlich
+- 3 Tage vollem Premium-Zugang
+- Automatische Billing nach Trial
+SCHRITT 4: DATABASE BEREINIGUNG
+Überprüfe bestehende User-Accounts:
+sql-- Finde alle Free-User mit unerlaubtem Trial
+SELECT * FROM users 
+WHERE subscription_type = 'free' 
+AND trial_end_date IS NOT NULL;
+
+-- Korrigiere fehlerhafte Accounts
+UPDATE users 
+SET trial_start_date = NULL, trial_end_date = NULL 
+WHERE subscription_type = 'free';
+SCHRITT 5: UI/UX FIX
+Stelle sicher, dass die Signup-Seite klar unterscheidet:
+❌ VERWIRREND:
+"Choose your plan: Free | Pro"
+
+✅ KLAR:
+"Get Started: 
+[Free Account - Prompt Library Only] 
+[3-Day Trial - Full Access + $4.99/month after]"
+SCHRITT 6: SOFORTIGE TESTS
+Teste sofort nach dem Fix:
+
+Erstelle "Free" Account → sollte KEINEN Premium-Zugang haben
+Erstelle "Trial" Account → sollte 3 Tage Premium-Zugang haben
+Überprüfe bestehende Free-Accounts → sollten korrigiert sein
+
+KRITISCHE ÜBERPRÜFUNG:
+
+Free = Nur Prompt Library
+Trial = 3 Tage Premium + Billing
+Keine automatischen Trials für Free-User
+
+Das ist ein kritischer Revenue-Bug - Free-User stehlen faktisch Premium-Features!
+Fixe das SOFORT bevor mehr User das ausnutzen.

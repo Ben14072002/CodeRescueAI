@@ -53,6 +53,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/start-trial/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Handle Firebase UID
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Check if user is already on trial or pro
+      if (user.subscriptionTier !== "free") {
+        return res.status(400).json({ error: "User already has premium access" });
+      }
+
+      const updatedUser = await storage.startTrial(user.id);
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error('Start trial error:', error);
+      res.status(500).json({ error: "Failed to start trial" });
+    }
+  });
+
   app.post("/api/expire-trial/:userId", async (req, res) => {
     try {
       const userId = req.params.userId;
@@ -78,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User registration endpoint for Firebase users
   app.post("/api/register-user", async (req, res) => {
     try {
-      const { userId, email, displayName } = req.body;
+      const { userId, email, displayName, signupType = "free" } = req.body;
 
       if (!userId || !email) {
         return res.status(400).json({ error: "User ID and email are required" });
@@ -90,14 +117,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ success: true, user, message: "User already exists" });
       }
 
-      // Create new trial user
+      // Create new FREE user (no trial by default)
       user = await storage.createUser({
         username: displayName || `user_${userId.substring(0, 8)}`,
         email: `${userId}@firebase.temp`,
         role: "user"
       });
 
-      res.json({ success: true, user, message: "Trial user created successfully" });
+      // Only start trial if explicitly requested
+      if (signupType === "trial") {
+        user = await storage.startTrial(user.id);
+        res.json({ success: true, user, message: "Trial user created successfully" });
+      } else {
+        res.json({ success: true, user, message: "Free user created successfully" });
+      }
     } catch (error) {
       console.error('User registration error:', error);
       res.status(500).json({ error: "Failed to register user" });
