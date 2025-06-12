@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, MessageCircle, Send, Bot, User, RefreshCw, CheckCircle, Clock, Star, TrendingUp, Lightbulb, Target, ArrowRight } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Send, Bot, User, RefreshCw, CheckCircle, Clock, Star, TrendingUp, Lightbulb, Target, ArrowRight, Crown, Lock, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { useSubscription } from '@/hooks/use-subscription';
+import { useTrial } from '@/hooks/use-trial';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +58,121 @@ interface WizardSession {
 
 export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { isProUser, checkPremiumAccess } = useSubscription();
+  const { isTrialActive } = useTrial();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check if user has premium access (Pro subscription or active trial)
+  const hasAccess = checkPremiumAccess() || isTrialActive;
+
+  // Show access denied screen for users without premium access
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-slate-900 p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <Button 
+              onClick={onBack}
+              variant="ghost" 
+              className="text-slate-400 hover:text-white mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </div>
+
+          {/* Access Denied Content */}
+          <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/30">
+            <CardContent className="p-12 text-center">
+              <div className="mb-8">
+                <div className="relative inline-block">
+                  <Brain className="w-20 h-20 text-purple-400 mx-auto mb-4" />
+                  <Lock className="w-8 h-8 text-amber-400 absolute -top-2 -right-2 bg-slate-900 rounded-full p-1" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-100 mb-4">
+                  AI Development Wizard
+                </h1>
+                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 mb-6">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Premium Feature
+                </Badge>
+              </div>
+
+              <div className="max-w-2xl mx-auto mb-8">
+                <h2 className="text-xl font-semibold text-slate-100 mb-4">
+                  Your Personal Senior Developer Mentor
+                </h2>
+                <p className="text-slate-300 mb-6 leading-relaxed">
+                  Get unstuck in minutes with AI-powered step-by-step guidance. The wizard analyzes your problem, 
+                  asks smart questions, and provides precise prompts to fix any coding issue.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4 mb-8 text-sm">
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-emerald-400 mb-2" />
+                    <div className="font-medium text-slate-100">Smart Problem Analysis</div>
+                    <div className="text-slate-400">Instantly identifies what's wrong</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <Target className="w-5 h-5 text-blue-400 mb-2" />
+                    <div className="font-medium text-slate-100">Custom Action Plans</div>
+                    <div className="text-slate-400">Step-by-step solutions for your stack</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <Lightbulb className="w-5 h-5 text-amber-400 mb-2" />
+                    <div className="font-medium text-slate-100">Precise AI Prompts</div>
+                    <div className="text-slate-400">Copy-paste prompts that actually work</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <Clock className="w-5 h-5 text-emerald-400 mb-2" />
+                    <div className="font-medium text-slate-100">8 Minute Average</div>
+                    <div className="text-slate-400">From stuck to shipping fast</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {user ? (
+                  <>
+                    <Button 
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold"
+                      onClick={() => window.location.href = '/checkout?feature=wizard'}
+                    >
+                      <Crown className="w-5 h-5 mr-2" />
+                      Start 3-Day Free Trial
+                    </Button>
+                    <p className="text-slate-400 text-sm">
+                      Get full access to AI Development Wizard + all Pro features
+                    </p>
+                    <p className="text-slate-400 text-xs">
+                      No credit card required • Cancel anytime • Then $4.99/month
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold"
+                      onClick={() => window.location.href = '/?signup=wizard'}
+                    >
+                      <Crown className="w-5 h-5 mr-2" />
+                      Sign Up & Start Free Trial
+                    </Button>
+                    <p className="text-slate-400 text-sm">
+                      Create account and get 3 days free access to all Pro features
+                    </p>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
   
   const [session, setSession] = useState<WizardSession>({
     sessionId: Date.now().toString(),

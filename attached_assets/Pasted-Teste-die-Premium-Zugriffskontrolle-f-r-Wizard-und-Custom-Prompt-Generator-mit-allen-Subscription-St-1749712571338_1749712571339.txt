@@ -1,0 +1,120 @@
+Teste die Premium-Zugriffskontrolle für Wizard und Custom Prompt Generator mit allen Subscription-Stufen.
+
+AUFGABE: Verifizieren, dass Premium-Features nur für berechtigte User zugänglich sind.
+
+TESTSCHRITTE:
+
+SCHRITT 1: KOSTENLOSER USER TEST
+1. Erstelle neuen kostenlosen Account oder logge dich mit kostenlosem Account ein
+2. Navigiere zur Haupt-Dashboard/App-Seite
+3. Versuche auf den Wizard zuzugreifen
+4. Versuche auf den Custom Prompt Generator zuzugreifen
+
+ERWARTETES VERHALTEN FÜR KOSTENLOSEN USER:
+✅ Wizard sollte NICHT zugänglich sein
+✅ Custom Prompt Generator sollte NICHT zugänglich sein
+✅ Upgrade-Prompt sollte erscheinen: "Start 3-Day Free Trial to access AI Wizard"
+✅ "Start Free Trial" Button sollte angezeigt werden
+✅ Kostenlose Features (Prompt Library) sollten funktionieren
+
+SCHRITT 2: AKTIVER 3-TAGE-TRIAL TEST
+1. Erstelle neuen Account und starte 3-Tage-Trial
+2. Verifiziere Trial-Status im Dashboard: "Trial Active: X days remaining"
+3. Teste vollständigen Zugriff auf Wizard
+4. Teste vollständigen Zugriff auf Custom Prompt Generator
+
+ERWARTETES VERHALTEN FÜR TRIAL USER:
+✅ Wizard sollte vollständig zugänglich sein
+✅ Custom Prompt Generator sollte vollständig zugänglich sein
+✅ Trial-Countdown sollte sichtbar sein
+✅ Keine Upgrade-Prompts bei Premium-Features
+✅ "Cancel Trial" Option sollte verfügbar sein
+
+SCHRITT 3: ABGELAUFENER TRIAL TEST
+1. Simuliere abgelaufenen Trial (setze Trial-Enddatum in Vergangenheit)
+2. Teste Zugriff auf Premium-Features
+3. Verifiziere automatische Rückstufung zu kostenlosem Tier
+
+ERWARTETES VERHALTEN NACH TRIAL-ABLAUF:
+✅ Zugriff auf Premium-Features sollte blockiert sein
+✅ User sollte Upgrade-Prompts sehen: "Your trial has ended - Subscribe for $4.99/month"
+✅ Prompt Library sollte weiterhin kostenlos verfügbar sein
+✅ "Subscribe Now" Button sollte zu Stripe führen
+
+SCHRITT 4: BEZAHLTER PRO USER TEST
+1. Logge dich mit bezahltem Pro-Account ein
+2. Teste unbegrenzten Zugriff auf alle Premium-Features
+3. Verifiziere Pro-Status im Dashboard
+
+ERWARTETES VERHALTEN FÜR PRO USER:
+✅ Wizard sollte unbegrenzt zugänglich sein
+✅ Custom Prompt Generator sollte unbegrenzt zugänglich sein
+✅ Dashboard zeigt "Pro Active" Status
+✅ "Manage Subscription" Option verfügbar
+
+SCHRITT 5: TRIAL CANCELLATION TEST
+1. Mit aktivem Trial: Gehe zu Profile/Settings
+2. Kündige Trial vor Ablauf
+3. Teste sofortigen Verlust von Premium-Zugriff
+
+ERWARTETES VERHALTEN NACH TRIAL-KÜNDIGUNG:
+✅ Premium-Features sofort gesperrt
+✅ User zu kostenlosem Tier zurückversetzt
+✅ "Restart Trial" oder "Subscribe" Optionen angezeigt
+
+SCHRITT 6: PRO SUBSCRIPTION CANCELLATION TEST
+1. Mit bezahltem Abo: Kündige Subscription
+2. Teste, dass Zugriff bis Periodenende erhalten bleibt
+3. Teste Zugriffsverlust nach Periodenende
+
+SPEZIFISCHE ZUGRIFFSKONTROLLE:
+
+USER STATUS MATRIX:
+Free User        → ❌ Wizard  ❌ Custom Generator  ✅ Prompt Library
+Trial Active     → ✅ Wizard  ✅ Custom Generator  ✅ Prompt Library
+Trial Expired    → ❌ Wizard  ❌ Custom Generator  ✅ Prompt Library
+Pro Active       → ✅ Wizard  ✅ Custom Generator  ✅ Prompt Library
+Pro Cancelled    → ✅ Wizard  ✅ Custom Generator  ✅ Prompt Library (bis Periodenende)
+
+EDGE CASES ZU TESTEN:
+- Trial-User der versucht ein zweites Trial zu starten
+- User mit fehlgeschlagener Trial-zu-Pro Conversion
+- Browser-Refresh während Trial-Aktivierung
+- User der Trial kündigt und sofort wieder startet
+- Expired Trial User der direkte URLs zu Premium-Features verwendet
+
+SICHERHEITSTESTS:
+- Direkter URL-Zugriff auf /wizard als Free User
+- Direkter URL-Zugriff auf /custom-generator als Free User
+- Browser Back-Button nach Trial-Kündigung
+- Session Storage Manipulation für Trial-Status
+- API-Endpoints für Premium-Features ohne gültige Berechtigung
+
+UI/UX TESTS:
+- Trial-Countdown Timer funktioniert korrekt
+- "Days remaining" wird richtig berechnet und angezeigt
+- CTA-Buttons führen zu korrekten Aktionen
+- Error-Messages sind benutzerfreundlich
+- Upgrade-Flows sind klar und funktional
+
+TRIAL-SPEZIFISCHE TESTS:
+- Trial startet sofort nach Bezahlinformationen-Eingabe
+- 3-Tage-Periode wird korrekt berechnet
+- Automatische Billing nach Trial funktioniert
+- Trial-Kündigung stoppt automatische Billing
+- User kann nur ein Trial pro Email-Adresse haben
+
+BERICHTERSTATTUNG:
+Für jeden User-Typ und Feature-Kombination:
+✅ KORREKT: Zugriff entspricht erwartetem Verhalten
+❌ BUG: Unerlaubter Zugriff oder fehlerhafte Sperrung
+⚠️ UX-PROBLEM: Verwirrende Nachrichten oder Flows
+
+KRITISCHE ÜBERPRÜFUNGEN:
+1. Free Users haben KEINEN Zugriff auf Premium-Features
+2. Trial Users haben VOLLEN Zugriff für 3 Tage
+3. Expired Trial Users verlieren sofort Premium-Zugriff
+4. Pro Users haben unbegrenzten Zugriff
+5. Kein doppeltes Trial für gleiche Email-Adresse
+
+Teste alle Kombinationen gründlich - die Trial-Conversion ist entscheidend für den Umsatz!
