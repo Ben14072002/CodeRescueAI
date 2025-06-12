@@ -180,10 +180,8 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplat
               !isProUser ? 'opacity-75' : ''
             }`}
             onClick={() => {
-              if (isProUser && onAIWizard) {
+              if (onAIWizard) {
                 onAIWizard();
-              } else {
-                window.location.href = '/?section=pricing';
               }
             }}
           >
@@ -224,10 +222,8 @@ export function ProblemSelection({ onAnalyze, onBack, onCustomPrompts, onTemplat
               !isProUser ? 'opacity-75' : ''
             }`}
             onClick={() => {
-              if (isProUser && onCustomPrompts) {
+              if (onCustomPrompts) {
                 onCustomPrompts();
-              } else {
-                window.location.href = '/?section=pricing';
               }
             }}
           >
