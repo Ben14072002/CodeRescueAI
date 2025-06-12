@@ -107,28 +107,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const feature = session.metadata.feature;
             
             try {
-              // Find user by Firebase UID
+              // Find or create user by Firebase UID
               let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
               if (!user && !isNaN(parseInt(userId))) {
                 user = await storage.getUser(parseInt(userId));
               }
 
-              if (user) {
-                // Start trial access immediately upon successful checkout
-                await storage.startTrial(user.id);
-                
-                // Update with Stripe customer and subscription info if available
-                if (session.customer && session.subscription) {
-                  await storage.updateUserSubscription(user.id, {
-                    stripeCustomerId: typeof session.customer === 'string' ? session.customer : session.customer.id,
-                    stripeSubscriptionId: typeof session.subscription === 'string' ? session.subscription : session.subscription.id,
-                    subscriptionStatus: 'trialing',
-                    subscriptionTier: 'trial'
-                  });
-                }
-                
-                console.log(`Trial access granted for user ${userId} (feature: ${feature})`);
+              // If user doesn't exist, create them (new signup flow)
+              if (!user) {
+                user = await storage.createUser({
+                  username: `user_${userId.substring(0, 8)}`,
+                  email: `${userId}@firebase.temp`,
+                  role: "user"
+                });
+                console.log(`Created new user during trial signup: ${user.id}`);
               }
+
+              // Start trial access immediately upon successful checkout
+              await storage.startTrial(user.id);
+              
+              // Update with Stripe customer and subscription info if available
+              if (session.customer && session.subscription) {
+                await storage.updateUserSubscription(user.id, {
+                  stripeCustomerId: typeof session.customer === 'string' ? session.customer : session.customer.id,
+                  stripeSubscriptionId: typeof session.subscription === 'string' ? session.subscription : session.subscription.id,
+                  subscriptionStatus: 'trialing',
+                  subscriptionTier: 'trial'
+                });
+              }
+              
+              console.log(`Trial access granted for user ${userId} (feature: ${feature})`);
             } catch (error) {
               console.error('Error processing trial signup:', error);
             }
@@ -197,29 +205,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscription: 'sub_test_456'
         };
 
-        // Find user
+        // Find or create user (simulating Firebase auth integration)
         let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
         if (!user && !isNaN(parseInt(userId))) {
           user = await storage.getUser(parseInt(userId));
         }
 
-        if (user) {
-          // Start trial access
-          await storage.startTrial(user.id);
-          
-          // Update with mock Stripe info
-          await storage.updateUserSubscription(user.id, {
-            stripeCustomerId: mockSession.customer,
-            stripeSubscriptionId: mockSession.subscription,
-            subscriptionStatus: 'trialing',
-            subscriptionTier: 'trial'
+        // If user doesn't exist, create them (simulating new signup)
+        if (!user) {
+          user = await storage.createUser({
+            username: `testuser_${userId.substring(0, 8)}`,
+            email: `${userId}@firebase.temp`,
+            role: "user"
           });
-          
-          console.log(`Test trial access granted for user ${userId}`);
-          res.json({ success: true, message: `Trial activated for user ${userId}` });
-        } else {
-          res.status(404).json({ error: 'User not found' });
+          console.log(`Created new user for trial: ${user.id}`);
         }
+
+        // Start trial access
+        await storage.startTrial(user.id);
+        
+        // Update with mock Stripe info
+        await storage.updateUserSubscription(user.id, {
+          stripeCustomerId: mockSession.customer,
+          stripeSubscriptionId: mockSession.subscription,
+          subscriptionStatus: 'trialing',
+          subscriptionTier: 'trial'
+        });
+        
+        console.log(`Test trial access granted for user ${userId} (DB ID: ${user.id})`);
+        res.json({ 
+          success: true, 
+          message: `Trial activated for user ${userId}`,
+          userId: user.id,
+          trialStatus: 'active'
+        });
       } else {
         res.status(400).json({ error: 'Unsupported event type' });
       }
