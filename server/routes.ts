@@ -88,6 +88,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!process.env.STRIPE_WEBHOOK_SECRET) {
           console.log('No webhook secret provided, skipping signature verification (development mode)');
           event = req.body;
+          console.log('Raw webhook body:', JSON.stringify(req.body, null, 2));
+          console.log('Webhook event type:', event?.type);
+          console.log('Webhook event data:', JSON.stringify(event?.data?.object?.metadata || {}, null, 2));
         } else {
           event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
         }
