@@ -11,11 +11,14 @@ export const users = pgTable("users", {
   role: varchar("role", { length: 20 }).notNull().default("user"),
   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
   stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
-  subscriptionStatus: varchar("subscription_status", { length: 50 }).default("trial"),
-  subscriptionTier: varchar("subscription_tier", { length: 20 }).default("trial"),
+  subscriptionStatus: varchar("subscription_status", { length: 50 }).default("free"),
+  subscriptionTier: varchar("subscription_tier", { length: 20 }).default("free"),
   subscriptionCurrentPeriodEnd: timestamp("subscription_current_period_end"),
-  trialStartDate: timestamp("trial_start_date").defaultNow(),
+  trialStartDate: timestamp("trial_start_date"),
   trialEndDate: timestamp("trial_end_date"),
+  hasUsedTrial: boolean("has_used_trial").default(false),
+  trialCount: integer("trial_count").default(0),
+  firebaseUid: varchar("firebase_uid", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

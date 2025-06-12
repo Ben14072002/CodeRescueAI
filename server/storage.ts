@@ -18,6 +18,7 @@ export interface IStorage {
     subscriptionCurrentPeriodEnd?: Date;
   }): Promise<User>;
   checkTrialStatus(userId: number): Promise<{ isTrialActive: boolean; daysRemaining: number; }>;
+  isTrialEligible(userId: number): Promise<{ eligible: boolean; reason?: string; }>;
   startTrial(userId: number): Promise<User>;
   expireTrial(userId: number): Promise<User>;
   getUserSessionsThisMonth(userId: number): Promise<Session[]>;
@@ -70,6 +71,40 @@ export class MemStorage implements IStorage {
         subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
       });
     });
+  }
+
+  async isTrialEligible(userId: number): Promise<{ eligible: boolean; reason?: string; }> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return { eligible: false, reason: "User not found" };
+    }
+
+    // SECURITY CHECK: Has user already used their trial?
+    if (user.hasUsedTrial) {
+      return { 
+        eligible: false, 
+        reason: `User has already used their trial period. Trial count: ${user.trialCount || 1}` 
+      };
+    }
+
+    // SECURITY CHECK: Does user already have active Pro subscription?
+    if (user.subscriptionTier === 'pro' && user.subscriptionStatus === 'active') {
+      return { 
+        eligible: false, 
+        reason: "User already has active Pro subscription" 
+      };
+    }
+
+    // SECURITY CHECK: Is user currently in trial period?
+    const trialStatus = await this.checkTrialStatus(userId);
+    if (trialStatus.isTrialActive) {
+      return { 
+        eligible: false, 
+        reason: "User is already in active trial period" 
+      };
+    }
+
+    return { eligible: true };
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -147,10 +182,54 @@ export class MemStorage implements IStorage {
     return { isTrialActive, daysRemaining };
   }
 
+  async isTrialEligible(userId: number): Promise<{ eligible: boolean; reason?: string; }> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return { eligible: false, reason: "User not found" };
+    }
+
+    // SECURITY CHECK: Has user already used their trial?
+    if (user.hasUsedTrial) {
+      return { 
+        eligible: false, 
+        reason: `User has already used their trial period. Trial count: ${user.trialCount || 1}` 
+      };
+    }
+
+    // SECURITY CHECK: Does user already have active Pro subscription?
+    if (user.subscriptionTier === 'pro' && user.subscriptionStatus === 'active') {
+      return { 
+        eligible: false, 
+        reason: "User already has active Pro subscription" 
+      };
+    }
+
+    // SECURITY CHECK: Is user currently in trial period?
+    const trialStatus = await this.checkTrialStatus(userId);
+    if (trialStatus.isTrialActive) {
+      return { 
+        eligible: false, 
+        reason: "User is already in active trial period" 
+      };
+    }
+
+    return { eligible: true };
+  }
+
   async startTrial(userId: number): Promise<User> {
     const user = this.users.get(userId);
     if (!user) {
       throw new Error("User not found");
+    }
+
+    // SECURITY CHECK: Prevent multiple trials per user
+    if (user.hasUsedTrial) {
+      throw new Error("User has already used their trial period. Only one trial allowed per account.");
+    }
+
+    // SECURITY CHECK: Prevent trial if user already has active subscription
+    if (user.subscriptionTier === 'pro' && user.subscriptionStatus === 'active') {
+      throw new Error("User already has active Pro subscription");
     }
 
     const now = new Date();
@@ -161,10 +240,13 @@ export class MemStorage implements IStorage {
       subscriptionStatus: "trial",
       subscriptionTier: "trial",
       trialStartDate: now,
-      trialEndDate: trialEndDate
+      trialEndDate: trialEndDate,
+      hasUsedTrial: true, // SECURITY: Mark trial as used permanently
+      trialCount: (user.trialCount || 0) + 1 // SECURITY: Increment trial count
     };
     
     this.users.set(userId, updatedUser);
+    console.log(`🔒 Trial activated for user ${userId}. hasUsedTrial: true, trialCount: ${updatedUser.trialCount}`);
     return updatedUser;
   }
 
@@ -174,15 +256,18 @@ export class MemStorage implements IStorage {
       throw new Error("User not found");
     }
 
+    // SECURITY: Preserve trial history when expiring trial
     const updatedUser: User = {
       ...user,
       subscriptionStatus: "free",
       subscriptionTier: "free",
-      trialStartDate: null,
-      trialEndDate: null
+      // KEEP trial dates for audit trail - do NOT reset to null
+      // KEEP hasUsedTrial: true - prevents getting another trial
+      // KEEP trialCount - for analytics and fraud detection
     };
 
     this.users.set(userId, updatedUser);
+    console.log(`🔒 Trial expired for user ${userId}. hasUsedTrial remains: ${user.hasUsedTrial}, trialCount: ${user.trialCount}`);
     return updatedUser;
   }
 
@@ -330,6 +415,40 @@ export class MemStorage implements IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  async isTrialEligible(userId: number): Promise<{ eligible: boolean; reason?: string; }> {
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) {
+      return { eligible: false, reason: "User not found" };
+    }
+
+    // SECURITY CHECK: Has user already used their trial?
+    if (user.hasUsedTrial) {
+      return { 
+        eligible: false, 
+        reason: `User has already used their trial period. Trial count: ${user.trialCount || 1}` 
+      };
+    }
+
+    // SECURITY CHECK: Does user already have active Pro subscription?
+    if (user.subscriptionTier === 'pro' && user.subscriptionStatus === 'active') {
+      return { 
+        eligible: false, 
+        reason: "User already has active Pro subscription" 
+      };
+    }
+
+    // SECURITY CHECK: Is user currently in trial period?
+    const trialStatus = await this.checkTrialStatus(userId);
+    if (trialStatus.isTrialActive) {
+      return { 
+        eligible: false, 
+        reason: "User is already in active trial period" 
+      };
+    }
+
+    return { eligible: true };
+  }
+
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
