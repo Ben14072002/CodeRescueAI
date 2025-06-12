@@ -30,6 +30,11 @@ const PRICING_PLANS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // Stripe trial checkout session creation
   app.post("/api/create-trial-checkout-session", async (req, res) => {
     try {
@@ -79,8 +84,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let event;
 
       try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET || '');
-      } catch (err) {
+        // For development, we'll skip signature verification if no webhook secret is provided
+        if (!process.env.STRIPE_WEBHOOK_SECRET) {
+          console.log('No webhook secret provided, skipping signature verification (development mode)');
+          event = req.body;
+        } else {
+          event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
+        }
+      } catch (err: any) {
         console.log(`Webhook signature verification failed.`, err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
       }
@@ -109,8 +120,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // Update with Stripe customer and subscription info if available
                 if (session.customer && session.subscription) {
                   await storage.updateUserSubscription(user.id, {
-                    stripeCustomerId: session.customer,
-                    stripeSubscriptionId: session.subscription,
+                    stripeCustomerId: typeof session.customer === 'string' ? session.customer : session.customer.id,
+                    stripeSubscriptionId: typeof session.subscription === 'string' ? session.subscription : session.subscription.id,
                     subscriptionStatus: 'trialing',
                     subscriptionTier: 'trial'
                   });
@@ -146,8 +157,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   stripeSubscriptionId: subscription.id,
                   subscriptionStatus: status,
                   subscriptionTier: tier,
-                  subscriptionCurrentPeriodEnd: subscription.current_period_end ? 
-                    new Date(subscription.current_period_end * 1000) : null
+                  subscriptionCurrentPeriodEnd: (subscription as any).current_period_end ? 
+                    new Date((subscription as any).current_period_end * 1000) : undefined
                 });
                 
                 console.log(`Subscription updated for user ${userId}: ${status}`);
@@ -166,6 +177,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Webhook error:', error);
       res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Test endpoint to simulate Stripe webhook events for development
+  app.post("/api/test-webhook", async (req, res) => {
+    try {
+      const { eventType, userId, sessionId } = req.body;
+      
+      if (eventType === 'checkout.session.completed') {
+        // Simulate successful checkout completion
+        const mockSession = {
+          metadata: {
+            userId: userId,
+            signupType: 'trial',
+            feature: 'test'
+          },
+          customer: 'cus_test_123',
+          subscription: 'sub_test_456'
+        };
+
+        // Find user
+        let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+        if (!user && !isNaN(parseInt(userId))) {
+          user = await storage.getUser(parseInt(userId));
+        }
+
+        if (user) {
+          // Start trial access
+          await storage.startTrial(user.id);
+          
+          // Update with mock Stripe info
+          await storage.updateUserSubscription(user.id, {
+            stripeCustomerId: mockSession.customer,
+            stripeSubscriptionId: mockSession.subscription,
+            subscriptionStatus: 'trialing',
+            subscriptionTier: 'trial'
+          });
+          
+          console.log(`Test trial access granted for user ${userId}`);
+          res.json({ success: true, message: `Trial activated for user ${userId}` });
+        } else {
+          res.status(404).json({ error: 'User not found' });
+        }
+      } else {
+        res.status(400).json({ error: 'Unsupported event type' });
+      }
+    } catch (error) {
+      console.error('Test webhook error:', error);
+      res.status(500).json({ error: 'Test webhook failed' });
     }
   });
 
