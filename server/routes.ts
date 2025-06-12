@@ -126,8 +126,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log(`Created new user during trial signup: ${user.id}`);
               }
 
-              // Start trial access immediately upon successful checkout
+              // SECURITY: Check trial eligibility before activation
+              const eligibility = await storage.isTrialEligible(user.id);
+              if (!eligibility.eligible) {
+                console.log(`🚨 TRIAL BLOCKED: ${eligibility.reason} for user ${user.id}`);
+                throw new Error(`Trial activation blocked: ${eligibility.reason}`);
+              }
+
+              // Start trial access after security validation
               await storage.startTrial(user.id);
+              console.log(`✅ Trial activated for user ${user.id} after security validation`);
               
               // Update with Stripe customer and subscription info if available
               if (session.customer && session.subscription) {

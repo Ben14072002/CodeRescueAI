@@ -73,40 +73,6 @@ export class MemStorage implements IStorage {
     });
   }
 
-  async isTrialEligible(userId: number): Promise<{ eligible: boolean; reason?: string; }> {
-    const user = this.users.get(userId);
-    if (!user) {
-      return { eligible: false, reason: "User not found" };
-    }
-
-    // SECURITY CHECK: Has user already used their trial?
-    if (user.hasUsedTrial) {
-      return { 
-        eligible: false, 
-        reason: `User has already used their trial period. Trial count: ${user.trialCount || 1}` 
-      };
-    }
-
-    // SECURITY CHECK: Does user already have active Pro subscription?
-    if (user.subscriptionTier === 'pro' && user.subscriptionStatus === 'active') {
-      return { 
-        eligible: false, 
-        reason: "User already has active Pro subscription" 
-      };
-    }
-
-    // SECURITY CHECK: Is user currently in trial period?
-    const trialStatus = await this.checkTrialStatus(userId);
-    if (trialStatus.isTrialActive) {
-      return { 
-        eligible: false, 
-        reason: "User is already in active trial period" 
-      };
-    }
-
-    return { eligible: true };
-  }
-
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
