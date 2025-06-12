@@ -214,6 +214,15 @@ export function CustomPromptGenerator({ onBack }: CustomPromptGeneratorProps) {
                       className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold"
                       onClick={async () => {
                         try {
+                          // SECURITY: Check trial eligibility first
+                          const eligibilityResponse = await fetch(`/api/trial-eligibility/${user?.uid}`);
+                          const eligibility = await eligibilityResponse.json();
+                          
+                          if (!eligibility.eligible) {
+                            alert(`Trial not available: ${eligibility.reason}`);
+                            return;
+                          }
+
                           const response = await fetch('/api/create-trial-checkout-session', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },

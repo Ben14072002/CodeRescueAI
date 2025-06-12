@@ -382,6 +382,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SECURITY: Check trial eligibility endpoint
+  app.get("/api/trial-eligibility/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Find user by Firebase UID or database ID
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const eligibility = await storage.isTrialEligible(user.id);
+      res.json(eligibility);
+    } catch (error) {
+      console.error('Error checking trial eligibility:', error);
+      res.status(500).json({ error: 'Failed to check trial eligibility' });
+    }
+  });
+
   app.post("/api/start-trial/:userId", async (req, res) => {
     try {
       const userId = req.params.userId;

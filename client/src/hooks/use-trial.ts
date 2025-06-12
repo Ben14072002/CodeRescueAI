@@ -95,6 +95,7 @@ export function useTrial() {
 
   return {
     ...trialStatus,
+    ...trialEligibility,
     loading,
     expireTrial,
     refreshTrialStatus: checkTrialStatus
