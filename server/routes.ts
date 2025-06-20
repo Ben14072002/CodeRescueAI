@@ -85,6 +85,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Complete trial setup after payment method collection
+  app.post("/api/complete-trial-setup", async (req, res) => {
+    try {
+      const { setupIntentId, userId } = req.body;
+
+      if (!setupIntentId || !userId) {
+        return res.status(400).json({ error: "Setup intent ID and user ID are required" });
+      }
+
+      // Retrieve setup intent to get customer and payment method
+      const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
+      
+      if (setupIntent.status !== 'succeeded') {
+        return res.status(400).json({ error: "Setup intent not completed" });
+      }
+
+      // Find or create user
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        user = await storage.createUser({
+          username: `user_${userId.substring(0, 8)}`,
+          email: `${userId}@firebase.temp`,
+          role: "user"
+        });
+      }
+
+      // Check trial eligibility
+      const eligibility = await storage.isTrialEligible(user.id);
+      if (!eligibility.eligible) {
+        return res.status(400).json({ error: `Trial not available: ${eligibility.reason}` });
+      }
+
+      // Create subscription with trial
+      const customerId = typeof setupIntent.customer === 'string' ? setupIntent.customer : setupIntent.customer?.id;
+      const paymentMethodId = typeof setupIntent.payment_method === 'string' ? setupIntent.payment_method : setupIntent.payment_method?.id;
+      
+      if (!customerId) {
+        throw new Error('No customer ID found in setup intent');
+      }
+
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: [{
+          price: PRICING_PLANS.pro_monthly.priceId,
+        }],
+        trial_period_days: 3,
+        default_payment_method: paymentMethodId || undefined,
+        metadata: {
+          userId: userId,
+          signupType: 'trial'
+        }
+      });
+
+      // Activate trial
+      await storage.startTrial(user.id);
+      
+      // Update subscription info
+      await storage.updateUserSubscription(user.id, {
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscription.id,
+        subscriptionStatus: 'trialing',
+        subscriptionTier: 'trial'
+      });
+
+      console.log(`Trial activated for user ${userId}`);
+      res.json({ success: true, message: "Trial activated successfully" });
+    } catch (error) {
+      console.error('Error completing trial setup:', error);
+      res.status(500).json({ error: 'Failed to complete trial setup' });
+    }
+  });
+
+  // Stripe setup intent for trial payment method collection
+  app.post("/api/create-trial-setup-intent", async (req, res) => {
+    try {
+      const { userId, email, name } = req.body;
+
+      if (!userId || !email) {
+        return res.status(400).json({ error: "User ID and email are required" });
+      }
+
+      // Create or get Stripe customer
+      const customers = await stripe.customers.list({ email: email, limit: 1 });
+      let customer;
+      
+      if (customers.data.length > 0) {
+        customer = customers.data[0];
+      } else {
+        customer = await stripe.customers.create({
+          email: email,
+          name: name || email,
+          metadata: { userId: userId }
+        });
+      }
+
+      // Create setup intent for payment method collection
+      const setupIntent = await stripe.setupIntents.create({
+        customer: customer.id,
+        payment_method_types: ['card'],
+        usage: 'off_session',
+        metadata: {
+          userId: userId,
+          purpose: 'trial_signup'
+        }
+      });
+
+      res.json({ clientSecret: setupIntent.client_secret });
+    } catch (error) {
+      console.error('Error creating setup intent:', error);
+      res.status(500).json({ error: 'Failed to create setup intent' });
+    }
+  });
+
   // Stripe trial checkout session creation
   app.post("/api/create-trial-checkout-session", async (req, res) => {
     try {
@@ -151,6 +268,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Handle the event
       switch (event.type) {
+        case 'setup_intent.succeeded':
+          const setupIntent = event.data.object;
+          
+          if (setupIntent.metadata?.purpose === 'trial_signup') {
+            const userId = setupIntent.metadata.userId;
+            
+            try {
+              // Find user by Firebase UID
+              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              if (!user && !isNaN(parseInt(userId))) {
+                user = await storage.getUser(parseInt(userId));
+              }
+
+              // If user doesn't exist, create them
+              if (!user) {
+                user = await storage.createUser({
+                  username: `user_${userId.substring(0, 8)}`,
+                  email: `${userId}@firebase.temp`,
+                  role: "user"
+                });
+                console.log(`Created new user during trial setup: ${user.id}`);
+              }
+
+              // SECURITY: Check trial eligibility before activation
+              const eligibility = await storage.isTrialEligible(user.id);
+              if (!eligibility.eligible) {
+                console.log(`🚨 TRIAL BLOCKED: ${eligibility.reason} for user ${user.id}`);
+                throw new Error(`Trial activation blocked: ${eligibility.reason}`);
+              }
+
+              // Create subscription with trial for this customer
+              const subscription = await stripe.subscriptions.create({
+                customer: setupIntent.customer,
+                items: [{
+                  price: PRICING_PLANS.pro_monthly.priceId,
+                }],
+                trial_period_days: 3,
+                default_payment_method: setupIntent.payment_method,
+                metadata: {
+                  userId: userId,
+                  signupType: 'trial'
+                }
+              });
+
+              // Start trial access after security validation
+              await storage.startTrial(user.id);
+              console.log(`✅ Trial activated for user ${user.id} after security validation`);
+              
+              // Update with Stripe customer and subscription info
+              const customerIdForWebhook = typeof setupIntent.customer === 'string' ? setupIntent.customer : setupIntent.customer?.id;
+              await storage.updateUserSubscription(user.id, {
+                stripeCustomerId: customerIdForWebhook || '',
+                stripeSubscriptionId: subscription.id,
+                subscriptionStatus: 'trialing',
+                subscriptionTier: 'trial'
+              });
+              
+              console.log(`Trial subscription created for user ${userId}`);
+            } catch (error) {
+              console.error('Error processing trial setup:', error);
+            }
+          }
+          break;
+
         case 'checkout.session.completed':
           const session = event.data.object;
           

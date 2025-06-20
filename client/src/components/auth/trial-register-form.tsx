@@ -57,8 +57,8 @@ function PaymentForm({ onComplete, onBack, clientSecret }: {
           alert(`Payment setup failed: ${error.message}`);
         }
       } else if (setupIntent && setupIntent.status === 'succeeded') {
-        // Confirm trial setup on backend
-        await apiRequest("POST", "/api/confirm-trial-setup", {
+        // Complete trial setup on backend
+        await apiRequest("POST", "/api/complete-trial-setup", {
           userId: user?.uid,
           setupIntentId: setupIntent.id
         });
