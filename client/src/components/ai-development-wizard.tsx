@@ -63,6 +63,39 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
   const { isTrialActive } = useTrial();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL LOGIC
+  const [session, setSession] = useState<WizardSession>({
+    sessionId: Date.now().toString(),
+    stage: 'welcome',
+    currentQuestionIndex: 0,
+    userResponses: []
+  });
+  
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [currentInput, setCurrentInput] = useState('');
+  const [isWizardTyping, setIsWizardTyping] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    helpfulness: number;
+    timeToSolve: number;
+    successRate: boolean;
+  } | null>(null);
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Initialize wizard conversation
+  useEffect(() => {
+    const welcomeMessage: Message = {
+      id: Date.now().toString(),
+      type: 'wizard',
+      content: "👋 Hi! I'm your AI Development Wizard. I'm here to help you get unstuck on any coding problem you're facing with AI tools like Cursor, Replit, Claude, or any other development challenge.\n\nThink of me as a senior developer who's seen every problem before and knows exactly how to guide you through it. What's got you stuck today?",
+      timestamp: new Date()
+    };
+    setMessages([welcomeMessage]);
+  }, []);
+
   // Check if user has premium access (Pro subscription or active trial)
   const hasAccess = checkPremiumAccess() || isTrialActive;
 
@@ -196,38 +229,6 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
       </div>
     );
   }
-  
-  const [session, setSession] = useState<WizardSession>({
-    sessionId: Date.now().toString(),
-    stage: 'welcome',
-    currentQuestionIndex: 0,
-    userResponses: []
-  });
-  
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentInput, setCurrentInput] = useState('');
-  const [isWizardTyping, setIsWizardTyping] = useState(false);
-  const [feedback, setFeedback] = useState<{
-    helpfulness: number;
-    timeToSolve: number;
-    successRate: boolean;
-  } | null>(null);
-
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Initialize wizard conversation
-  useEffect(() => {
-    const welcomeMessage: Message = {
-      id: Date.now().toString(),
-      type: 'wizard',
-      content: "👋 Hi! I'm your AI Development Wizard. I'm here to help you get unstuck on any coding problem you're facing with AI tools like Cursor, Replit, Claude, or any other development challenge.\n\nThink of me as a senior developer who's seen every problem before and knows exactly how to guide you through it. What's got you stuck today?",
-      timestamp: new Date()
-    };
-    setMessages([welcomeMessage]);
-  }, []);
 
   const sendWizardMessage = async (content: string, delay: number = 1000) => {
     setIsWizardTyping(true);
@@ -289,10 +290,9 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
     
     // Fallback questions
     return [
-      "Can you share the specific error message you're seeing?",
-      "What were you trying to accomplish when this problem started?",
-      "How long have you been working on this issue?",
-      "Have you tried any solutions already?"
+      "What specific error message or behavior are you seeing?",
+      "What did you expect to happen instead?",
+      "What was the last thing you tried before getting stuck?"
     ];
   };
 
@@ -303,7 +303,7 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           classification, 
-          userResponses: responses, 
+          responses, 
           sessionId: session.sessionId 
         })
       });
@@ -321,281 +321,198 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
       solutionSteps: [
         {
           step: 1,
-          title: "Identify the Root Cause",
-          description: "Let's start by understanding exactly what's happening.",
+          title: "Analyze the Problem",
+          description: "Review the error messages and identify the root cause",
           expectedTime: "5 minutes"
         },
         {
           step: 2,
           title: "Apply the Fix",
-          description: "Here's the specific solution for your problem.",
+          description: "Implement the recommended solution",
           expectedTime: "10 minutes"
         }
       ],
-      expectedTime: "15-20 minutes",
-      alternativeApproaches: ["Alternative approach if the main solution doesn't work"],
-      preventionTips: ["How to avoid this problem in the future"],
-      learningResources: ["Additional resources for learning"]
+      expectedTime: "15 minutes",
+      alternativeApproaches: ["Try a different approach if the first doesn't work"],
+      preventionTips: ["Add proper error handling"],
+      learningResources: ["Check the official documentation"]
     };
   };
 
   const handleUserInput = async () => {
     if (!currentInput.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       content: currentInput,
       timestamp: new Date()
     };
-    
-    setMessages(prev => [...prev, userMessage]);
-    const userInput = currentInput;
-    setCurrentInput('');
 
-    // Update session with user response
-    const newResponses = [...session.userResponses, userInput];
-    setSession(prev => ({ ...prev, userResponses: newResponses }));
+    setMessages(prev => [...prev, userMessage]);
+    const input = currentInput;
+    setCurrentInput('');
 
     // Handle different conversation stages
     switch (session.stage) {
       case 'welcome':
-        // Classify the initial problem
-        const classification = await classifyProblem(userInput);
+        // Initial problem intake
         setSession(prev => ({ 
           ...prev, 
-          stage: 'questioning', 
-          classification 
+          stage: 'intake',
+          userResponses: [input]
         }));
-        
+
         await sendWizardMessage(
-          `I can see you're dealing with ${classification.category.replace('_', ' ')} issues. ${
-            classification.emotionalState === 'frustrated' 
-              ? "I understand this can be really frustrating - I've helped solve this exact type of problem many times before." 
-              : "Let me help you work through this systematically."
-          }\n\nTo give you the most targeted help, I need to understand your situation better. Let me ask you a few specific questions.`
+          "I understand you're dealing with a coding challenge. Let me analyze this and ask a few targeted questions to give you the most effective solution.\n\nAnalyzing your problem..."
         );
-        
-        // Generate and ask first follow-up question
+
+        const classification = await classifyProblem(input);
         const questions = await generateFollowUpQuestions(classification);
-        setTimeout(async () => {
-          await sendWizardMessage(questions[0]);
-        }, 2000);
-        
+
+        setSession(prev => ({ 
+          ...prev, 
+          classification,
+          stage: 'questioning'
+        }));
+
+        await sendWizardMessage(
+          `Got it! I can see this is a ${classification.complexity} ${classification.category} issue. Let me ask you a few quick questions to nail down the exact solution:\n\n**Question 1:** ${questions[0]}`
+        );
         break;
 
       case 'questioning':
-        const questionIndex = session.currentQuestionIndex + 1;
-        
-        if (questionIndex < 3) { // Ask up to 3 follow-up questions
+        // Collect responses to follow-up questions
+        const updatedResponses = [...session.userResponses, input];
+        setSession(prev => ({ 
+          ...prev, 
+          userResponses: updatedResponses,
+          currentQuestionIndex: prev.currentQuestionIndex + 1
+        }));
+
+        if (session.currentQuestionIndex < 2) {
+          // Ask next question
+          const nextQuestionIndex = session.currentQuestionIndex + 1;
+          const nextQuestion = await generateFollowUpQuestions(session.classification!);
+          
+          await sendWizardMessage(
+            `Perfect! **Question ${nextQuestionIndex + 1}:** ${nextQuestion[nextQuestionIndex] || "What have you already tried to solve this?"}`
+          );
+        } else {
+          // Generate solution
+          setSession(prev => ({ ...prev, stage: 'analysis' }));
+          
+          await sendWizardMessage(
+            "Excellent! I have all the information I need. Let me create your personalized action plan..."
+          );
+
+          const solution = await generateSolution(session.classification!, updatedResponses);
+          
           setSession(prev => ({ 
             ...prev, 
-            currentQuestionIndex: questionIndex 
+            solution,
+            stage: 'solution'
           }));
-          
-          const questions = await generateFollowUpQuestions(session.classification!);
-          if (questions[questionIndex]) {
-            await sendWizardMessage(questions[questionIndex]);
-          }
-        } else {
-          // Move to analysis stage
-          setSession(prev => ({ ...prev, stage: 'analysis' }));
-          await sendWizardMessage(
-            "Perfect! I have all the information I need. Let me analyze your situation and create a step-by-step solution...",
-            500
-          );
-          
-          // Generate solution
-          setTimeout(async () => {
-            const solution = await generateSolution(session.classification!, newResponses);
-            setSession(prev => ({ ...prev, stage: 'solution', solution }));
-            
-            await sendWizardMessage(
-              `**Here's what's happening:**\n${solution.diagnosis}\n\n**Your step-by-step solution:**`,
-              1500
-            );
-            
-            // Present solution steps
-            for (let i = 0; i < solution.solutionSteps.length; i++) {
-              const step = solution.solutionSteps[i];
-              setTimeout(async () => {
-                await sendWizardMessage(
-                  `**Step ${step.step}: ${step.title}**\n${step.description}${
-                    step.code ? `\n\`\`\`\n${step.code}\n\`\`\`` : ''
-                  }\n*Expected time: ${step.expectedTime}*${
-                    step.aiPrompt ? `\n\n**🤖 AI Assistant Prompt:**\n\`\`\`\n${step.aiPrompt}\n\`\`\`\n*Copy this prompt to use with Replit AI, Cursor, Windsurf, or Lovable for this step*` : ''
-                  }`,
-                  800
-                );
-              }, (i + 1) * 2000);
-            }
-            
-            // Ask for feedback after all steps
-            setTimeout(async () => {
-              await sendWizardMessage(
-                `**Estimated total time:** ${solution.expectedTime}\n\nTry these steps and let me know how it goes! Did this solve your problem?`,
-                1000
-              );
-              setSession(prev => ({ ...prev, stage: 'feedback' }));
-            }, (solution.solutionSteps.length + 1) * 2000);
-          }, 2000);
+
+          // Present the solution
+          const solutionMessage = `## 🎯 **Diagnosis**
+${solution.diagnosis}
+
+## 📋 **Action Plan** (${solution.expectedTime})
+
+${solution.solutionSteps.map(step => 
+  `**Step ${step.step}: ${step.title}** (${step.expectedTime})
+${step.description}
+${step.code ? `\`\`\`\n${step.code}\n\`\`\`` : ''}
+${step.aiPrompt ? `💡 **AI Prompt:** "${step.aiPrompt}"` : ''}`
+).join('\n\n')}
+
+## 🔄 **Alternative Approaches**
+${solution.alternativeApproaches.map(approach => `• ${approach}`).join('\n')}
+
+## 🛡️ **Prevention Tips**
+${solution.preventionTips.map(tip => `• ${tip}`).join('\n')}
+
+## 📚 **Learning Resources**
+${solution.learningResources.map(resource => `• ${resource}`).join('\n')}
+
+---
+
+How does this solution look? Would you like me to elaborate on any step or provide additional guidance?`;
+
+          await sendWizardMessage(solutionMessage, 2000);
         }
         break;
 
       case 'solution':
-        setSession(prev => ({ ...prev, stage: 'feedback' }));
+        // Handle follow-up questions about the solution
         await sendWizardMessage(
-          "Did the solution work for you? I'd love to know how it went so I can continue improving!"
+          "I'm here to help you implement this solution! What specific step would you like me to elaborate on, or do you have questions about the approach?"
         );
         break;
-
-      case 'feedback':
-        // Process feedback and offer next steps
-        const wasSuccessful = userInput.toLowerCase().includes('yes') || 
-                            userInput.toLowerCase().includes('worked') || 
-                            userInput.toLowerCase().includes('fixed');
-        
-        if (wasSuccessful) {
-          await sendWizardMessage(
-            "Excellent! 🎉 I'm glad we got that sorted out.\n\n**Prevention tips for next time:**\n" +
-            session.solution?.preventionTips.map(tip => `• ${tip}`).join('\n') +
-            "\n\nFeel free to come back anytime you need help with another challenge!"
-          );
-        } else {
-          await sendWizardMessage(
-            "No worries - let's try a different approach.\n\n**Alternative solutions:**\n" +
-            session.solution?.alternativeApproaches.map(alt => `• ${alt}`).join('\n') +
-            "\n\nOr feel free to describe what happened when you tried the steps, and I'll adjust the solution."
-          );
-        }
-        break;
     }
-  };
-
-  const getStageDisplay = () => {
-    switch (session.stage) {
-      case 'welcome': return 'Getting Started';
-      case 'intake': return 'Understanding Your Problem';
-      case 'questioning': return 'Diagnostic Questions';
-      case 'analysis': return 'Analyzing Solution';
-      case 'solution': return 'Step-by-Step Solution';
-      case 'feedback': return 'Follow-up';
-      default: return 'AI Development Wizard';
-    }
-  };
-
-  const getProgressPercentage = () => {
-    const stageValues = {
-      welcome: 10,
-      intake: 20,
-      questioning: 50,
-      analysis: 70,
-      solution: 90,
-      feedback: 100
-    };
-    return stageValues[session.stage] || 0;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onBack}
-                className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Dashboard
-              </button>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Bot className="w-6 h-6 text-blue-600" />
-                  AI Development Wizard
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{getStageDisplay()}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Session Progress</p>
-                <div className="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                  <div 
-                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
-                    style={{ width: `${getProgressPercentage()}%` }}
-                  />
-                </div>
-              </div>
-              <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                Pro Feature
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 p-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <Button 
+            onClick={onBack}
+            variant="ghost" 
+            className="text-slate-400 hover:text-white mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <Brain className="w-8 h-8 text-purple-400" />
+              <h1 className="text-2xl font-bold text-slate-100">AI Development Wizard</h1>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                <Crown className="w-3 h-3 mr-1" />
+                Pro
               </Badge>
             </div>
+            <p className="text-slate-400">Your personal senior developer mentor</p>
           </div>
         </div>
-      </div>
 
-      {/* Chat Interface */}
-      <div className="max-w-4xl mx-auto px-6 py-6">
-        <Card className="h-[calc(100vh-200px)] flex flex-col overflow-hidden">
-          <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+        <Card className="bg-white/5 backdrop-blur border-white/10">
+          <CardContent className="p-0">
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="h-[500px] overflow-y-auto p-6 space-y-4">
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`flex items-start gap-3 max-w-[80%] ${
-                    message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+                <div key={message.id} className={`flex ${
+                  message.type === 'user' ? 'justify-end' : 'justify-start'
+                } mb-4`}>
+                  <div className={`flex items-start gap-3 max-w-[85%] ${
+                    message.type === 'user' ? 'flex-row-reverse' : ''
                   }`}>
-                    {/* Avatar */}
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      message.type === 'wizard' 
-                        ? 'bg-blue-100 dark:bg-blue-900' 
-                        : 'bg-gray-100 dark:bg-gray-700'
+                      message.type === 'user' 
+                        ? 'bg-blue-600' 
+                        : 'bg-purple-100 dark:bg-purple-900'
                     }`}>
-                      {message.type === 'wizard' ? (
-                        <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      {message.type === 'user' ? (
+                        <User className="w-5 h-5 text-white" />
                       ) : (
-                        <User className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        <Bot className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                       )}
                     </div>
-                    
-                    {/* Message Content */}
-                    <div className={`px-4 py-3 rounded-lg word-wrap break-words ${
-                      message.type === 'wizard'
-                        ? 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-                        : 'bg-blue-600 text-white'
+                    <div className={`px-4 py-3 rounded-lg ${
+                      message.type === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100'
                     }`}>
-                      <div className={`text-sm whitespace-pre-wrap chat-message-content ${
-                        message.type === 'wizard' 
-                          ? 'text-gray-900 dark:text-white' 
-                          : 'text-white'
-                      }`}>
-                        {message.content}
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <div className="whitespace-pre-wrap">{message.content}</div>
                       </div>
-                      {/* Copy AI Prompt Button */}
-                      {message.type === 'wizard' && message.content.includes('🤖 AI Assistant Prompt:') && (
-                        <button
-                          onClick={() => {
-                            const promptMatch = message.content.match(/🤖 AI Assistant Prompt:\s*```\s*([\s\S]*?)\s*```/);
-                            if (promptMatch) {
-                              navigator.clipboard.writeText(promptMatch[1].trim());
-                              toast({ title: "AI Prompt copied to clipboard!" });
-                            }
-                          }}
-                          className="mt-2 px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                        >
-                          📋 Copy AI Prompt
-                        </button>
-                      )}
                       <div className={`text-xs mt-2 ${
-                        message.type === 'wizard' 
-                          ? 'text-gray-500 dark:text-gray-400' 
-                          : 'text-blue-100'
+                        message.type === 'user' 
+                          ? 'text-blue-100' 
+                          : 'text-gray-500 dark:text-gray-400'
                       }`}>
                         {message.timestamp.toLocaleTimeString()}
                       </div>
@@ -608,12 +525,12 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
               {isWizardTyping && (
                 <div className="flex justify-start mb-4">
                   <div className="flex items-start gap-3 max-w-[85%]">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                      <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-lg">
                       <div className="flex items-center gap-2">
-                        <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+                        <RefreshCw className="w-4 h-4 animate-spin text-purple-600" />
                         <span className="text-sm text-gray-600 dark:text-gray-400">Wizard is thinking...</span>
                       </div>
                     </div>
