@@ -333,6 +333,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to check current user
+  app.get("/api/debug/current-user/:firebaseUid", async (req, res) => {
+    try {
+      const { firebaseUid } = req.params;
+      const user = await storage.getUserByFirebaseUid(firebaseUid);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found", firebaseUid });
+      }
+
+      const trialStatus = await storage.checkTrialStatus(user.id);
+      const eligibility = await storage.isTrialEligible(user.id);
+      
+      res.json({ 
+        user,
+        trialStatus,
+        eligibility,
+        firebaseUid
+      });
+    } catch (error) {
+      console.error('Error fetching user debug info:', error);
+      res.status(500).json({ error: 'Failed to fetch user info' });
+    }
+  });
+
   // Manual trial activation endpoint (for testing/emergency use)
   app.post("/api/start-trial", async (req, res) => {
     try {
