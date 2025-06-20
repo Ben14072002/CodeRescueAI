@@ -143,7 +143,7 @@ export default function Home() {
           <TrialCountdown 
             daysRemaining={daysRemaining} 
             isTrialActive={isTrialActive}
-            onUpgrade={() => setShowAuthModal(true)}
+            onUpgrade={() => setCurrentSection("landing")}
           />
         )}
 

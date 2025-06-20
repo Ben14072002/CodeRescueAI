@@ -7,6 +7,7 @@ import { CookieBanner } from "@/components/cookie-banner";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 import Checkout from "@/pages/checkout";
+import Pricing from "@/pages/pricing";
 import Profile from "@/pages/profile";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
@@ -18,6 +19,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/upgrade" component={Pricing} />
       <Route path="/profile" component={Profile} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
