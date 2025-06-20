@@ -820,6 +820,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.params.userId;
       
+      // FORCE NO CACHE - prevent 304 responses
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'ETag': `"${Date.now()}"` // Always different ETag
+      });
+      
       // Find user by Firebase UID first, then fallback to database ID
       let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
@@ -911,10 +919,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Subscription management endpoints
+  // Get subscription status for a user (frontend endpoint)
+  app.get("/api/subscription-status/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // FORCE NO CACHE - prevent 304 responses
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'ETag': `"${Date.now()}"` // Always different ETag
+      });
+      
+      // Find user by Firebase UID first, then fallback to database ID
+      let user = await storage.getUserByFirebaseUid(userId);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get trial status
+      const trialStatus = await storage.checkTrialStatus(user.id);
+      
+      // Check for active subscription
+      let subscriptionData = {
+        tier: user.subscriptionTier || 'free',
+        status: user.subscriptionStatus || 'free',
+        currentPeriodEnd: user.subscriptionCurrentPeriodEnd || null
+      };
+
+      // If user has Stripe subscription, get latest info
+      if (user.stripeSubscriptionId) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          subscriptionData = {
+            tier: subscription.status === 'active' ? 'pro' : subscription.status === 'trialing' ? 'trial' : 'free',
+            status: subscription.status,
+            currentPeriodEnd: (subscription as any).current_period_end ? 
+              new Date((subscription as any).current_period_end * 1000) : null
+          };
+        } catch (error) {
+          console.error('Error fetching Stripe subscription:', error);
+        }
+      }
+
+      res.json(subscriptionData);
+    } catch (error) {
+      console.error('Error getting subscription status:', error);
+      res.status(500).json({ error: 'Failed to get subscription status' });
+    }
+  });
+
+  // Subscription management endpoints  
   app.get("/api/subscription/:userId", async (req, res) => {
     try {
       const userId = req.params.userId;
+      
+      // FORCE NO CACHE - prevent 304 responses
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'ETag': `"${Date.now()}"` // Always different ETag
+      });
       
       // Find user by Firebase UID first, then fallback to database ID
       let user = await storage.getUserByFirebaseUid(userId);
