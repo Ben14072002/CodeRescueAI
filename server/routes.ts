@@ -44,8 +44,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Plan and user ID are required" });
       }
 
-      // Get user data
-      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      // Find user by Firebase UID first, then fallback to database ID
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
@@ -628,8 +628,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.params.userId;
       
-      // Find user by Firebase UID or database ID
-      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      // Find user by Firebase UID first, then fallback to database ID
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
@@ -651,8 +651,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.params.userId;
       
-      // Find user by Firebase UID or database ID
-      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      // Find user by Firebase UID first, then fallback to database ID
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
@@ -673,8 +673,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.params.userId;
       
-      // Find user by Firebase UID or database ID
-      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      // Find user by Firebase UID first, then fallback to database ID
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
