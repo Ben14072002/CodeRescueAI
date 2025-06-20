@@ -25,7 +25,9 @@ export function useSubscription() {
       return response.json() as Promise<SubscriptionData>;
     },
     enabled: !!user?.uid,
-    refetchInterval: 30000, // Refetch every 30 seconds to catch subscription updates
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache data
+    refetchInterval: 5000, // Refetch every 5 seconds for immediate updates
     refetchOnWindowFocus: true,
     refetchOnMount: true
   });
@@ -42,7 +44,9 @@ export function useSubscription() {
       return response.json() as Promise<{ isTrialActive: boolean; daysRemaining: number }>;
     },
     enabled: !!user?.uid,
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache data
+    refetchInterval: 5000, // Refetch every 5 seconds for immediate updates
     refetchOnWindowFocus: true,
     refetchOnMount: true
   });
