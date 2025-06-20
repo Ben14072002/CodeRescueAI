@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { LandingSection } from "@/components/landing-section";
 import { ProblemSelection } from "@/components/problem-selection";
 import { SolutionDashboard } from "@/components/solution-dashboard";
@@ -27,6 +28,7 @@ export default function Home() {
   const [showCopyToast, setShowCopyToast] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authDefaultView, setAuthDefaultView] = useState<"login" | "register">("login");
+  const [, setLocation] = useLocation();
   
   const { currentSession } = useSession();
   const { user, loading } = useAuth();
@@ -143,7 +145,7 @@ export default function Home() {
           <TrialCountdown 
             daysRemaining={daysRemaining} 
             isTrialActive={isTrialActive}
-            onUpgrade={() => setCurrentSection("landing")}
+            onUpgrade={() => setLocation("/pricing")}
           />
         )}
 

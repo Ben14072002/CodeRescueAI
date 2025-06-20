@@ -35,6 +35,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Stripe regular checkout session creation (for paid subscriptions)
+  app.post("/api/create-checkout-session", async (req, res) => {
+    try {
+      const { plan, userId } = req.body;
+
+      if (!plan || !userId) {
+        return res.status(400).json({ error: "Plan and user ID are required" });
+      }
+
+      // Get user data
+      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Validate plan
+      const planConfig = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      if (!planConfig) {
+        return res.status(400).json({ error: "Invalid plan selected" });
+      }
+
+      // Create Stripe checkout session for regular subscription
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        customer_email: user.email,
+        line_items: [{
+          price: planConfig.priceId,
+          quantity: 1,
+        }],
+        metadata: {
+          userId: userId,
+          plan: plan,
+          signupType: 'subscription'
+        },
+        success_url: `${req.headers.origin}/?upgrade=success`,
+        cancel_url: `${req.headers.origin}/pricing?upgrade=cancelled`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      res.status(500).json({ error: 'Failed to create checkout session' });
+    }
+  });
+
   // Stripe trial checkout session creation
   app.post("/api/create-trial-checkout-session", async (req, res) => {
     try {
@@ -150,6 +200,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`Trial access granted for user ${userId} (feature: ${feature})`);
             } catch (error) {
               console.error('Error processing trial signup:', error);
+            }
+          }
+          
+          // Handle regular subscription signup completion
+          else if (session.metadata?.signupType === 'subscription') {
+            const userId = session.metadata.userId;
+            const plan = session.metadata.plan;
+            
+            try {
+              // Find user by Firebase UID
+              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              if (!user && !isNaN(parseInt(userId))) {
+                user = await storage.getUser(parseInt(userId));
+              }
+
+              if (!user) {
+                console.error(`User not found for subscription signup: ${userId}`);
+                throw new Error(`User not found: ${userId}`);
+              }
+
+              // Update with Stripe subscription info
+              if (session.customer && session.subscription) {
+                await storage.updateUserSubscription(user.id, {
+                  stripeCustomerId: typeof session.customer === 'string' ? session.customer : session.customer.id,
+                  stripeSubscriptionId: typeof session.subscription === 'string' ? session.subscription : session.subscription.id,
+                  subscriptionStatus: 'active',
+                  subscriptionTier: plan === 'pro_yearly' ? 'pro_yearly' : 'pro_monthly'
+                });
+              }
+              
+              console.log(`Pro subscription activated for user ${userId} (plan: ${plan})`);
+            } catch (error) {
+              console.error('Error processing subscription signup:', error);
             }
           }
           break;
