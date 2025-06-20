@@ -105,8 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           plan: plan,
           signupType: 'subscription'
         },
-        success_url: `${req.headers.origin}/?upgrade=success`,
-        cancel_url: `${req.headers.origin}/pricing?upgrade=cancelled`,
+        success_url: `${req.headers.origin || 'https://localhost:5000'}/?upgrade=success`,
+        cancel_url: `${req.headers.origin || 'https://localhost:5000'}/pricing?upgrade=cancelled`,
       });
 
       res.json({ url: session.url });
