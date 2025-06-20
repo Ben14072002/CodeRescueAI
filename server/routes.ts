@@ -192,6 +192,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create trial session with Stripe checkout
+  app.post("/api/create-trial-session", async (req, res) => {
+    try {
+      const { userId, feature } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Find or create user
+      let user = await storage.getUserByFirebaseUid(userId);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Check trial eligibility
+      const eligibility = await storage.isTrialEligible(user.id);
+      if (!eligibility.eligible) {
+        return res.status(400).json({ error: `Trial not available: ${eligibility.reason}` });
+      }
+
+      // Create Stripe checkout session with trial
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        customer_email: user.email,
+        line_items: [{
+          price: PRICING_PLANS.pro_monthly.priceId,
+          quantity: 1,
+        }],
+        subscription_data: {
+          trial_period_days: 3,
+          metadata: {
+            userId: userId,
+            signupType: 'trial',
+            feature: feature || 'general'
+          }
+        },
+        metadata: {
+          userId: userId,
+          signupType: 'trial',
+          feature: feature || 'general'
+        },
+        success_url: `${req.headers.origin || 'https://localhost:5000'}/?upgrade=success`,
+        cancel_url: `${req.headers.origin || 'https://localhost:5000'}/pricing?upgrade=cancelled`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error('Error creating trial session:', error);
+      res.status(500).json({ error: 'Failed to create trial session' });
+    }
+  });
+
   // Stripe setup intent for trial payment method collection
   app.post("/api/create-trial-setup-intent", async (req, res) => {
     try {

@@ -72,6 +72,24 @@ export default function Home() {
     setCurrentSection("problems");
   };
 
+  // Handle URL parameters for routing and authentication
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const plan = urlParams.get('plan');
+    const upgrade = urlParams.get('upgrade');
+
+    if (action === 'login') {
+      setAuthDefaultView('login');
+      setShowAuthModal(true);
+    } else if (action === 'checkout' && plan) {
+      setLocation(`/checkout?plan=${plan}`);
+    } else if (upgrade === 'success') {
+      // Handle successful payment return
+      setCurrentSection('dashboard');
+    }
+  }, [setLocation]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
