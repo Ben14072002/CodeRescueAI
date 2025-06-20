@@ -66,12 +66,6 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
   // Check if user has premium access (Pro subscription or active trial)
   const hasAccess = checkPremiumAccess() || isTrialActive;
 
-  // Debug information for trial activation
-  console.log('Debug - User UID:', user?.uid);
-  console.log('Debug - Has Access:', hasAccess);
-  console.log('Debug - Is Trial Active:', isTrialActive);
-  console.log('Debug - Is Pro User:', isProUser);
-
   // Show access denied screen for users without premium access
   if (!hasAccess) {
     return (

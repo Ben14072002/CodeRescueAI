@@ -75,6 +75,8 @@ export function useSubscription() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const upgradeStatus = urlParams.get('upgrade');
+    const trialStatus = urlParams.get('trial');
+    const uid = urlParams.get('uid');
     
     if (upgradeStatus === 'success') {
       console.log('Payment success detected, refreshing subscription status');
@@ -84,7 +86,36 @@ export function useSubscription() {
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [queryClient]);
+
+    // Handle trial completion - auto-activate trial for user
+    if (trialStatus === 'success' && uid && user?.uid === uid) {
+      console.log('Trial checkout success detected, activating trial for user:', uid);
+      
+      // Automatically activate trial via API
+      fetch('/api/start-trial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: uid })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Trial activated successfully:', data.message);
+          // Force refresh subscription data
+          queryClient.invalidateQueries({ queryKey: ['/api/subscription-status'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/trial-status'] });
+        } else {
+          console.error('Trial activation failed:', data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error activating trial:', error);
+      });
+      
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [queryClient, user]);
 
   const refreshSubscription = () => {
     console.log('Manually refreshing subscription status');

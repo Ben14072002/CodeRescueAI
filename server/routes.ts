@@ -322,7 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           feature: feature || 'trial',
           signupType: 'trial'
         },
-        success_url: `${req.headers.origin}/?trial=success`,
+        success_url: `${req.headers.origin}/?trial=success&uid=${userId}`,
         cancel_url: `${req.headers.origin}/?trial=cancelled`,
       });
 
@@ -407,16 +407,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         // For development, we'll skip signature verification if no webhook secret is provided
         if (!process.env.STRIPE_WEBHOOK_SECRET) {
-          console.log('No webhook secret provided, skipping signature verification (development mode)');
+          console.log('🔧 Development mode: No webhook secret, accepting all webhook events');
           // In development, body is already parsed as JSON
           event = req.body;
-          console.log('Webhook event type:', event?.type);
-          console.log('Webhook event data:', JSON.stringify(event?.data?.object?.metadata || {}, null, 2));
+          console.log('📡 Webhook event type:', event?.type);
+          console.log('📡 Webhook metadata:', JSON.stringify(event?.data?.object?.metadata || {}, null, 2));
         } else {
           event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
+          console.log('✅ Webhook signature verified:', event.type);
         }
       } catch (err: any) {
-        console.log(`Webhook signature verification failed.`, err.message);
+        console.log(`❌ Webhook signature verification failed:`, err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
       }
 
