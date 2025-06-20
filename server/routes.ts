@@ -333,6 +333,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual trial activation endpoint (for testing/emergency use)
+  app.post("/api/start-trial", async (req, res) => {
+    try {
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Find user by Firebase UID
+      let user = await storage.getUserByFirebaseUid(userId);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Check trial eligibility
+      const eligibility = await storage.isTrialEligible(user.id);
+      if (!eligibility.eligible) {
+        return res.status(400).json({ error: `Trial not available: ${eligibility.reason}` });
+      }
+
+      // Activate trial
+      const updatedUser = await storage.startTrial(user.id);
+      
+      console.log(`✅ Manual trial activated for user ${userId} (ID: ${user.id})`);
+      res.json({ 
+        success: true, 
+        message: "Trial activated successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Error starting trial:', error);
+      res.status(500).json({ error: 'Failed to start trial' });
+    }
+  });
+
   // Stripe webhook endpoint for trial signup completion
   app.post("/api/webhooks/stripe", async (req, res) => {
     try {
