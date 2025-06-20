@@ -35,6 +35,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // User registration endpoint
+  app.post("/api/register-user", async (req, res) => {
+    try {
+      const { uid, email, username } = req.body;
+
+      if (!uid || !email) {
+        return res.status(400).json({ error: "Firebase UID and email are required" });
+      }
+
+      // Check if user already exists
+      let existingUser = await storage.getUserByFirebaseUid(uid);
+      if (existingUser) {
+        return res.json({ success: true, user: existingUser, message: "User already exists" });
+      }
+
+      // Create new user with Firebase UID
+      const newUser = await storage.createUser({
+        username: username || `user_${uid.substring(0, 8)}`,
+        email: email,
+        role: "user",
+        firebaseUid: uid
+      });
+
+      console.log(`✅ User registered: ${newUser.id} (Firebase UID: ${uid})`);
+      res.json({ success: true, user: newUser, message: "User registered successfully" });
+    } catch (error) {
+      console.error('Error registering user:', error);
+      res.status(500).json({ error: 'Failed to register user' });
+    }
+  });
+
   // Stripe regular checkout session creation (for paid subscriptions)
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
