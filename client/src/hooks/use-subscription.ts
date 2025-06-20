@@ -87,33 +87,43 @@ export function useSubscription() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Handle trial completion - auto-activate trial for user
-    if (trialStatus === 'success' && uid && user?.uid === uid) {
-      console.log('Trial checkout success detected, activating trial for user:', uid);
+    // CRITICAL: Auto-activate trial when user returns from Stripe checkout
+    // This bypasses webhook dependency and works immediately for all users
+    if ((trialStatus === 'success' || window.location.search.includes('trial=success')) && user?.uid) {
+      const userIdToActivate = uid || user.uid;
+      console.log('AUTO-ACTIVATING TRIAL: User returned from Stripe checkout, activating trial for:', userIdToActivate);
       
-      // Automatically activate trial via API
+      // Immediately activate trial via API call
       fetch('/api/start-trial', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: uid })
+        body: JSON.stringify({ userId: userIdToActivate })
       })
       .then(response => response.json())
       .then(data => {
+        console.log('TRIAL ACTIVATION RESULT:', data);
         if (data.success) {
-          console.log('Trial activated successfully:', data.message);
-          // Force refresh subscription data
-          queryClient.invalidateQueries({ queryKey: ['/api/subscription-status'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/trial-status'] });
+          console.log('✅ Trial successfully activated - user now has Pro access');
+          // Force complete refresh of all subscription data
+          queryClient.removeQueries({ queryKey: ['/api/subscription-status'] });
+          queryClient.removeQueries({ queryKey: ['/api/trial-status'] });
+          // Immediate refetch with fresh data
+          setTimeout(() => {
+            queryClient.refetchQueries({ queryKey: ['/api/subscription-status'] });
+            queryClient.refetchQueries({ queryKey: ['/api/trial-status'] });
+          }, 200);
         } else {
-          console.error('Trial activation failed:', data.error);
+          console.error('❌ Trial activation failed:', data.error);
         }
       })
       .catch(error => {
-        console.error('Error activating trial:', error);
+        console.error('❌ Network error during trial activation:', error);
       });
       
-      // Clear URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Clear URL parameters after processing
+      if (window.location.search.includes('trial=success')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
   }, [queryClient, user]);
 
