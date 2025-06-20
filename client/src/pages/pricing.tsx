@@ -34,7 +34,7 @@ export default function Pricing() {
 
   const handleUpgrade = async (plan: 'monthly' | 'yearly') => {
     if (!user) {
-      setLocation('/');
+      setLocation('/?action=login');
       return;
     }
 
@@ -49,14 +49,20 @@ export default function Pricing() {
         })
       });
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error('No checkout URL received');
+        console.error('No checkout URL received:', data);
+        throw new Error('Invalid response from server');
       }
     } catch (error) {
       console.error('Upgrade error:', error);
+      alert('Unable to start checkout. Please try again.');
     } finally {
       setUpgradeLoading(false);
     }
@@ -79,12 +85,11 @@ export default function Pricing() {
         return;
       }
 
-      const response = await fetch('/api/create-trial-checkout-session', {
+      const response = await fetch('/api/create-trial-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           userId: user.uid,
-          email: user.email,
           feature: 'upgrade'
         })
       });

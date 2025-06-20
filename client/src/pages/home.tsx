@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { LandingSection } from "@/components/landing-section";
 import { ProblemSelection } from "@/components/problem-selection";

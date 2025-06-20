@@ -27,14 +27,15 @@ const CheckoutForm = ({ planName, onSuccess }: { planName: string; onSuccess: ()
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/dashboard`,
+        return_url: `${window.location.origin}/?upgrade=success`,
       },
     });
 
     if (error) {
+      console.error('Payment confirmation error:', error);
       toast({
         title: "Payment Failed",
-        description: error.message,
+        description: error.message || "Something went wrong with your payment",
         variant: "destructive",
       });
     } else {
@@ -90,17 +91,15 @@ export default function Checkout() {
       return;
     }
 
-    // For testing, allow checkout without authentication
-    // TODO: Re-enable authentication in production
-    // if (!user) {
-    //   setLocation(`/?plan=${plan}&action=checkout`);
-    //   return;
-    // }
+    if (!user) {
+      setLocation(`/?plan=${plan}&action=checkout`);
+      return;
+    }
 
     // Create checkout session
     apiRequest("POST", "/api/create-checkout-session", { 
       plan, 
-      userId: user?.uid || 'anonymous_user'
+      userId: user.uid
     })
       .then((res) => res.json())
       .then((data) => {
