@@ -31,9 +31,9 @@ export function useAuth() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              userId: user.uid,
+              uid: user.uid,
               email: user.email,
-              displayName: user.displayName
+              username: user.displayName || user.email?.split('@')[0] || 'user'
             })
           });
         } catch (error) {

@@ -114,7 +114,8 @@ CodeBreaker is a full-stack web application designed to help developers get unst
 - Strict TypeScript configuration with proper type checking
 
 ## Changelog
-- June 20, 2025. Initial setup
+- June 20, 2025: Fixed critical user registration authentication bug - corrected parameter mismatch between frontend (userId) and backend (uid) in Firebase auth flow, resolving "Firebase UID and email are required" errors and enabling successful Pro upgrade checkout
+- June 20, 2025: Initial setup
 
 ## User Preferences
 
