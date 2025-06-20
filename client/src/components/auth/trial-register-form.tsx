@@ -279,7 +279,17 @@ export function TrialRegisterForm({ onBack, onSuccess }: TrialRegisterFormProps)
   const handleGoogleSignup = async () => {
     setIsLoading(true);
     try {
-      await loginWithGoogle();
+      const result = await loginWithGoogle();
+      
+      // If Google auth was successful, set form data from Google profile
+      if (result?.user) {
+        setFormData(prev => ({
+          ...prev,
+          email: result.user.email || "",
+          displayName: result.user.displayName || result.user.email?.split('@')[0] || ""
+        }));
+      }
+      
       // Move to payment step after Google signup
       setStep("payment");
     } catch (err: any) {

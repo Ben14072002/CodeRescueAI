@@ -13,6 +13,7 @@ import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Refund from "@/pages/refund";
 import CookiePolicy from "@/pages/cookie-policy";
+import TrialSetup from "@/pages/trial-setup";
 
 function Router() {
   return (

@@ -181,19 +181,27 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
                             return;
                           }
 
-                          const response = await fetch('/api/create-trial-checkout-session', {
+                          // Create trial setup intent for authenticated users
+                          const response = await fetch('/api/create-trial-setup-intent', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
                               userId: user?.uid,
                               email: user?.email,
-                              feature: 'wizard'
+                              name: user?.displayName || user?.email?.split('@')[0] || 'User'
                             })
                           });
-                          const { url } = await response.json();
-                          window.location.href = url;
+                          
+                          if (response.ok) {
+                            const { clientSecret } = await response.json();
+                            // Redirect to trial payment setup page with client secret
+                            window.location.href = `/trial-setup?client_secret=${clientSecret}&return_url=${encodeURIComponent(window.location.pathname + '#wizard')}`;
+                          } else {
+                            throw new Error('Failed to create trial setup intent');
+                          }
                         } catch (error) {
-                          console.error('Trial checkout error:', error);
+                          console.error('Trial setup error:', error);
+                          alert('Unable to start trial setup. Please try again.');
                         }
                       }}
                     >

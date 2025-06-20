@@ -78,6 +78,7 @@ export default function Home() {
     const action = urlParams.get('action');
     const plan = urlParams.get('plan');
     const upgrade = urlParams.get('upgrade');
+    const signup = urlParams.get('signup');
 
     if (action === 'login') {
       setAuthDefaultView('login');
@@ -87,8 +88,28 @@ export default function Home() {
     } else if (upgrade === 'success') {
       // Handle successful payment return
       setCurrentSection('dashboard');
+    } else if (signup === 'wizard' || signup === 'trial') {
+      // Show trial registration for Google Auth users
+      setAuthDefaultView('register');
+      setShowAuthModal(true);
     }
   }, [setLocation]);
+
+  // Handle Google Auth trial activation event
+  useEffect(() => {
+    const handleGoogleAuthTrial = (event: CustomEvent) => {
+      console.log('Google Auth user needs trial activation:', event.detail);
+      // Show trial registration modal for Google Auth users
+      setAuthDefaultView('register');
+      setShowAuthModal(true);
+    };
+
+    window.addEventListener('google-auth-trial-required', handleGoogleAuthTrial as EventListener);
+    
+    return () => {
+      window.removeEventListener('google-auth-trial-required', handleGoogleAuthTrial as EventListener);
+    };
+  }, []);
 
   if (loading) {
     return (
