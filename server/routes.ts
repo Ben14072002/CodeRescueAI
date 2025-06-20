@@ -579,6 +579,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get subscription status for a user
+  app.get("/api/subscription-status/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Find user by Firebase UID first, then by ID
+      let user = await storage.getUserByFirebaseUid(userId);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Check trial status
+      const trialStatus = await storage.checkTrialStatus(user.id);
+      
+      res.json({
+        subscriptionStatus: user.subscriptionStatus || 'free',
+        subscriptionTier: user.subscriptionTier || 'free',
+        stripeCustomerId: user.stripeCustomerId,
+        stripeSubscriptionId: user.stripeSubscriptionId,
+        subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd,
+        trial: {
+          isActive: trialStatus.isTrialActive,
+          daysRemaining: trialStatus.daysRemaining,
+          startDate: user.trialStartDate,
+          endDate: user.trialEndDate
+        }
+      });
+    } catch (error) {
+      console.error('Error getting subscription status:', error);
+      res.status(500).json({ error: "Failed to get subscription status" });
+    }
+  });
+
   // Test endpoint to simulate user creation and webhook events for development
   app.post("/api/test-webhook", async (req, res) => {
     try {
