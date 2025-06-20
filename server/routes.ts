@@ -102,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Find or create user
-      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             try {
               // Find user by Firebase UID
-              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              let user = await storage.getUserByFirebaseUid(userId);
               if (!user && !isNaN(parseInt(userId))) {
                 user = await storage.getUser(parseInt(userId));
               }
@@ -342,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             try {
               // Find or create user by Firebase UID
-              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              let user = await storage.getUserByFirebaseUid(userId);
               if (!user && !isNaN(parseInt(userId))) {
                 user = await storage.getUser(parseInt(userId));
               }
@@ -391,7 +391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             try {
               // Find user by Firebase UID
-              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              let user = await storage.getUserByFirebaseUid(userId);
               if (!user && !isNaN(parseInt(userId))) {
                 user = await storage.getUser(parseInt(userId));
               }
@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const userId = subscription.metadata.userId;
             
             try {
-              let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+              let user = await storage.getUserByFirebaseUid(userId);
               if (!user && !isNaN(parseInt(userId))) {
                 user = await storage.getUser(parseInt(userId));
               }
@@ -581,7 +581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         // Find or create user (simulating Firebase auth integration)
-        let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+        let user = await storage.getUserByFirebaseUid(userId);
         if (!user && !isNaN(parseInt(userId))) {
           user = await storage.getUser(parseInt(userId));
         }
@@ -702,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.params.userId;
       
       // Find user by Firebase UID or database ID
-      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
@@ -724,8 +724,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.params.userId;
       
-      // Find user by Firebase UID or database ID
-      let user = await storage.getUserByEmail(`${userId}@firebase.temp`);
+      // Find user by Firebase UID first, then fallback to database ID
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
