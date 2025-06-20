@@ -49,20 +49,6 @@ export function useAuth() {
       .then((result) => {
         if (result?.user) {
           console.log('Google sign-in successful via redirect');
-          
-          // Check if user needs trial activation after Google Auth
-          const urlParams = new URLSearchParams(window.location.search);
-          const signup = urlParams.get('signup');
-          
-          if (signup === 'wizard' || signup === 'trial') {
-            // Trigger trial activation flow for Google Auth users
-            setTimeout(() => {
-              const event = new CustomEvent('google-auth-trial-required', {
-                detail: { user: result.user }
-              });
-              window.dispatchEvent(event);
-            }, 500);
-          }
         }
       })
       .catch((error) => {
