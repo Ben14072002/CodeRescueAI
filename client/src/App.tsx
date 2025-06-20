@@ -23,6 +23,7 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/upgrade" component={Pricing} />
       <Route path="/profile" component={Profile} />
+      <Route path="/trial-setup" component={TrialSetup} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/refund" component={Refund} />
