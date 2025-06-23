@@ -18,7 +18,7 @@ import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
 import { useTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/use-subscription";
-import codebreakerLogo from "@/assets/codebreaker-logo.png";
+
 
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "templates" | "project-planner" | "ai-wizard" | "settings";
@@ -105,13 +105,8 @@ export default function Home() {
       <header className="fixed top-0 z-50 w-full backdrop-blur-sm bg-slate-900/80 border-b border-purple-500/20">
         <div className="container flex h-28 items-center justify-between px-8 mx-auto max-w-7xl">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-4">
-              <img 
-                src={codebreakerLogo} 
-                alt="CodeBreaker Logo" 
-                className="w-16 h-16 cosmic-glow"
-              />
-              <h1 className="text-3xl font-bold text-white cosmic-glow">CodeBreaker</h1>
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold text-white cosmic-glow">CODEBREAKER</h1>
             </div>
           </div>
           <div className="flex items-center space-x-6">
