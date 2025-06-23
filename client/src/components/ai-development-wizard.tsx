@@ -435,16 +435,9 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
               solution,
               stage: 'solution'
             }));
-          } catch (error) {
-            console.error('Solution generation error:', error);
-            await sendWizardMessage(
-              "I encountered a technical issue with the advanced analysis system. However, I can still provide targeted guidance for your QR code problem:\n\n**Immediate Debug Steps:**\n1. Test the generated QR URLs directly in your browser\n2. Check server logs when scanning QR codes\n3. Verify your route handlers are properly configured\n\nWould you like me to guide you through systematic debugging of your QR code routing?"
-            );
-            return;
-          }
 
-          // Present the comprehensive solution with enhanced analysis
-          const solutionMessage = `## 🎯 **Deep Analysis & Diagnosis**
+            // Present the comprehensive solution with enhanced analysis
+            const solutionMessage = `## 🎯 **Deep Analysis & Diagnosis**
 ${solution.diagnosis}
 
 ## 📋 **Step-by-Step Solution Plan** (${solution.expectedTime})
@@ -494,7 +487,14 @@ ${solution.learningResources.map(resource => `• ${resource}`).join('\n')}
 
 Ready to implement? Which step would you like to start with, or do you need clarification on any part of the solution?`;
 
-          await sendWizardMessage(solutionMessage, 2000);
+            await sendWizardMessage(solutionMessage);
+          } catch (error) {
+            console.error('Solution generation error:', error);
+            await sendWizardMessage(
+              "I encountered a technical issue with the advanced analysis system. However, I can still provide targeted guidance for your problem:\n\n**Immediate Debug Steps:**\n1. Check the specific error messages in your logs\n2. Verify your configuration settings\n3. Test individual components systematically\n\nWould you like me to guide you through systematic debugging?"
+            );
+            return;
+          }
         }
         break;
 
