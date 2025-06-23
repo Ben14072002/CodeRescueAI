@@ -105,8 +105,11 @@ export default function Home() {
       <header className="fixed top-0 z-50 w-full backdrop-blur-sm bg-slate-900/80 border-b border-purple-500/20">
         <div className="container flex h-28 items-center justify-between px-8 mx-auto max-w-7xl">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-white cosmic-glow">CODEBREAKER</h1>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">C</span>
+              </div>
+              <h1 className="text-xl font-bold text-white">CodeBreaker</h1>
             </div>
           </div>
           <div className="flex items-center space-x-6">
