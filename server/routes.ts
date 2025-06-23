@@ -1424,17 +1424,11 @@ Generate specific, context-aware prompts that address QR code URL routing, serve
         
         // Handle markdown code blocks more robustly
         if (cleanContent.includes('```')) {
-          // Extract content between code blocks using a more flexible approach
-          const codeBlockMatch = cleanContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-          if (codeBlockMatch && codeBlockMatch[1]) {
-            cleanContent = codeBlockMatch[1].trim();
-          } else {
-            // Alternative approach: find the JSON object boundaries
-            const jsonStart = cleanContent.indexOf('{');
-            const jsonEnd = cleanContent.lastIndexOf('}');
-            if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-              cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
-            }
+          // Extract JSON content from markdown code blocks
+          const jsonStart = cleanContent.indexOf('{');
+          const jsonEnd = cleanContent.lastIndexOf('}');
+          if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
           }
         }
         
