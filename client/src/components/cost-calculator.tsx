@@ -14,7 +14,7 @@ export function CostCalculator() {
   const [scenario, setScenario] = useState<'light' | 'normal' | 'heavy'>('normal');
   const [animateCounter, setAnimateCounter] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
-  
+
   // Scenario-based presets with realistic data
   const scenarios = {
     light: { 
@@ -39,7 +39,7 @@ export function CostCalculator() {
       frustrationLevel: "High"
     }
   };
-  
+
   const current = scenarios[scenario];
   const proPlanCost = 4.99;
   const checkpointCost = 0.25;
@@ -49,7 +49,7 @@ export function CostCalculator() {
   const savings = Math.max(0, monthlyCost - proPlanCost);
   const roiPercentage = savings > 0 ? Math.round((savings / proPlanCost) * 100) : 0;
   const breakEvenSessions = Math.ceil(proPlanCost / costPerSession);
-  
+
   useEffect(() => {
     setAnimateCounter(true);
     const timer = setTimeout(() => setAnimateCounter(false), 600);
@@ -62,13 +62,13 @@ export function CostCalculator() {
       setLocation('/');
       return;
     }
-    
+
     if (isPro) {
       // User already has Pro - redirect to dashboard
       setLocation('/');
       return;
     }
-    
+
     // User logged in but not Pro - redirect to checkout
     setLocation('/checkout?plan=pro_monthly');
   };
