@@ -157,8 +157,10 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-6 pt-36 pb-12">
         {/* Emergency Pro Activation - Show for authenticated users without Pro access */}
-        {user && !isPro && !isTrialActive && (
-          <EmergencyProActivation />
+        {user && !isPro && (
+          <div className="mb-8">
+            <EmergencyProActivation />
+          </div>
         )}
 
         {/* Trial Countdown - Show only for authenticated users on non-landing pages */}

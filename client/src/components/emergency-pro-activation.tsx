@@ -48,14 +48,14 @@ export function EmergencyProActivation() {
   };
 
   return (
-    <Card className="max-w-md mx-auto mt-8 border-red-500/50 bg-red-950/20">
+    <Card className="max-w-2xl mx-auto border-orange-500/50 bg-orange-950/20">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-red-400">
-          <AlertTriangle className="w-5 h-5" />
-          Emergency Pro Activation
+        <CardTitle className="flex items-center gap-2 text-orange-400 text-xl">
+          <AlertTriangle className="w-6 h-6" />
+          URGENT: Pro Access Issue
         </CardTitle>
-        <CardDescription className="text-red-300">
-          For users who paid but don't have Pro access
+        <CardDescription className="text-orange-300 text-base">
+          You paid for Pro but still see free plan restrictions. Click below to activate your Pro access immediately.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -81,21 +81,26 @@ export function EmergencyProActivation() {
         <Button 
           onClick={activatePro}
           disabled={isActivating || !user?.uid}
-          className="w-full bg-red-600 hover:bg-red-700"
+          className="w-full bg-orange-600 hover:bg-orange-700 text-lg py-4"
         >
-          {isActivating ? 'Activating...' : 'Activate Pro Access'}
+          {isActivating ? 'Activating Pro Access...' : 'Activate My Pro Access Now'}
         </Button>
 
         {activationResult && (
-          <div className={`p-3 rounded text-sm ${
+          <div className={`p-4 rounded text-base font-medium ${
             activationResult.startsWith('Success') 
               ? 'bg-green-950/50 text-green-400 border border-green-500/50' 
               : 'bg-red-950/50 text-red-400 border border-red-500/50'
           }`}>
             {activationResult.startsWith('Success') && (
-              <CheckCircle className="w-4 h-4 inline mr-2" />
+              <CheckCircle className="w-5 h-5 inline mr-2" />
             )}
             {activationResult}
+            {activationResult.startsWith('Success') && (
+              <div className="mt-2 text-sm text-green-300">
+                Your Pro features will be available in 2 seconds...
+              </div>
+            )}
           </div>
         )}
       </CardContent>
