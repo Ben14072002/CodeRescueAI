@@ -29,7 +29,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authDefaultView, setAuthDefaultView] = useState<"login" | "register">("login");
   const [, setLocation] = useLocation();
-  
+
   const { currentSession } = useSession();
   const { user, loading } = useAuth();
   const { isTrialActive, daysRemaining } = useTrial();
@@ -43,7 +43,7 @@ export default function Home() {
     }
     setCurrentSection("problems");
   };
-  
+
   const navigateToSolution = () => setCurrentSection("solution");
   const navigateToLanding = () => setCurrentSection("landing");
   const navigateToDashboard = () => setCurrentSection("dashboard");
@@ -101,57 +101,53 @@ export default function Home() {
   return (
     <div className="min-h-screen text-white">
       {/* Header */}
-      <header className="glassmorphism-dark border-b border-purple-400/20 relative z-50">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div 
-              className="logo-container cursor-pointer transition-transform duration-300 ease-out hover:scale-105"
-              onClick={navigateToLanding}
-            >
-              <img 
-                src={codeBreakeLogo} 
-                alt="CodeBreaker Logo" 
-                className="w-32 md:w-48 h-auto object-contain transition-all duration-300 cosmic-glow"
-              />
+      <header className="fixed top-0 z-50 w-full border-b border-transparent backdrop-blur-sm">
+        <div className="container flex h-16 items-center justify-between px-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center cosmic-glow">
+                <span className="text-white font-bold text-sm">CB</span>
+              </div>
+              <h1 className="text-xl font-bold text-white cosmic-glow">CodeBreaker</h1>
             </div>
-            <div className="flex items-center space-x-6">
-              {user ? (
-                <>
-                  <button 
-                    onClick={navigateToDashboard}
-                    className="text-gray-300 hover:text-white transition-colors flex items-center space-x-3 glassmorphism px-4 py-2 rounded-xl cosmic-glow-hover"
-                  >
-                    <div className="w-10 h-10 cosmic-gradient-bg rounded-full flex items-center justify-center cosmic-glow">
-                      <span className="text-sm font-bold text-white">
-                        {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
-                      </span>
-                    </div>
-                    <span className="hidden md:block font-medium">{user.displayName || "Dashboard"}</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => {
-                      setAuthDefaultView("login");
-                      setShowAuthModal(true);
-                    }}
-                    className="text-gray-300 hover:text-white transition-colors font-medium px-4 py-2 rounded-lg hover:bg-purple-500/20"
-                  >
-                    Sign In
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setAuthDefaultView("register");
-                      setShowAuthModal(true);
-                    }}
-                    className="cosmic-button text-white px-6 py-3 rounded-xl font-semibold cosmic-glow-hover"
-                  >
-                    Sign Up
-                  </button>
-                </>
-              )}
-            </div>
+          </div>
+          <div className="flex items-center space-x-6">
+            {user ? (
+              <>
+                <button 
+                  onClick={navigateToDashboard}
+                  className="text-gray-300 hover:text-white transition-colors flex items-center space-x-3 glassmorphism px-4 py-2 rounded-xl cosmic-glow-hover"
+                >
+                  <div className="w-10 h-10 cosmic-gradient-bg rounded-full flex items-center justify-center cosmic-glow">
+                    <span className="text-sm font-bold text-white">
+                      {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
+                    </span>
+                  </div>
+                  <span className="hidden md:block font-medium">{user.displayName || "Dashboard"}</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={() => {
+                    setAuthDefaultView("login");
+                    setShowAuthModal(true);
+                  }}
+                  className="text-gray-300 hover:text-white transition-colors font-medium px-4 py-2 rounded-lg hover:bg-purple-500/20"
+                >
+                  Sign In
+                </button>
+                <button 
+                  onClick={() => {
+                    setAuthDefaultView("register");
+                    setShowAuthModal(true);
+                  }}
+                  className="cosmic-button text-white px-6 py-3 rounded-xl font-semibold cosmic-glow-hover"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -170,7 +166,7 @@ export default function Home() {
         {currentSection === "landing" && (
           <LandingSection onGetStarted={navigateToProblems} />
         )}
-        
+
         {currentSection === "problems" && (
           <ProblemSelection
             onAnalyze={navigateToSolution}
@@ -181,7 +177,7 @@ export default function Home() {
             onAIWizard={navigateToAIWizard}
           />
         )}
-        
+
         {currentSection === "solution" && (
           <SolutionDashboard
             onBack={navigateToProblems}
@@ -227,13 +223,13 @@ export default function Home() {
         onClose={() => setShowSuccessModal(false)}
         onNewSession={handleNewSession}
       />
-      
+
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         defaultView={authDefaultView}
       />
-      
+
       <CopyToast show={showCopyToast} />
     </div>
   );
