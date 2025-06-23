@@ -40,11 +40,13 @@ interface WizardSolution {
     code?: string;
     expectedTime: string;
     aiPrompt?: string;
+    successCriteria?: string;
   }>;
   expectedTime: string;
   alternativeApproaches: string[];
   preventionTips: string[];
   learningResources: string[];
+  troubleshootingTips?: string[];
 }
 
 interface WizardSession {
@@ -116,7 +118,7 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
     const welcomeMessage: Message = {
       id: Date.now().toString(),
       type: 'wizard',
-      content: "👋 Hi! I'm your AI Development Wizard. I'm here to help you get unstuck on any coding problem you're facing with AI tools like Cursor, Replit, Claude, or any other development challenge.\n\nThink of me as a senior developer who's seen every problem before and knows exactly how to guide you through it. What's got you stuck today?",
+      content: "👋 Hi! I'm your AI Development Wizard. I'm here to help you get unstuck on any coding problem you're facing with AI tools like Cursor, Replit, Claude, or any other development challenge.\n\nI'm designed to provide deep analysis and create copy-paste ready prompts that use advanced prompting strategies. I'll analyze your problem thoroughly, ask targeted questions, and generate intelligent solutions with specific, actionable AI prompts.\n\nWhat coding challenge has you stuck today?",
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -442,23 +444,33 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
             stage: 'solution'
           }));
 
-          // Present the solution with enhanced prompts
-          const solutionMessage = `## 🎯 **Diagnosis**
+          // Present the comprehensive solution with enhanced analysis
+          const solutionMessage = `## 🎯 **Deep Analysis & Diagnosis**
 ${solution.diagnosis}
 
-## 📋 **Action Plan** (${solution.expectedTime})
+## 📋 **Step-by-Step Solution Plan** (${solution.expectedTime})
 
 ${solution.solutionSteps.map(step => 
   `**Step ${step.step}: ${step.title}** (${step.expectedTime})
 ${step.description}
 
-${step.code ? `**Code Implementation:**\n\`\`\`\n${step.code}\n\`\`\`\n` : ''}
+${step.code ? `**Implementation Code:**
+\`\`\`
+${step.code}
+\`\`\`
 
-${step.aiPrompt ? `🤖 **Custom AI Prompt for This Step:**
+` : ''}
+
+${step.aiPrompt ? `🤖 **Copy-Paste Ready AI Prompt:**
 \`\`\`
 ${step.aiPrompt}
 \`\`\`
-*Copy this prompt and paste it into your AI coding assistant for optimal results.*
+*This prompt uses advanced prompting techniques - copy and paste directly into your AI assistant for optimal results.*
+
+` : ''}
+
+${step.successCriteria ? `✅ **Success Criteria:**
+${step.successCriteria}
 
 ` : ''}`
 ).join('\n---\n\n')}
@@ -466,17 +478,22 @@ ${step.aiPrompt}
 ## 🔄 **Alternative Approaches**
 ${solution.alternativeApproaches.map(approach => `• ${approach}`).join('\n')}
 
-## 🛡️ **Prevention Tips**
+## 🛡️ **Prevention Strategies**
 ${solution.preventionTips.map(tip => `• ${tip}`).join('\n')}
 
-## 📚 **Learning Resources**
+${solution.troubleshootingTips ? `## 🔧 **Troubleshooting Tips**
+${solution.troubleshootingTips.map(tip => `• ${tip}`).join('\n')}
+
+` : ''}
+
+## 📚 **Technical Resources**
 ${solution.learningResources.map(resource => `• ${resource}`).join('\n')}
 
 ---
 
-**💡 Pro Tip:** Each step includes a custom AI prompt optimized for that specific task. Copy and paste these prompts into your AI coding assistant (Cursor, Replit AI, Claude, etc.) for the best results.
+**🚀 Implementation Strategy:** Each step includes intelligently crafted AI prompts that leverage proven prompting frameworks. These prompts are designed to eliminate the generic responses you've been getting and provide deep, actionable solutions.
 
-How does this solution look? Would you like me to elaborate on any step or provide additional guidance?`;
+Ready to implement? Which step would you like to start with, or do you need clarification on any part of the solution?`;
 
           await sendWizardMessage(solutionMessage, 2000);
         }
