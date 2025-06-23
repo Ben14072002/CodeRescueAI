@@ -26,6 +26,8 @@ interface LandingSectionProps {
 }
 
 export function LandingSection({ onGetStarted }: LandingSectionProps) {
+  const [showVideo, setShowVideo] = React.useState(false);
+
   return (
     <div className="min-h-screen cosmic-background">
       {/* Hero Section */}
@@ -65,7 +67,7 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
               variant="outline"
               size="lg"
               className="glassmorphism border-purple-400/30 text-white hover:bg-purple-500/20 px-10 py-5 text-xl rounded-xl cosmic-glow-hover w-full sm:w-auto"
-              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => setShowVideo(true)}
             >
               <Brain className="w-6 h-6 mr-3" />
               See How It Works
@@ -426,6 +428,34 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </Card>
         </div>
       </section>
+      {/* Video Modal */}
+          {showVideo && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+              <div className="bg-slate-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                  <h3 className="text-xl font-semibold text-slate-100">How CodeBreaker Works</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowVideo(false)}
+                    className="text-slate-400 hover:text-slate-100"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <div className="p-6">
+                  <video 
+                    controls 
+                    className="w-full h-auto rounded-lg"
+                    style={{ maxHeight: '70vh' }}
+                  >
+                    <source src="/codebreaker-demo.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+            </div>
+          )}
       {/* Footer */}
       <Footer />
     </div>
