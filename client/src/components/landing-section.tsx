@@ -38,17 +38,17 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
               NEW: AI Development Wizard + Free Templates Available!
             </Badge>
           </div>
-          
+
           {/* Main Headlines */}
           <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
             <span className="cosmic-gradient-text">AI Assistant</span><br />
             <span className="text-white">Got Stuck?</span>
           </h1>
-          
+
           <p className="text-2xl md:text-3xl text-gray-200 mb-6 max-w-4xl mx-auto font-medium">
             Break free in under 10 minutes with battle-tested strategies
           </p>
-          
+
           <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">Stop wasting hours when Cursor, Replit AI, Loveable or Windsurf get stuck in loops.</p>
 
           {/* CTA Buttons */}
@@ -206,11 +206,11 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
                   </div>
                   <h3 className="text-xl font-semibold mb-3 text-slate-100">{feature.title}</h3>
                   <p className="text-slate-400 mb-4 leading-relaxed">{feature.description}</p>
-                  
+
                   <Badge className={`${feature.bgColor} ${feature.color} border-none mb-4`}>
                     {feature.highlight}
                   </Badge>
-                  
+
                   <div className="bg-slate-900/50 p-4 rounded-lg mt-4">
                     <p className="text-sm text-slate-300 italic">"{feature.example}"</p>
                   </div>
