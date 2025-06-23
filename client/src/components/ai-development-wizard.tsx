@@ -438,7 +438,7 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
           } catch (error) {
             console.error('Solution generation error:', error);
             await sendWizardMessage(
-              "I encountered an issue generating the intelligent solution. Let me provide a direct debugging approach for your QR code issue:\n\n**Immediate Action Required:**\n1. Check your server routing configuration\n2. Verify QR code URL generation logic\n3. Test the generated URLs directly in browser\n\nWould you like me to help you debug this step by step?"
+              "I encountered a technical issue with the advanced analysis system. However, I can still provide targeted guidance for your QR code problem:\n\n**Immediate Debug Steps:**\n1. Test the generated QR URLs directly in your browser\n2. Check server logs when scanning QR codes\n3. Verify your route handlers are properly configured\n\nWould you like me to guide you through systematic debugging of your QR code routing?"
             );
             return;
           }

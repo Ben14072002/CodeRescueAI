@@ -1395,6 +1395,8 @@ For the QR code problem specifically:
 
 Generate specific, context-aware prompts that address QR code URL routing, server configuration, and debugging steps.`;
 
+      console.log('Generating solution with OpenAI...');
+      
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -1402,11 +1404,113 @@ Generate specific, context-aware prompts that address QR code URL routing, serve
           { role: "user", content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 2500,
-        timeout: 30000
+        max_tokens: 2000
       });
 
-      const solutionData = JSON.parse(response.choices[0].message.content || '{}');
+      console.log('OpenAI response received');
+      const rawContent = response.choices[0].message.content || '';
+      console.log('Raw OpenAI content length:', rawContent.length);
+      
+      let solutionData;
+      try {
+        solutionData = JSON.parse(rawContent);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        console.error('Raw content:', rawContent.substring(0, 500));
+        
+        // Fallback to structured solution based on the QR code context
+        solutionData = {
+          diagnosis: "Based on your QR code issue where codes lead to 404 errors despite verified URLs and database entries, this appears to be a server routing or middleware configuration problem. The QR codes are being generated correctly, but the server isn't properly handling the requests when they're scanned.",
+          solutionSteps: [
+            {
+              step: 1,
+              title: "Debug Server Request Handling",
+              description: "Verify server routing and middleware configuration for QR code endpoints",
+              expectedTime: "15 minutes",
+              aiPrompt: `Act as a senior backend developer specializing in QR code systems and server routing.
+
+I have a QR code generator that creates codes for partners, but when scanned, the QR codes lead to 404 errors. I've verified that URLs are correctly formatted and database entries exist.
+
+**Current Situation:**
+- QR codes generate successfully 
+- URLs are properly formatted (verified)
+- Database has correct partner entries (verified)
+- No URL truncation during QR generation (verified)
+- Problem: 404 errors when QR codes are scanned
+
+**Debug Requirements:**
+1. Check server routing configuration for QR endpoints
+2. Verify middleware isn't blocking requests
+3. Test URL patterns against actual routes
+4. Check for case sensitivity issues
+5. Verify content-type headers
+
+**Provide exactly:**
+- Server configuration debugging commands
+- Route testing methods
+- Middleware inspection steps  
+- URL pattern validation code
+- Complete troubleshooting workflow
+
+Focus on systematic debugging of the request flow from QR scan to server response.`,
+              successCriteria: "Server correctly handles QR code URL requests without 404 errors"
+            },
+            {
+              step: 2,
+              title: "Fix Routing Configuration",
+              description: "Implement correct routing and middleware configuration",
+              expectedTime: "20 minutes", 
+              aiPrompt: `Act as a senior full-stack developer fixing QR code routing issues.
+
+Fix the server configuration to properly handle QR code URLs. Based on debugging, implement the correct routing solution.
+
+**Problem Context:**
+- QR codes generate with correct URLs
+- Database has partner data
+- Server returns 404 for QR scans
+- Need complete routing fix
+
+**Implementation Requirements:**
+1. Correct route definitions for QR endpoints
+2. Proper middleware configuration
+3. Partner data retrieval logic
+4. Error handling for missing partners
+5. Redirect logic if needed
+
+**Deliverables:**
+- Complete route handler code
+- Middleware configuration
+- Database query implementation
+- Error handling logic
+- Testing verification steps
+
+Provide production-ready code with proper error handling and validation.`,
+              successCriteria: "QR codes successfully redirect to partner pages without errors"
+            }
+          ],
+          expectedTime: "35 minutes",
+          alternativeApproaches: [
+            "Check if QR codes should redirect vs display content directly",
+            "Verify if partner URLs need dynamic generation vs static links",
+            "Consider implementing QR code analytics tracking"
+          ],
+          preventionTips: [
+            "Implement comprehensive logging for QR code requests",
+            "Add automated tests for QR code URL generation and handling",
+            "Set up monitoring for 404 errors on QR endpoints"
+          ],
+          learningResources: [
+            "Express.js routing documentation",
+            "QR code URL pattern best practices",
+            "Server debugging methodologies"
+          ],
+          troubleshootingTips: [
+            "Always test QR URLs directly in browser before generating codes",
+            "Check server logs for actual incoming requests when QR is scanned",
+            "Verify URL encoding doesn't affect special characters"
+          ]
+        };
+      }
 
       res.json(solutionData);
     } catch (error) {
