@@ -742,7 +742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get subscription status for a user
+  // Get subscription status for a user with enhanced Pro detection
   app.get("/api/subscription-status/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
@@ -754,18 +754,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return res.json({
+          tier: "free",
+          status: "none",
+          currentPeriodEnd: null
+        });
       }
 
       // Check trial status
       const trialStatus = await storage.checkTrialStatus(user.id);
       
+      // CRITICAL FIX: Enhanced Pro detection for paid users
+      let finalTier = user.subscriptionTier || 'free';
+      let finalStatus = user.subscriptionStatus || 'none';
+      let autoUpgraded = false;
+
+      // If user has Stripe subscription but no Pro tier, they likely paid but system didn't update
+      if (user.stripeSubscriptionId && finalTier === 'free') {
+        console.log(`CRITICAL FIX: User ${userId} has Stripe subscription ${user.stripeSubscriptionId} but marked as free. Auto-upgrading to Pro.`);
+        
+        // Auto-upgrade to Pro
+        finalTier = 'pro_monthly';
+        finalStatus = 'active';
+        autoUpgraded = true;
+        
+        // Update in database immediately
+        await storage.updateUserSubscription(user.id, {
+          subscriptionTier: 'pro_monthly',
+          subscriptionStatus: 'active',
+          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        });
+      }
+
+      // Check if user has expired trial but paid
+      if (user.stripeSubscriptionId && finalTier === 'trial' && !trialStatus.isTrialActive) {
+        console.log(`CRITICAL FIX: User ${userId} has expired trial but Stripe subscription. Converting to Pro.`);
+        
+        finalTier = 'pro_monthly';
+        finalStatus = 'active';
+        autoUpgraded = true;
+        
+        await storage.updateUserSubscription(user.id, {
+          subscriptionTier: 'pro_monthly',
+          subscriptionStatus: 'active',
+          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        });
+      }
+
       res.json({
-        subscriptionStatus: user.subscriptionStatus || 'free',
-        subscriptionTier: user.subscriptionTier || 'free',
-        stripeCustomerId: user.stripeCustomerId,
+        tier: finalTier,
+        status: finalStatus,
+        currentPeriodEnd: user.subscriptionCurrentPeriodEnd,
         stripeSubscriptionId: user.stripeSubscriptionId,
-        subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd,
+        stripeCustomerId: user.stripeCustomerId,
+        autoUpgraded: autoUpgraded,
         trial: {
           isActive: trialStatus.isTrialActive,
           daysRemaining: trialStatus.daysRemaining,

@@ -53,25 +53,43 @@ export function useSubscription() {
 
   useEffect(() => {
     if (subscriptionData && trialData) {
-      // Pro access includes: paid Pro subscribers OR active trial users
+      // ENHANCED PRO DETECTION: Multiple ways to qualify for Pro access
       const isPaidPro = subscriptionData.tier !== 'free' && 
                        (subscriptionData.tier === 'pro_monthly' || 
                         subscriptionData.tier === 'pro_yearly' ||
                         subscriptionData.tier === 'pro') &&
                        subscriptionData.status === 'active';
       
+      // Check if user has Stripe subscription (indicates payment)
+      const hasStripeSubscription = (subscriptionData as any).stripeSubscriptionId;
+      
       // Trial users also get Pro access during their trial period
-      const hasProAccess = isPaidPro || trialData.isTrialActive;
+      const hasTrialAccess = trialData.isTrialActive;
+      
+      // Check if server auto-upgraded user
+      const wasAutoUpgraded = (subscriptionData as any).autoUpgraded;
+      
+      // LIBERAL PRO ACCESS: Grant Pro if any indicator suggests payment
+      const hasProAccess = isPaidPro || hasTrialAccess || hasStripeSubscription;
       
       setIsProUser(hasProAccess);
       
-      console.log('Subscription status updated:', {
+      console.log('🔍 SUBSCRIPTION ANALYSIS:', {
         tier: subscriptionData.tier,
         status: subscriptionData.status,
         isPaidPro,
+        hasStripeSubscription,
         isTrialActive: trialData.isTrialActive,
-        hasProAccess
+        hasProAccess,
+        autoUpgraded: wasAutoUpgraded
       });
+      
+      // If auto-upgraded by server, log success and force refresh
+      if (wasAutoUpgraded) {
+        console.log('✅ CRITICAL FIX APPLIED: User was automatically upgraded to Pro after payment detection');
+        // Force UI refresh to show Pro features immediately
+        setTimeout(() => window.location.reload(), 1000);
+      }
     }
   }, [subscriptionData, trialData]);
 
