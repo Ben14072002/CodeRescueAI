@@ -117,32 +117,33 @@ export default function Pricing() {
   const isTrialActive = trialData?.isTrialActive || false;
 
   return (
-    <div className="min-h-screen bg-slate-900 py-12">
+    <div className="min-h-screen cosmic-background py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Choose Your Plan
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            <span className="cosmic-gradient-text">Choose Your</span><br />
+            <span className="text-white">Plan</span>
           </h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+          <p className="text-2xl text-gray-300 max-w-3xl mx-auto">
             Get unstuck faster with our AI-powered development tools
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
           {/* Free Plan */}
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <div className="flex items-center justify-between">
+          <Card className="glassmorphism-dark border-purple-400/20 cosmic-glow-hover">
+            <CardHeader className="pb-8">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <CardTitle className="text-white">Free Plan</CardTitle>
-                  <CardDescription className="text-slate-400">
+                  <CardTitle className="text-white text-3xl font-bold">Free Plan</CardTitle>
+                  <CardDescription className="text-gray-300 text-lg">
                     Perfect for getting started
                   </CardDescription>
                 </div>
-                <Zap className="w-8 h-8 text-slate-400" />
+                <Zap className="w-10 h-10 text-purple-400 cosmic-glow" />
               </div>
-              <div className="text-3xl font-bold text-white">
-                €0<span className="text-lg font-normal text-slate-400">/month</span>
+              <div className="text-4xl font-bold text-white">
+                €0<span className="text-xl font-normal text-gray-400">/month</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -231,11 +232,11 @@ export default function Pricing() {
           </Card>
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-16">
           <Button 
             variant="ghost" 
             onClick={() => setLocation('/')}
-            className="text-slate-400 hover:text-white"
+            className="glassmorphism text-white hover:bg-purple-500/20 px-8 py-3 text-lg cosmic-glow-hover"
           >
             ← Back to Dashboard
           </Button>

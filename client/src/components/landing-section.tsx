@@ -49,42 +49,45 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
             Break free in under 10 minutes with battle-tested strategies
           </p>
           
-          <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">Stop wasting hours when Cursor, Replit AI, Loveable or Windsurf get stuck in loops.</p>
+          <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">Stop wasting hours when Cursor, Replit AI, Loveable or Windsurf get stuck in loops.</p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
             <Button 
               onClick={onGetStarted}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all shadow-lg w-full sm:w-auto"
+              className="cosmic-button text-white px-10 py-5 text-xl font-semibold rounded-xl cosmic-glow-hover w-full sm:w-auto"
             >
-              <Play className="w-5 h-5 mr-2" />
+              <Play className="w-6 h-6 mr-3" />
               Start Rescue Session
             </Button>
             <Button 
               variant="outline"
               size="lg"
-              className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-4 text-lg w-full sm:w-auto"
+              className="glassmorphism border-purple-400/30 text-white hover:bg-purple-500/20 px-10 py-5 text-xl rounded-xl cosmic-glow-hover w-full sm:w-auto"
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              <Brain className="w-5 h-5 mr-2" />
+              <Brain className="w-6 h-6 mr-3" />
               See How It Works
             </Button>
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-slate-400 text-sm">
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-emerald-500" />
-              Average rescue time: 8 minutes
+          <div className="flex flex-wrap items-center justify-center gap-8 text-gray-200">
+            <div className="glassmorphism-dark px-6 py-4 rounded-xl flex items-center gap-3 cosmic-glow-hover">
+              <Clock className="w-6 h-6 text-emerald-400" />
+              <span className="font-bold text-xl">8 min</span>
+              <span className="text-gray-300">Avg. Time</span>
             </div>
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-emerald-500" />
-              94% success rate
+            <div className="glassmorphism-dark px-6 py-4 rounded-xl flex items-center gap-3 cosmic-glow-hover">
+              <CheckCircle className="w-6 h-6 text-emerald-400" />
+              <span className="font-bold text-xl">94%</span>
+              <span className="text-gray-300">Success Rate</span>
             </div>
-            <div className="flex items-center">
-              <Users className="w-4 h-4 mr-2 text-emerald-500" />
-              500+ developers rescued
+            <div className="glassmorphism-dark px-6 py-4 rounded-xl flex items-center gap-3 cosmic-glow-hover">
+              <Users className="w-6 h-6 text-purple-300" />
+              <span className="font-bold text-xl">500+</span>
+              <span className="text-gray-300">Developers</span>
             </div>
           </div>
         </div>
