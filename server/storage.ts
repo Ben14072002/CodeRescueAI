@@ -1,4 +1,4 @@
-import { users, sessions, promptRatings, projects, type User, type InsertUser, type Session, type InsertSession, type PromptRating, type InsertPromptRating, type Project, type InsertProject } from "@shared/schema";
+import { users, sessions, promptRatings, projects, wizardConversations, type User, type InsertUser, type Session, type InsertSession, type PromptRating, type InsertPromptRating, type Project, type InsertProject, type WizardConversation, type InsertWizardConversation } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte } from "drizzle-orm";
 
@@ -36,6 +36,13 @@ export interface IStorage {
   deleteProject(projectId: number): Promise<void>;
   updateProjectProgress(projectId: number, progress: any): Promise<Project>;
   markProjectCompleted(projectId: number): Promise<Project>;
+  
+  // Wizard Conversation methods
+  createWizardConversation(conversation: InsertWizardConversation): Promise<WizardConversation>;
+  updateWizardConversation(sessionId: string, updates: Partial<InsertWizardConversation>): Promise<WizardConversation>;
+  getWizardConversation(sessionId: string): Promise<WizardConversation | undefined>;
+  getUserWizardConversations(userId: number): Promise<WizardConversation[]>;
+  deleteWizardConversation(sessionId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -43,6 +50,7 @@ export class MemStorage implements IStorage {
   private sessions: Map<number, Session>;
   private promptRatings: Map<number, PromptRating>;
   private projects: Map<number, Project>;
+  private wizardConversations: Map<string, WizardConversation>;
   currentId: number;
   currentSessionId: number;
   currentRatingId: number;
@@ -53,6 +61,7 @@ export class MemStorage implements IStorage {
     this.sessions = new Map();
     this.promptRatings = new Map();
     this.projects = new Map();
+    this.wizardConversations = new Map();
     this.currentId = 1;
     this.currentSessionId = 1;
     this.currentRatingId = 1;
@@ -634,6 +643,50 @@ export class DatabaseStorage implements IStorage {
     }
     
     return updatedProject;
+  }
+
+  async createWizardConversation(conversation: InsertWizardConversation): Promise<WizardConversation> {
+    const [newConversation] = await db
+      .insert(wizardConversations)
+      .values(conversation)
+      .returning();
+    return newConversation;
+  }
+
+  async updateWizardConversation(sessionId: string, updates: Partial<InsertWizardConversation>): Promise<WizardConversation> {
+    const [updatedConversation] = await db
+      .update(wizardConversations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(wizardConversations.sessionId, sessionId))
+      .returning();
+    
+    if (!updatedConversation) {
+      throw new Error('Wizard conversation not found');
+    }
+    
+    return updatedConversation;
+  }
+
+  async getWizardConversation(sessionId: string): Promise<WizardConversation | undefined> {
+    const [conversation] = await db
+      .select()
+      .from(wizardConversations)
+      .where(eq(wizardConversations.sessionId, sessionId));
+    return conversation || undefined;
+  }
+
+  async getUserWizardConversations(userId: number): Promise<WizardConversation[]> {
+    return await db
+      .select()
+      .from(wizardConversations)
+      .where(eq(wizardConversations.userId, userId))
+      .orderBy(desc(wizardConversations.updatedAt));
+  }
+
+  async deleteWizardConversation(sessionId: string): Promise<void> {
+    await db
+      .delete(wizardConversations)
+      .where(eq(wizardConversations.sessionId, sessionId));
   }
 }
 

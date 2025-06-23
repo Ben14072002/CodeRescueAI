@@ -1547,6 +1547,69 @@ Provide production-ready code with proper error handling and validation.`,
     }
   });
 
+  // Wizard Conversation Routes
+  app.post("/api/wizard/save-conversation", async (req, res) => {
+    try {
+      const { userId, sessionId, title, classification, messages, solution, status } = req.body;
+      
+      const conversation = await storage.createWizardConversation({
+        userId,
+        sessionId,
+        title,
+        problemCategory: classification?.category || 'Unknown',
+        classification,
+        messages,
+        solution,
+        status: status || 'active'
+      });
+      
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error saving wizard conversation:', error);
+      res.status(500).json({ error: 'Failed to save conversation' });
+    }
+  });
+
+  app.put("/api/wizard/update-conversation/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const updates = req.body;
+      
+      const conversation = await storage.updateWizardConversation(sessionId, updates);
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error updating wizard conversation:', error);
+      res.status(500).json({ error: 'Failed to update conversation' });
+    }
+  });
+
+  app.get("/api/wizard/conversations/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const conversations = await storage.getUserWizardConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error('Error fetching wizard conversations:', error);
+      res.status(500).json({ error: 'Failed to fetch conversations' });
+    }
+  });
+
+  app.get("/api/wizard/conversation/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const conversation = await storage.getWizardConversation(sessionId);
+      
+      if (!conversation) {
+        return res.status(404).json({ error: 'Conversation not found' });
+      }
+      
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error fetching wizard conversation:', error);
+      res.status(500).json({ error: 'Failed to fetch conversation' });
+    }
+  });
+
   // Rate prompts
   app.post("/api/rate-prompt", async (req, res) => {
     try {

@@ -388,11 +388,14 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
         const questions = await generateFollowUpQuestions(classification);
         console.log('Generated questions:', questions);
 
-        setSession(prev => ({ 
-          ...prev, 
+        const updatedSession = { 
+          ...session, 
           classification,
-          stage: 'questioning'
-        }));
+          stage: 'questioning' as const
+        };
+        
+        setSession(updatedSession);
+        await saveConversation(updatedSession);
 
         const analysisMessage = classification.technicalIndicators?.length ? 
           `Technical Analysis Complete! I've identified this as a **${classification.complexity}** ${classification.category} issue with these indicators: ${classification.technicalIndicators.join(', ')}.\n\nTo create the most effective solution, I need additional context:\n\n**Question 1:** ${questions[0]}` :
@@ -430,11 +433,14 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
             const solution = await generateSolution(session.classification!, updatedResponses);
             console.log('Solution generated successfully:', solution);
             
-            setSession(prev => ({ 
-              ...prev, 
+            const updatedSession = { 
+              ...session, 
               solution,
-              stage: 'solution'
-            }));
+              stage: 'solution' as const
+            };
+            
+            setSession(updatedSession);
+            await saveConversation(updatedSession);
 
             // Present diagnosis first
             await sendWizardMessage(`## 🎯 **Deep Analysis & Diagnosis**
