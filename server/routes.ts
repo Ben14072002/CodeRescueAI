@@ -407,33 +407,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "User ID is required" });
       }
 
-      // Find user by Firebase UID
+      // Find user by Firebase UID or create if doesn't exist
       let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
 
+      // If user doesn't exist, create them immediately
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        console.log(`Creating new user for Pro activation: ${userId}`);
+        user = await storage.createUser({
+          username: `user_${userId.substring(0, 8)}`,
+          email: `${userId}@firebase.temp`,
+          firebaseUid: userId,
+          role: "user",
+          subscriptionStatus: 'active',
+          subscriptionTier: plan
+        });
+      } else {
+        // Update existing user to Pro
+        user = await storage.updateUserSubscription(user.id, {
+          subscriptionStatus: 'active',
+          subscriptionTier: plan,
+          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        });
       }
-
-      // Activate Pro subscription immediately
-      const updatedUser = await storage.updateUserSubscription(user.id, {
-        subscriptionStatus: 'active',
-        subscriptionTier: plan,
-        subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-      });
       
-      console.log(`🔥 URGENT: Manual Pro activation for paid user ${userId} (ID: ${user.id})`);
+      console.log(`🔥 URGENT: Manual Pro activation completed for user ${userId} (ID: ${user.id})`);
       res.json({ 
         success: true, 
         message: "Pro subscription activated successfully",
-        user: updatedUser,
+        user: {
+          id: user.id,
+          subscriptionStatus: user.subscriptionStatus,
+          subscriptionTier: user.subscriptionTier
+        },
         plan: plan
       });
     } catch (error) {
       console.error('Error activating Pro:', error);
-      res.status(500).json({ error: 'Failed to activate Pro subscription' });
+      res.status(500).json({ error: `Failed to activate Pro subscription: ${error.message}` });
     }
   });
 
