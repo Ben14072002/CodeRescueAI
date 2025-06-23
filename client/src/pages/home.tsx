@@ -106,7 +106,10 @@ export default function Home() {
       <header className="fixed top-0 z-50 w-full backdrop-blur-sm bg-slate-900/80 border-b border-purple-500/20">
         <div className="container flex h-28 items-center justify-between px-8 mx-auto max-w-7xl">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-3">
+            <div 
+              className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={navigateToLanding}
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">&lt;/&gt;</span>
               </div>
@@ -156,7 +159,12 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 pt-36 pb-12">
-        {/* Pro access should now work automatically - remove emergency activation */}
+        {/* Emergency Pro Activation - Show for authenticated users without Pro access */}
+        {user && !isPro && (
+          <div className="mb-8">
+            <EmergencyProActivation />
+          </div>
+        )}
 
         {/* Trial Countdown - Show only for authenticated users on non-landing pages */}
         {user && currentSection !== "landing" && !isPro && (
