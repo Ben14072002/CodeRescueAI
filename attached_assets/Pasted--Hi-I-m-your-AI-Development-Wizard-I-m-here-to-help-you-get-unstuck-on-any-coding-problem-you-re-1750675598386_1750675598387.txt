@@ -1,0 +1,115 @@
+👋 Hi! I'm your AI Development Wizard. I'm here to help you get unstuck on any coding problem you're facing with AI tools like Cursor, Replit, Claude, or any other development challenge.
+
+Think of me as a senior developer who's seen every problem before and knows exactly how to guide you through it. What's got you stuck today?
+12:42:37
+i want to create a qr code generating system and my ai agent gets stuck with it the qr code leads to nothing
+12:43:26
+I understand you're dealing with a coding challenge. Let me analyze this and ask a few targeted questions to give you the most effective solution.
+
+Analyzing your problem...
+12:43:27
+Got it! I can see this is a medium general issue. Let me ask you a few quick questions to nail down the exact solution:
+
+**Question 1:** What specific error message or behavior are you seeing?
+12:43:28
+when scanning the qr code i get to a 404 page
+12:43:55
+Perfect! **Question 2:** What did you expect to happen instead?
+12:43:56
+every qr code generated should be corresponding to a partner and should lead to their website
+12:44:26
+Perfect! **Question 3:** What was the last thing you tried before getting stuck?
+12:44:27
+changing the urls
+12:44:42
+Excellent! I have all the information I need. Let me create your personalized action plan...
+12:44:43
+## 🎯 **Diagnosis**
+Based on your description, this appears to be a common development challenge.
+
+## 📋 **Action Plan** (15 minutes)
+
+**Step 1: Analyze the Problem** (5 minutes)
+Review the error messages and identify the root cause
+
+
+
+🤖 **Custom AI Prompt for This Step:**
+```
+**AI CODING ASSISTANT - PROBLEM ANALYSIS**
+
+I need you to act as a senior developer and help me debug this issue.
+
+**CONTEXT:**
+- Problem: [DESCRIBE_YOUR_SPECIFIC_ISSUE]
+- Tech Stack: [YOUR_TECHNOLOGIES]
+- Expected Behavior: [WHAT_SHOULD_HAPPEN]
+- Actual Behavior: [WHAT_IS_HAPPENING]
+
+**ANALYSIS REQUIRED:**
+1. Identify the root cause of this issue
+2. Explain why this is happening
+3. List the most likely causes in order of probability
+4. Provide debugging steps to confirm the diagnosis
+
+**OUTPUT FORMAT:**
+- Root Cause Analysis
+- Step-by-step debugging commands
+- Verification steps to confirm the issue
+
+Be specific and provide exact commands I can run.
+```
+*Copy this prompt and paste it into your AI coding assistant for optimal results.*
+
+
+---
+
+**Step 2: Apply the Fix** (10 minutes)
+Implement the recommended solution
+
+
+
+🤖 **Custom AI Prompt for This Step:**
+```
+**AI CODING ASSISTANT - SOLUTION IMPLEMENTATION**
+
+Implement the complete fix for this issue. Provide FULL, WORKING code.
+
+**PROBLEM CONTEXT:**
+- Issue: [YOUR_SPECIFIC_PROBLEM]
+- Root Cause: [IDENTIFIED_CAUSE]
+- Tech Stack: [YOUR_TECHNOLOGIES]
+- Files Involved: [RELEVANT_FILES]
+
+**SOLUTION REQUIREMENTS:**
+1. Complete code implementation (no partial solutions)
+2. Error handling and edge cases
+3. Testing steps to verify the fix works
+4. Integration with existing codebase
+
+**DELIVERABLES:**
+- Complete, copy-paste ready code files
+- Installation commands for any dependencies
+- Step-by-step implementation guide
+- Verification commands to test the solution
+
+**CRITICAL:** Provide complete working code, not snippets or placeholders.
+```
+*Copy this prompt and paste it into your AI coding assistant for optimal results.*
+
+
+
+## 🔄 **Alternative Approaches**
+• Try a different approach if the first doesn't work
+
+## 🛡️ **Prevention Tips**
+• Add proper error handling
+
+## 📚 **Learning Resources**
+• Check the official documentation
+
+---
+
+**💡 Pro Tip:** Each step includes a custom AI prompt optimized for that specific task. Copy and paste these prompts into your AI coding assistant (Cursor, Replit AI, Claude, etc.) for the best results.
+
+How does this solution look? Would you like me to elaborate on any step or provide additional guidance?

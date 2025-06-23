@@ -483,104 +483,10 @@ How does this solution look? Would you like me to elaborate on any step or provi
         break;
 
       case 'solution':
-        // Handle follow-up questions about the solution
-        if (input.toLowerCase().includes('qr') && input.toLowerCase().includes('code')) {
-          // QR Code specific enhanced solution
-          const qrCodeSolution = `## 🎯 **Enhanced QR Code Solution**
-
-Based on your QR code issue, here's an enhanced action plan with custom AI prompts:
-
-**Step 1: Debug QR Code URL Generation** (30 minutes)
-🤖 **Custom AI Prompt:**
-\`\`\`
-**AI CODING ASSISTANT - QR CODE URL DEBUG**
-
-I have a QR code system that generates codes but they lead to 404 pages. Help me debug the URL generation logic.
-
-**CURRENT SITUATION:**
-- QR codes are being generated successfully
-- When scanned, they show 404 errors
-- Expected: QR codes should redirect to partner websites
-- Tech Stack: [YOUR_FRAMEWORK]
-- QR Library: [YOUR_QR_LIBRARY]
-
-**DEBUG REQUIREMENTS:**
-1. Analyze the URL formation logic
-2. Check if partner URLs are properly stored/retrieved
-3. Verify QR code generation is using correct URLs
-4. Test URL accessibility before QR generation
-
-**DELIVERABLES:**
-- Complete debugging commands to test URLs
-- Logging code to trace URL generation
-- Validation function to check URL format
-- Test cases for different partner scenarios
-
-Provide complete, working debug code I can implement immediately.
-\`\`\`
-
-**Step 2: Fix URL Formation Logic** (45 minutes)
-🤖 **Custom AI Prompt:**
-\`\`\`
-**AI CODING ASSISTANT - QR CODE URL FIX**
-
-Fix my QR code URL generation system to ensure valid partner URLs.
-
-**TECHNICAL CONTEXT:**
-- Problem: QR codes generate but URLs are incorrect/404
-- Partner Data: [DESCRIBE_PARTNER_DATA_STRUCTURE]
-- Current QR Generation: [PASTE_CURRENT_CODE]
-- Database Schema: [PARTNER_TABLE_STRUCTURE]
-
-**COMPLETE FIX REQUIRED:**
-1. Partner URL validation and storage
-2. Dynamic URL generation for each partner
-3. QR code generation with validated URLs
-4. Error handling for missing/invalid URLs
-5. Testing function to verify QR functionality
-
-**OUTPUT FORMAT:**
-- Complete working code files
-- Database migration if needed
-- Validation functions
-- Test suite for QR generation
-- Integration steps
-
-Provide production-ready code with proper error handling.
-\`\`\`
-
-**Step 3: Implement QR Code Testing** (20 minutes)
-🤖 **Custom AI Prompt:**
-\`\`\`
-**AI CODING ASSISTANT - QR CODE TESTING**
-
-Create comprehensive testing for QR code generation and validation.
-
-**TESTING REQUIREMENTS:**
-- Automated QR code generation testing
-- URL validation before QR creation
-- QR code scanning simulation
-- Partner data integrity tests
-- Error handling verification
-
-**DELIVERABLES:**
-- Complete test suite
-- Mock partner data for testing
-- QR validation functions
-- Automated testing scripts
-- Performance testing for bulk generation
-
-Provide complete testing implementation with examples.
-\`\`\`
-
-Copy these prompts and use them step-by-step with your AI coding assistant for optimal results!`;
-
-          await sendWizardMessage(qrCodeSolution);
-        } else {
-          await sendWizardMessage(
-            "I'm here to help you implement this solution! What specific step would you like me to elaborate on, or do you have questions about the approach?"
-          );
-        }
+        // Handle follow-up questions and provide additional analysis
+        await sendWizardMessage(
+          "I'm here to help you implement this solution! What specific step would you like me to elaborate on, or do you have questions about the approach? I can also provide additional deep-dive analysis if needed."
+        );
         break;
     }
   };

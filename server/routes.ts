@@ -1207,101 +1207,38 @@ Generate a well-structured prompt that would help an AI assistant provide the mo
     }
   });
 
-  // AI Development Wizard - Enhanced with Custom Prompts
-  app.post("/api/wizard/generate-solution", async (req, res) => {
+  // AI Development Wizard - Intelligent Question Generation
+  app.post("/api/wizard/generate-questions", async (req, res) => {
     try {
-      const { classification, responses, sessionId } = req.body;
+      const { classification, sessionId } = req.body;
 
-      const systemPrompt = `You are an expert AI development consultant who creates detailed action plans with custom AI prompts for each step.
+      const systemPrompt = `You are an expert AI development consultant who generates targeted diagnostic questions to fully understand coding problems.
 
-Your role is to:
-1. Diagnose the root cause of coding problems
-2. Create a step-by-step action plan
-3. Generate proven AI prompts for each step using advanced prompting strategies
+QUESTION GENERATION STRATEGY:
+- Apply diagnostic frameworks (5 Whys, Fault Tree Analysis)
+- Focus on technical specifics rather than generic questions
+- Adapt complexity to user experience level
+- Target the most likely root causes based on classification
 
-PROMPTING STRATEGIES TO USE:
-- Role-based prompting (act as senior developer)
-- Context-rich prompts with specific project details
-- Chain-of-thought prompting for complex problems
-- Few-shot examples when applicable
-- Constraint-based prompting for focused outputs
-- Output format specification for structured results`;
+Return JSON array of exactly 3 specific, targeted questions:
+["question1", "question2", "question3"]
 
-      const userPrompt = `Analyze this development problem and create a comprehensive solution with custom AI prompts:
+Questions should:
+- Be specific to the problem category
+- Elicit technical details needed for diagnosis
+- Progress from symptoms to root causes
+- Avoid generic questions like "what did you try?"`;
 
-PROBLEM CLASSIFICATION:
+      const userPrompt = `Generate 3 targeted diagnostic questions for this problem:
+
+Classification:
 - Category: ${classification.category}
 - Complexity: ${classification.complexity}
-- AI Tool: ${classification.aiTool}
-- Experience Level: ${classification.experience}
-- Emotional State: ${classification.emotionalState}
+- Technical Indicators: ${JSON.stringify(classification.technicalIndicators || [])}
+- User Experience: ${classification.experience}
+- Likely Root Cause: ${classification.rootCauseLikely}
 
-USER RESPONSES:
-${responses.map((response, index) => `Response ${index + 1}: ${response}`).join('\n')}
-
-Create a detailed action plan where EACH STEP includes:
-1. Clear step title and description
-2. Estimated time
-3. Custom AI prompt using proven prompting strategies
-4. Validation criteria
-
-Format each AI prompt to be:
-- Role-specific (senior developer, expert in X)
-- Context-rich with project details
-- Output format specified
-- Action-oriented with clear deliverables
-- Copy-paste ready for immediate use
-
-Focus on practical, executable solutions with working code.`;
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      });
-
-      const solutionData = JSON.parse(response.choices[0].message.content || '{}');
-
-      res.json(solutionData);
-    } catch (error) {
-      console.error('Error generating wizard solution:', error);
-      res.status(500).json({ error: 'Failed to generate solution' });
-    }
-  });
-
-  // AI Development Wizard
-  app.post("/api/wizard/analyze-problem", async (req, res) => {
-    try {
-      const { problemDescription, context, aiTool, experience } = req.body;
-
-      const systemPrompt = `You are an expert AI development consultant specializing in troubleshooting AI assistant failures. Analyze problems and provide structured solutions.
-
-Your response must be valid JSON with this exact structure:
-{
-  "classification": {
-    "category": "string",
-    "severity": number (1-10),
-    "complexity": "simple|medium|complex",
-    "urgency": "low|medium|high",
-    "aiTool": "string",
-    "experience": "beginner|intermediate|advanced",
-    "emotionalState": "frustrated|confused|calm|urgent"
-  },
-  "followUpQuestions": ["question1", "question2", "question3"]
-}`;
-
-      const userPrompt = `Analyze this AI development problem:
-
-Problem: ${problemDescription}
-Context: ${context}
-AI Tool: ${aiTool}
-Experience Level: ${experience}
-
-Classify the problem and suggest 3 targeted follow-up questions to better understand the issue.`;
+Generate questions that will help identify the specific root cause and gather technical details needed for a precise solution.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -1310,51 +1247,57 @@ Classify the problem and suggest 3 targeted follow-up questions to better unders
           { role: "user", content: userPrompt }
         ],
         response_format: { type: "json_object" },
-        temperature: 0.3
+        temperature: 0.4
       });
 
-      const analysis = JSON.parse(response.choices[0].message.content || '{}');
-      res.json(analysis);
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(result.questions || ["What specific error message or behavior are you seeing?", "What did you expect to happen instead?", "What was the last thing you tried before getting stuck?"]);
     } catch (error) {
-      console.error('Error analyzing problem:', error);
-      res.status(500).json({ error: 'Failed to analyze problem' });
+      console.error('Error generating questions:', error);
+      res.status(500).json({ error: 'Failed to generate questions' });
     }
   });
 
-  app.post("/api/wizard/generate-solution", async (req, res) => {
+  // AI Development Wizard - Deep Problem Classification
+  app.post("/api/wizard/classify-problem", async (req, res) => {
     try {
-      const { classification, responses, originalProblem } = req.body;
+      const { userInput, sessionId } = req.body;
 
-      const systemPrompt = `You are an expert AI development consultant. Generate comprehensive, actionable solutions for AI assistant problems.
+      const systemPrompt = `You are an expert AI development consultant with deep expertise in debugging AI assistant failures. Analyze problems using systematic classification frameworks.
 
-Your response must be valid JSON with this structure:
+CLASSIFICATION METHODOLOGY:
+- Apply pattern recognition to identify common AI failure modes
+- Assess technical complexity and user experience factors
+- Determine optimal intervention strategies
+- Classify emotional state to adjust communication approach
+
+Return valid JSON with this structure:
 {
-  "diagnosis": "string",
-  "solutionSteps": [
-    {
-      "step": number,
-      "title": "string",
-      "description": "string", 
-      "code": "string (optional)",
-      "expectedTime": "string",
-      "aiPrompt": "string (optional)"
-    }
-  ],
-  "expectedTime": "string",
-  "alternativeApproaches": ["string"],
-  "preventionTips": ["string"],
-  "learningResources": ["string"]
+  "category": "specific problem category",
+  "severity": number (1-10),
+  "complexity": "simple|medium|complex", 
+  "urgency": "low|medium|high",
+  "aiTool": "identified tool or 'unknown'",
+  "experience": "beginner|intermediate|advanced",
+  "emotionalState": "frustrated|confused|calm|urgent",
+  "technicalIndicators": ["specific technical issues identified"],
+  "rootCauseLikely": "initial assessment of root cause"
 }`;
 
-      const contextualInfo = responses.join('\n');
-      
-      const userPrompt = `Generate a comprehensive solution for this AI development problem:
+      const userPrompt = `Analyze this AI development problem with technical depth:
 
-Original Problem: ${originalProblem}
-Classification: ${JSON.stringify(classification)}
-Additional Context: ${contextualInfo}
+User Input: "${userInput}"
 
-Provide a step-by-step solution with specific prompts, code examples, and actionable guidance.`;
+ANALYSIS REQUIREMENTS:
+1. Identify the specific problem category (QR codes, API integration, database, UI, deployment, etc.)
+2. Assess technical complexity based on described symptoms
+3. Determine urgency based on language patterns and business impact
+4. Identify likely AI tool based on context clues
+5. Assess user experience level from problem description
+6. Gauge emotional state from language patterns
+7. Identify technical indicators that suggest root causes
+
+Provide intelligent classification for targeted solution generation.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -1366,10 +1309,99 @@ Provide a step-by-step solution with specific prompts, code examples, and action
         temperature: 0.2
       });
 
-      const solution = JSON.parse(response.choices[0].message.content || '{}');
-      res.json(solution);
+      const analysis = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(analysis);
     } catch (error) {
-      console.error('Error generating solution:', error);
+      console.error('Error classifying problem:', error);
+      res.status(500).json({ error: 'Failed to classify problem' });
+    }
+  });
+
+  // AI Development Wizard - Enhanced Deep Analysis System
+  app.post("/api/wizard/generate-solution", async (req, res) => {
+    try {
+      const { classification, responses, sessionId } = req.body;
+
+      const systemPrompt = `You are a senior AI development consultant specializing in debugging AI assistant failures. Your expertise includes advanced prompting strategies, debugging methodologies, and proven problem-solving frameworks.
+
+ANALYSIS METHODOLOGY:
+1. Perform deep root cause analysis using first principles thinking
+2. Apply proven debugging frameworks (5 Whys, Fault Tree Analysis)
+3. Generate context-specific AI prompts using advanced techniques:
+   - Chain-of-thought reasoning
+   - Role-based prompting with specific expertise
+   - Few-shot examples where applicable
+   - Output format specification
+   - Constraint-driven prompting
+   - Error handling protocols
+
+PROMPT GENERATION RULES:
+- NO placeholders like [YOUR_CODE] or [DESCRIBE_ISSUE]
+- Include actual code patterns, commands, and specific contexts
+- Use proven prompt engineering patterns (ReAct, CoT, ToT)
+- Provide complete debugging workflows
+- Include validation steps and success criteria
+
+Return valid JSON with this structure:
+{
+  "diagnosis": "detailed root cause analysis with technical depth",
+  "solutionSteps": [
+    {
+      "step": number,
+      "title": "specific actionable title",
+      "description": "detailed implementation guidance", 
+      "code": "actual code examples when relevant",
+      "expectedTime": "realistic time estimate",
+      "aiPrompt": "complete copy-paste ready prompt with no placeholders",
+      "successCriteria": "specific validation steps"
+    }
+  ],
+  "expectedTime": "total realistic timeline",
+  "alternativeApproaches": ["specific alternative methods"],
+  "preventionTips": ["actionable prevention strategies"],
+  "learningResources": ["specific documentation/tutorials"],
+  "troubleshootingTips": ["common pitfalls and solutions"]
+}`;
+
+      const userPrompt = `Analyze this development problem with deep technical expertise:
+
+PROBLEM CLASSIFICATION:
+- Category: ${classification.category}
+- Complexity: ${classification.complexity}
+- AI Tool: ${classification.aiTool}
+- User Experience Level: ${classification.experience}
+- Urgency: ${classification.urgency}
+
+USER RESPONSES:
+1. Initial Problem: ${responses[0] || 'Not provided'}
+2. Error/Behavior: ${responses[1] || 'Not provided'}
+3. Expected Outcome: ${responses[2] || 'Not provided'}
+4. Previous Attempts: ${responses[3] || 'Not provided'}
+
+ANALYSIS REQUIREMENTS:
+1. Identify the root cause using systematic debugging
+2. Create step-by-step solution with proven methodologies
+3. Generate copy-paste ready AI prompts for each step
+4. Include specific debugging commands and validation steps
+5. Provide alternative approaches for different scenarios
+
+Focus on creating actionable, specific solutions with intelligent prompts that leverage advanced prompting techniques.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 3000
+      });
+
+      const solutionData = JSON.parse(response.choices[0].message.content || '{}');
+
+      res.json(solutionData);
+    } catch (error) {
+      console.error('Error generating wizard solution:', error);
       res.status(500).json({ error: 'Failed to generate solution' });
     }
   });
