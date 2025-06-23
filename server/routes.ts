@@ -1335,12 +1335,15 @@ ANALYSIS METHODOLOGY:
    - Constraint-driven prompting
    - Error handling protocols
 
-PROMPT GENERATION RULES:
-- NO placeholders like [YOUR_CODE] or [DESCRIBE_ISSUE]
-- Include actual code patterns, commands, and specific contexts
-- Use proven prompt engineering patterns (ReAct, CoT, ToT)
-- Provide complete debugging workflows
-- Include validation steps and success criteria
+PROMPT GENERATION RULES FOR EACH STEP:
+- NO placeholders like [YOUR_CODE] or [DESCRIBE_ISSUE] 
+- Use advanced prompting frameworks: ReAct (Reasoning+Acting), Chain-of-Thought, Tree-of-Thoughts
+- Include specific expert role assignments (e.g., "Act as a senior DevOps engineer...")
+- Provide step-by-step reasoning chains with "First, analyze X... Then, consider Y... Finally, implement Z..."
+- Include few-shot examples: "For example, if you see error X, then do Y because Z"
+- Add environmental context and constraints specific to the user's situation
+- Include validation checkpoints and troubleshooting decision trees
+- Use output format specifications with exact deliverables expected
 
 CRITICAL FORMATTING REQUIREMENTS:
 - Return ONLY valid JSON content
@@ -1393,13 +1396,17 @@ ANALYSIS REQUIREMENTS:
 
 Focus on creating actionable, specific solutions with intelligent prompts that leverage advanced prompting techniques.
 
-For the QR code problem specifically:
-- User has verified URLs are correctly formatted
-- User has verified database entries exist 
-- User has verified no URL truncation occurs
-- The issue is QR codes leading to 404 errors despite proper setup
+CONTEXT-SPECIFIC REQUIREMENTS:
+For QR code problems: Generate prompts that use systematic debugging chains, expert role-playing, and specific technical validation steps
+For database issues: Create prompts with connection troubleshooting decision trees, step-by-step diagnostic workflows, and environment-specific solutions
+For API problems: Build prompts with request/response analysis chains, authentication debugging flows, and endpoint validation procedures
 
-Generate specific, context-aware prompts that address QR code URL routing, server configuration, and debugging steps.`;
+Each prompt must demonstrate advanced techniques like:
+- Multi-step reasoning chains
+- Expert persona assignments
+- Environmental constraint handling
+- Decision tree troubleshooting
+- Validation checkpoint systems`;
 
       console.log('Generating solution with OpenAI...');
       

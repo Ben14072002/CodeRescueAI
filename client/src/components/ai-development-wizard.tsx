@@ -436,14 +436,21 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
               stage: 'solution'
             }));
 
-            // Present the comprehensive solution with enhanced analysis
-            const solutionMessage = `## 🎯 **Deep Analysis & Diagnosis**
+            // Present diagnosis first
+            await sendWizardMessage(`## 🎯 **Deep Analysis & Diagnosis**
 ${solution.diagnosis}
 
-## 📋 **Step-by-Step Solution Plan** (${solution.expectedTime})
+## 📋 **Implementation Plan** (${solution.expectedTime})
+I'll walk you through each step with advanced AI prompts designed for your specific situation.`);
 
-${solution.solutionSteps.map(step => 
-  `**Step ${step.step}: ${step.title}** (${step.expectedTime})
+            // Send each step as a separate message with a delay
+            for (let i = 0; i < solution.solutionSteps.length; i++) {
+              const step = solution.solutionSteps[i];
+              
+              await new Promise(resolve => setTimeout(resolve, 1500)); // Delay between steps
+              
+              const stepMessage = `### **Step ${step.step}: ${step.title}** (${step.expectedTime})
+
 ${step.description}
 
 ${step.code ? `**Implementation Code:**
@@ -451,23 +458,19 @@ ${step.code ? `**Implementation Code:**
 ${step.code}
 \`\`\`
 
-` : ''}
-
-${step.aiPrompt ? `🤖 **Copy-Paste Ready AI Prompt:**
+` : ''}${step.aiPrompt ? `🤖 **Advanced AI Prompt:**
 \`\`\`
 ${step.aiPrompt}
 \`\`\`
-*This prompt uses advanced prompting techniques - copy and paste directly into your AI assistant for optimal results.*
 
-` : ''}
+` : ''}${step.successCriteria ? `✅ **Success Criteria:** ${step.successCriteria}` : ''}`;
 
-${step.successCriteria ? `✅ **Success Criteria:**
-${step.successCriteria}
+              await sendWizardMessage(stepMessage);
+            }
 
-` : ''}`
-).join('\n---\n\n')}
-
-## 🔄 **Alternative Approaches**
+            // Send summary and resources
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const summaryMessage = `## 🔄 **Alternative Approaches**
 ${solution.alternativeApproaches.map(approach => `• ${approach}`).join('\n')}
 
 ## 🛡️ **Prevention Strategies**
@@ -476,18 +479,14 @@ ${solution.preventionTips.map(tip => `• ${tip}`).join('\n')}
 ${solution.troubleshootingTips ? `## 🔧 **Troubleshooting Tips**
 ${solution.troubleshootingTips.map(tip => `• ${tip}`).join('\n')}
 
-` : ''}
-
-## 📚 **Technical Resources**
+` : ''}## 📚 **Technical Resources**
 ${solution.learningResources.map(resource => `• ${resource}`).join('\n')}
 
 ---
 
-**🚀 Implementation Strategy:** Each step includes intelligently crafted AI prompts that leverage proven prompting frameworks. These prompts are designed to eliminate the generic responses you've been getting and provide deep, actionable solutions.
+Ready to implement? Which step would you like me to elaborate on?`;
 
-Ready to implement? Which step would you like to start with, or do you need clarification on any part of the solution?`;
-
-            await sendWizardMessage(solutionMessage);
+            await sendWizardMessage(summaryMessage);
           } catch (error) {
             console.error('Solution generation error:', error);
             await sendWizardMessage(
