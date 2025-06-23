@@ -18,7 +18,7 @@ import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
 import { useTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/use-subscription";
-import codeBreakeLogo from "@assets/Design sans titre (25).png";
+
 
 type Section = "landing" | "problems" | "solution" | "dashboard" | "custom-prompts" | "templates" | "project-planner" | "ai-wizard" | "settings";
 
@@ -102,12 +102,14 @@ export default function Home() {
     <div className="min-h-screen text-white">
       {/* Header */}
       <header className="fixed top-0 z-50 w-full backdrop-blur-sm bg-slate-900/80 border-b border-purple-500/20">
-        <div className="container flex h-20 items-center justify-between px-6 mx-auto max-w-7xl">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center cosmic-glow shadow-lg">
-                <span className="text-white font-bold text-lg">CB</span>
-              </div>
+        <div className="container flex h-24 items-center justify-between px-8 mx-auto max-w-7xl">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
+              <img 
+                src="/src/assets/codebreaker-logo.png" 
+                alt="CodeBreaker Logo" 
+                className="w-12 h-12 cosmic-glow"
+              />
               <h1 className="text-2xl font-bold text-white cosmic-glow">CodeBreaker</h1>
             </div>
           </div>
@@ -153,7 +155,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-24 pb-8">
+      <main className="container mx-auto px-6 pt-32 pb-12">
         {/* Trial Countdown - Show only for authenticated users on non-landing pages */}
         {user && currentSection !== "landing" && !isPro && (
           <TrialCountdown 
