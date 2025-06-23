@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, serial, varchar, text, boolean, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, boolean, timestamp, integer, jsonb, json } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
@@ -46,6 +46,51 @@ export const userPreferences = pgTable("user_preferences", {
   theme: varchar("theme", { length: 20 }).notNull().default("dark"),
   defaultPromptStyle: varchar("default_prompt_style", { length: 20 }).notNull().default("direct"),
   lastProblemType: varchar("last_problem_type", { length: 100 }),
+});
+
+export const wizardConversations = pgTable("wizard_conversations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  sessionId: text("session_id").notNull().unique(),
+  title: text("title").notNull(),
+  problemCategory: text("problem_category").notNull(),
+  classification: json("classification").$type<{
+    category: string;
+    severity: number;
+    complexity: string;
+    urgency: string;
+    aiTool?: string;
+    experience: string;
+    emotionalState: string;
+    technicalIndicators?: string[];
+    rootCauseLikely?: string;
+  }>(),
+  messages: json("messages").$type<Array<{
+    id: string;
+    type: 'user' | 'wizard';
+    content: string;
+    timestamp: Date;
+  }>>(),
+  solution: json("solution").$type<{
+    diagnosis: string;
+    solutionSteps: Array<{
+      step: number;
+      title: string;
+      description: string;
+      code?: string;
+      expectedTime: string;
+      aiPrompt?: string;
+      successCriteria?: string;
+    }>;
+    expectedTime: string;
+    alternativeApproaches: string[];
+    preventionTips: string[];
+    learningResources: string[];
+    troubleshootingTips?: string[];
+  }>(),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const promptRatings = pgTable("prompt_ratings", {
