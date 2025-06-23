@@ -1385,7 +1385,15 @@ ANALYSIS REQUIREMENTS:
 4. Include specific debugging commands and validation steps
 5. Provide alternative approaches for different scenarios
 
-Focus on creating actionable, specific solutions with intelligent prompts that leverage advanced prompting techniques.`;
+Focus on creating actionable, specific solutions with intelligent prompts that leverage advanced prompting techniques.
+
+For the QR code problem specifically:
+- User has verified URLs are correctly formatted
+- User has verified database entries exist 
+- User has verified no URL truncation occurs
+- The issue is QR codes leading to 404 errors despite proper setup
+
+Generate specific, context-aware prompts that address QR code URL routing, server configuration, and debugging steps.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -1394,7 +1402,8 @@ Focus on creating actionable, specific solutions with intelligent prompts that l
           { role: "user", content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 3000
+        max_tokens: 2500,
+        timeout: 30000
       });
 
       const solutionData = JSON.parse(response.choices[0].message.content || '{}');

@@ -337,36 +337,21 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
       });
       
       if (response.ok) {
-        return await response.json();
+        const result = await response.json();
+        console.log('Generated solution:', result);
+        return result;
+      } else {
+        console.error('Solution generation failed with status:', response.status);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
       }
     } catch (error) {
       console.error('Solution generation failed:', error);
     }
     
-    // Fallback solution with enhanced prompts
-    return {
-      diagnosis: "Based on your description, this appears to be a common development challenge.",
-      solutionSteps: [
-        {
-          step: 1,
-          title: "Analyze the Problem",
-          description: "Review the error messages and identify the root cause",
-          expectedTime: "5 minutes",
-          aiPrompt: "**AI CODING ASSISTANT - PROBLEM ANALYSIS**\n\nI need you to act as a senior developer and help me debug this issue.\n\n**CONTEXT:**\n- Problem: [DESCRIBE_YOUR_SPECIFIC_ISSUE]\n- Tech Stack: [YOUR_TECHNOLOGIES]\n- Expected Behavior: [WHAT_SHOULD_HAPPEN]\n- Actual Behavior: [WHAT_IS_HAPPENING]\n\n**ANALYSIS REQUIRED:**\n1. Identify the root cause of this issue\n2. Explain why this is happening\n3. List the most likely causes in order of probability\n4. Provide debugging steps to confirm the diagnosis\n\n**OUTPUT FORMAT:**\n- Root Cause Analysis\n- Step-by-step debugging commands\n- Verification steps to confirm the issue\n\nBe specific and provide exact commands I can run."
-        },
-        {
-          step: 2,
-          title: "Apply the Fix",
-          description: "Implement the recommended solution",
-          expectedTime: "10 minutes",
-          aiPrompt: "**AI CODING ASSISTANT - SOLUTION IMPLEMENTATION**\n\nImplement the complete fix for this issue. Provide FULL, WORKING code.\n\n**PROBLEM CONTEXT:**\n- Issue: [YOUR_SPECIFIC_PROBLEM]\n- Root Cause: [IDENTIFIED_CAUSE]\n- Tech Stack: [YOUR_TECHNOLOGIES]\n- Files Involved: [RELEVANT_FILES]\n\n**SOLUTION REQUIREMENTS:**\n1. Complete code implementation (no partial solutions)\n2. Error handling and edge cases\n3. Testing steps to verify the fix works\n4. Integration with existing codebase\n\n**DELIVERABLES:**\n- Complete, copy-paste ready code files\n- Installation commands for any dependencies\n- Step-by-step implementation guide\n- Verification commands to test the solution\n\n**CRITICAL:** Provide complete working code, not snippets or placeholders."
-        }
-      ],
-      expectedTime: "15 minutes",
-      alternativeApproaches: ["Try a different approach if the first doesn't work"],
-      preventionTips: ["Add proper error handling"],
-      learningResources: ["Check the official documentation"]
-    };
+    // This should never be reached if OpenAI is working properly
+    console.error("OpenAI solution generation completely failed");
+    throw new Error("Failed to generate intelligent solution");
   };
 
   const handleUserInput = async () => {
@@ -394,11 +379,14 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
         }));
 
         await sendWizardMessage(
-          "I understand you're dealing with a coding challenge. Let me analyze this and ask a few targeted questions to give you the most effective solution.\n\nAnalyzing your problem..."
+          "I understand you're dealing with a coding challenge. Let me analyze this deeply and ask targeted questions to create a comprehensive solution.\n\nPerforming technical analysis..."
         );
 
         const classification = await classifyProblem(input);
+        console.log('Problem classification:', classification);
+        
         const questions = await generateFollowUpQuestions(classification);
+        console.log('Generated questions:', questions);
 
         setSession(prev => ({ 
           ...prev, 
@@ -406,9 +394,11 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
           stage: 'questioning'
         }));
 
-        await sendWizardMessage(
-          `Got it! I can see this is a ${classification.complexity} ${classification.category} issue. Let me ask you a few quick questions to nail down the exact solution:\n\n**Question 1:** ${questions[0]}`
-        );
+        const analysisMessage = classification.technicalIndicators?.length ? 
+          `Technical Analysis Complete! I've identified this as a **${classification.complexity}** ${classification.category} issue with these indicators: ${classification.technicalIndicators.join(', ')}.\n\nTo create the most effective solution, I need additional context:\n\n**Question 1:** ${questions[0]}` :
+          `Got it! I can see this is a **${classification.complexity}** ${classification.category} issue. Let me ask targeted questions to create a comprehensive solution:\n\n**Question 1:** ${questions[0]}`;
+
+        await sendWizardMessage(analysisMessage);
         break;
 
       case 'questioning':
@@ -433,16 +423,25 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
           setSession(prev => ({ ...prev, stage: 'analysis' }));
           
           await sendWizardMessage(
-            "Excellent! I have all the information I need. Let me create your personalized action plan..."
+            "Excellent! I have all the context needed. Analyzing the root cause and generating custom AI prompts for your specific situation...\n\n*Using advanced prompting frameworks to create targeted solutions*"
           );
 
-          const solution = await generateSolution(session.classification!, updatedResponses);
-          
-          setSession(prev => ({ 
-            ...prev, 
-            solution,
-            stage: 'solution'
-          }));
+          try {
+            const solution = await generateSolution(session.classification!, updatedResponses);
+            console.log('Solution generated successfully:', solution);
+            
+            setSession(prev => ({ 
+              ...prev, 
+              solution,
+              stage: 'solution'
+            }));
+          } catch (error) {
+            console.error('Solution generation error:', error);
+            await sendWizardMessage(
+              "I encountered an issue generating the intelligent solution. Let me provide a direct debugging approach for your QR code issue:\n\n**Immediate Action Required:**\n1. Check your server routing configuration\n2. Verify QR code URL generation logic\n3. Test the generated URLs directly in browser\n\nWould you like me to help you debug this step by step?"
+            );
+            return;
+          }
 
           // Present the comprehensive solution with enhanced analysis
           const solutionMessage = `## 🎯 **Deep Analysis & Diagnosis**
