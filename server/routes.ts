@@ -398,6 +398,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // URGENT: Manual Pro activation endpoint for paid users
+  app.post("/api/activate-pro", async (req, res) => {
+    try {
+      const { userId, plan = 'pro_monthly' } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Find user by Firebase UID
+      let user = await storage.getUserByFirebaseUid(userId);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Activate Pro subscription immediately
+      const updatedUser = await storage.updateUserSubscription(user.id, {
+        subscriptionStatus: 'active',
+        subscriptionTier: plan,
+        subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+      });
+      
+      console.log(`🔥 URGENT: Manual Pro activation for paid user ${userId} (ID: ${user.id})`);
+      res.json({ 
+        success: true, 
+        message: "Pro subscription activated successfully",
+        user: updatedUser,
+        plan: plan
+      });
+    } catch (error) {
+      console.error('Error activating Pro:', error);
+      res.status(500).json({ error: 'Failed to activate Pro subscription' });
+    }
+  });
+
   // Stripe webhook endpoint for trial signup completion
   app.post("/api/webhooks/stripe", async (req, res) => {
     try {
