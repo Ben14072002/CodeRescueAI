@@ -550,9 +550,12 @@ ${solution.learningResources.map(resource => `• ${resource}`).join('\n')}
 
 ---
 
-Ready to implement? Which step would you like me to elaborate on?`;
+**Ready to implement?** I can elaborate on any step, provide specific code examples, or help you troubleshoot as you work through the solution. Which step would you like to start with?`;
 
             await sendWizardMessage(summaryMessage);
+            
+            // Set stage to post-solution for better follow-up handling
+            setSession(prev => ({ ...prev, stage: 'post-solution' }));
           } catch (error) {
             console.error('Solution generation error:', error);
             await sendWizardMessage(
@@ -564,10 +567,101 @@ Ready to implement? Which step would you like me to elaborate on?`;
         break;
 
       case 'solution':
-        // Handle follow-up questions and provide additional analysis
-        await sendWizardMessage(
-          "I'm here to help you implement this solution! What specific step would you like me to elaborate on, or do you have questions about the approach? I can also provide additional deep-dive analysis if needed."
-        );
+        // This case shouldn't be reached due to stage change above
+        await sendWizardMessage("I'm analyzing your request...");
+        break;
+
+      case 'post-solution':
+        // Handle follow-up questions about the solution with intelligent responses
+        const userInput = input.toLowerCase().trim();
+        
+        // Check for specific step requests
+        const stepMatch = input.match(/(?:step\s*)?(\d+)|(?:first|1st)|(?:second|2nd)|(?:third|3rd)|(?:fourth|4th)|(?:fifth|5th)/i);
+        if (stepMatch || userInput.includes('first') || userInput.includes('elaborate') || userInput.includes('detail')) {
+          let stepNumber = 1;
+          
+          if (stepMatch) {
+            const numberMatch = stepMatch[1];
+            if (numberMatch) {
+              stepNumber = parseInt(numberMatch);
+            } else if (stepMatch[0].includes('first') || stepMatch[0].includes('1st')) stepNumber = 1;
+            else if (stepMatch[0].includes('second') || stepMatch[0].includes('2nd')) stepNumber = 2;
+            else if (stepMatch[0].includes('third') || stepMatch[0].includes('3rd')) stepNumber = 3;
+            else if (stepMatch[0].includes('fourth') || stepMatch[0].includes('4th')) stepNumber = 4;
+            else if (stepMatch[0].includes('fifth') || stepMatch[0].includes('5th')) stepNumber = 5;
+          }
+          
+          if (session.solution && session.solution.solutionSteps[stepNumber - 1]) {
+            const step = session.solution.solutionSteps[stepNumber - 1];
+            
+            const detailedStepMessage = `## 🔍 **Deep Dive: Step ${step.step} - ${step.title}**
+
+${step.description}
+
+### **Detailed Implementation Guide:**
+
+${step.code ? `**Code Implementation:**
+\`\`\`
+${step.code}
+\`\`\`
+
+**Code Explanation:**
+This code establishes the foundation for ${step.title.toLowerCase()}. The key components work together to ensure reliable execution.
+
+` : ''}**🎯 Strategic Approach:**
+${step.aiPrompt ? step.aiPrompt : `Focus on ${step.title.toLowerCase()} by breaking it into smaller, testable components. Verify each part works before moving to the next.`}
+
+**⚡ Pro Tips:**
+• Start with a minimal working version
+• Test frequently during implementation  
+• Keep backups before making changes
+• Document any modifications you make
+
+**🔍 Debugging Checklist:**
+• Verify all prerequisites are met
+• Check for proper permissions/access
+• Validate input parameters
+• Monitor system resources during execution
+
+${step.successCriteria ? `**✅ How to Verify Success:**
+${step.successCriteria}` : `**✅ You'll know it's working when:**
+The ${step.title.toLowerCase()} completes without errors and produces the expected output.`}
+
+**What specific part of this step would you like me to explain further?**`;
+
+            await sendWizardMessage(detailedStepMessage);
+          } else {
+            await sendWizardMessage(`I don't have a Step ${stepNumber} in the current solution. The solution contains ${session.solution?.solutionSteps.length || 0} steps. Which step number would you like me to elaborate on?`);
+          }
+        } else if (userInput.includes('code') || userInput.includes('example') || userInput.includes('implement')) {
+          await sendWizardMessage("I can provide specific code examples for any step. Which step would you like detailed code implementation for? Just say 'step 1', 'step 2', etc., and I'll give you complete, production-ready code with explanations.");
+        } else if (userInput.includes('trouble') || userInput.includes('error') || userInput.includes('not work') || userInput.includes('fail')) {
+          await sendWizardMessage("I can help you troubleshoot! Please share:\n\n• **What step** you're working on\n• **The exact error message** you're seeing\n• **What you expected** to happen\n• **What actually happened** instead\n\nWith these details, I can provide targeted debugging guidance.");
+        } else if (userInput.includes('alternative') || userInput.includes('different') || userInput.includes('other way')) {
+          if (session.solution?.alternativeApproaches) {
+            const altMessage = `## 🔄 **Alternative Implementation Approaches**
+
+${session.solution.alternativeApproaches.map((approach, index) => `### **Option ${index + 1}:**
+${approach}
+
+**When to use this approach:** Consider this when the main solution doesn't fit your specific constraints or environment.`).join('\n\n')}
+
+Which alternative approach interests you? I can provide detailed implementation steps for any of these.`;
+            
+            await sendWizardMessage(altMessage);
+          }
+        } else {
+          // Default intelligent response based on context
+          await sendWizardMessage(`I'm here to help you implement the solution! I can:
+
+• **Elaborate on specific steps** - Just ask "explain step 1" or "detail step 2"
+• **Provide complete code examples** - Say "show me the code for step X"  
+• **Help with troubleshooting** - Share any errors you encounter
+• **Suggest alternatives** - If the current approach doesn't fit your needs
+• **Answer technical questions** - About any part of the implementation
+
+What would be most helpful for you right now?`);
+        }
         break;
     }
   };
