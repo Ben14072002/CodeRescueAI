@@ -99,10 +99,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <div className="min-h-screen text-white">
       {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50">
-        <div className="container mx-auto px-4 py-4">
+      <header className="glassmorphism-dark border-b border-purple-400/20 relative z-50">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div 
               className="logo-container cursor-pointer transition-transform duration-300 ease-out hover:scale-105"
@@ -111,22 +111,22 @@ export default function Home() {
               <img 
                 src={codeBreakeLogo} 
                 alt="CodeBreaker Logo" 
-                className="w-32 md:w-48 h-auto object-contain transition-all duration-300"
+                className="w-32 md:w-48 h-auto object-contain transition-all duration-300 cosmic-glow"
               />
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               {user ? (
                 <>
                   <button 
                     onClick={navigateToDashboard}
-                    className="text-slate-400 hover:text-white transition-colors flex items-center space-x-2"
+                    className="text-gray-300 hover:text-white transition-colors flex items-center space-x-3 glassmorphism px-4 py-2 rounded-xl cosmic-glow-hover"
                   >
-                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-xs font-bold text-white">
+                    <div className="w-10 h-10 cosmic-gradient-bg rounded-full flex items-center justify-center cosmic-glow">
+                      <span className="text-sm font-bold text-white">
                         {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
                       </span>
                     </div>
-                    <span className="hidden md:block">{user.displayName || "Dashboard"}</span>
+                    <span className="hidden md:block font-medium">{user.displayName || "Dashboard"}</span>
                   </button>
                 </>
               ) : (
@@ -136,7 +136,7 @@ export default function Home() {
                       setAuthDefaultView("login");
                       setShowAuthModal(true);
                     }}
-                    className="text-slate-400 hover:text-white transition-colors"
+                    className="text-gray-300 hover:text-white transition-colors font-medium px-4 py-2 rounded-lg hover:bg-purple-500/20"
                   >
                     Sign In
                   </button>
@@ -145,7 +145,7 @@ export default function Home() {
                       setAuthDefaultView("register");
                       setShowAuthModal(true);
                     }}
-                    className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="cosmic-button text-white px-6 py-3 rounded-xl font-semibold cosmic-glow-hover"
                   >
                     Sign Up
                   </button>

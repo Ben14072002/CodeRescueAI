@@ -153,27 +153,29 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
         </div>
       </section>
       {/* Features Section - Engaging & Digestible */}
-      <section id="how-it-works" className="mb-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-100">
-              Everything You Need to Get Unstuck
+      <section id="how-it-works" className="mb-32 py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 text-white">
+              <span className="cosmic-gradient-text">Powerful Features</span><br />
+              <span className="text-white">to Simplify Your</span><br />
+              <span className="text-white">Development Experience</span>
             </h2>
-            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+            <p className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
               Battle-tested strategies that get you coding again in minutes, not hours
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
               {
                 icon: Brain,
                 title: "AI Development Wizard",
-                description: "Personal senior developer that walks you through problems step-by-step",
+                description: "Personal senior developer that walks you through problems step-by-step with precision guidance",
                 highlight: "Avg. rescue time: 8 minutes",
                 color: "text-purple-400",
-                bgColor: "bg-purple-500/10",
-                borderColor: "border-purple-500/20",
+                bgColor: "bg-purple-500/20",
+                borderColor: "border-purple-400/30",
                 example: "Example: 'React state not updating' → Get exact prompts to fix it"
               },
               {
@@ -218,36 +220,36 @@ export function LandingSection({ onGetStarted }: LandingSectionProps) {
           </div>
 
           {/* Quick Process Overview */}
-          <div className="mt-16 text-center">
-            <h3 className="text-2xl font-bold mb-8 text-slate-100">How It Works</h3>
-            <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+          <div className="mt-24 text-center">
+            <h3 className="text-4xl font-bold mb-12 text-white">How It Works</h3>
+            <div className="flex flex-col lg:flex-row items-center justify-center space-y-8 lg:space-y-0 lg:space-x-12">
               {[
                 { step: "1", text: "Describe your problem", time: "30 sec" },
                 { step: "2", text: "Get smart questions", time: "1 min" },
                 { step: "3", text: "Receive action plan", time: "2 min" },
                 { step: "4", text: "Follow prompts & ship", time: "5 min" }
               ].map((phase, index) => (
-                <div key={index} className="flex items-center">
+                <div key={index} className="flex items-center group">
                   <div className="flex flex-col items-center">
-                    <div className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">
+                    <div className="cosmic-gradient-bg text-white rounded-full w-16 h-16 flex items-center justify-center font-bold mb-4 text-xl cosmic-glow group-hover:scale-110 transition-transform duration-300">
                       {phase.step}
                     </div>
-                    <p className="text-slate-100 font-medium">{phase.text}</p>
-                    <p className="text-slate-400 text-sm">{phase.time}</p>
+                    <p className="text-white font-semibold text-lg mb-2">{phase.text}</p>
+                    <p className="text-gray-400">{phase.time}</p>
                   </div>
                   {index < 3 && (
-                    <ArrowRight className="w-6 h-6 text-slate-600 mx-4 hidden md:block" />
+                    <ArrowRight className="w-8 h-8 text-purple-400 mx-8 hidden lg:block cosmic-glow" />
                   )}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <Button 
               onClick={onGetStarted}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all shadow-lg"
+              className="cosmic-button text-white px-12 py-6 text-2xl font-bold transform hover:scale-105 transition-all cosmic-glow-hover rounded-2xl"
             >
               <Play className="w-5 h-5 mr-2" />
               Start Your First Rescue
