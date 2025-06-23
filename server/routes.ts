@@ -1113,6 +1113,72 @@ Generate a well-structured prompt that would help an AI assistant provide the mo
     }
   });
 
+  // AI Development Wizard - Enhanced with Custom Prompts
+  app.post("/api/wizard/generate-solution", async (req, res) => {
+    try {
+      const { classification, responses, sessionId } = req.body;
+
+      const systemPrompt = `You are an expert AI development consultant who creates detailed action plans with custom AI prompts for each step.
+
+Your role is to:
+1. Diagnose the root cause of coding problems
+2. Create a step-by-step action plan
+3. Generate proven AI prompts for each step using advanced prompting strategies
+
+PROMPTING STRATEGIES TO USE:
+- Role-based prompting (act as senior developer)
+- Context-rich prompts with specific project details
+- Chain-of-thought prompting for complex problems
+- Few-shot examples when applicable
+- Constraint-based prompting for focused outputs
+- Output format specification for structured results`;
+
+      const userPrompt = `Analyze this development problem and create a comprehensive solution with custom AI prompts:
+
+PROBLEM CLASSIFICATION:
+- Category: ${classification.category}
+- Complexity: ${classification.complexity}
+- AI Tool: ${classification.aiTool}
+- Experience Level: ${classification.experience}
+- Emotional State: ${classification.emotionalState}
+
+USER RESPONSES:
+${responses.map((response, index) => `Response ${index + 1}: ${response}`).join('\n')}
+
+Create a detailed action plan where EACH STEP includes:
+1. Clear step title and description
+2. Estimated time
+3. Custom AI prompt using proven prompting strategies
+4. Validation criteria
+
+Format each AI prompt to be:
+- Role-specific (senior developer, expert in X)
+- Context-rich with project details
+- Output format specified
+- Action-oriented with clear deliverables
+- Copy-paste ready for immediate use
+
+Focus on practical, executable solutions with working code.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      });
+
+      const solutionData = JSON.parse(response.choices[0].message.content || '{}');
+
+      res.json(solutionData);
+    } catch (error) {
+      console.error('Error generating wizard solution:', error);
+      res.status(500).json({ error: 'Failed to generate solution' });
+    }
+  });
+
   // AI Development Wizard
   app.post("/api/wizard/analyze-problem", async (req, res) => {
     try {

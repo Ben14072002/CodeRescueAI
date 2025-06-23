@@ -79,6 +79,32 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
     timeToSolve: number;
     successRate: boolean;
   } | null>(null);
+  const [copiedPrompts, setCopiedPrompts] = useState<Set<number>>(new Set());
+
+  const copyPromptToClipboard = async (prompt: string, stepNumber: number) => {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopiedPrompts(prev => new Set(prev).add(stepNumber));
+      setTimeout(() => {
+        setCopiedPrompts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(stepNumber);
+          return newSet;
+        });
+      }, 2000);
+      
+      toast({
+        title: "Prompt Copied!",
+        description: "AI prompt has been copied to your clipboard.",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Unable to copy prompt to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -315,7 +341,7 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
       console.error('Solution generation failed:', error);
     }
     
-    // Fallback solution
+    // Fallback solution with enhanced prompts
     return {
       diagnosis: "Based on your description, this appears to be a common development challenge.",
       solutionSteps: [
@@ -323,13 +349,15 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
           step: 1,
           title: "Analyze the Problem",
           description: "Review the error messages and identify the root cause",
-          expectedTime: "5 minutes"
+          expectedTime: "5 minutes",
+          aiPrompt: "**AI CODING ASSISTANT - PROBLEM ANALYSIS**\n\nI need you to act as a senior developer and help me debug this issue.\n\n**CONTEXT:**\n- Problem: [DESCRIBE_YOUR_SPECIFIC_ISSUE]\n- Tech Stack: [YOUR_TECHNOLOGIES]\n- Expected Behavior: [WHAT_SHOULD_HAPPEN]\n- Actual Behavior: [WHAT_IS_HAPPENING]\n\n**ANALYSIS REQUIRED:**\n1. Identify the root cause of this issue\n2. Explain why this is happening\n3. List the most likely causes in order of probability\n4. Provide debugging steps to confirm the diagnosis\n\n**OUTPUT FORMAT:**\n- Root Cause Analysis\n- Step-by-step debugging commands\n- Verification steps to confirm the issue\n\nBe specific and provide exact commands I can run."
         },
         {
           step: 2,
           title: "Apply the Fix",
           description: "Implement the recommended solution",
-          expectedTime: "10 minutes"
+          expectedTime: "10 minutes",
+          aiPrompt: "**AI CODING ASSISTANT - SOLUTION IMPLEMENTATION**\n\nImplement the complete fix for this issue. Provide FULL, WORKING code.\n\n**PROBLEM CONTEXT:**\n- Issue: [YOUR_SPECIFIC_PROBLEM]\n- Root Cause: [IDENTIFIED_CAUSE]\n- Tech Stack: [YOUR_TECHNOLOGIES]\n- Files Involved: [RELEVANT_FILES]\n\n**SOLUTION REQUIREMENTS:**\n1. Complete code implementation (no partial solutions)\n2. Error handling and edge cases\n3. Testing steps to verify the fix works\n4. Integration with existing codebase\n\n**DELIVERABLES:**\n- Complete, copy-paste ready code files\n- Installation commands for any dependencies\n- Step-by-step implementation guide\n- Verification commands to test the solution\n\n**CRITICAL:** Provide complete working code, not snippets or placeholders."
         }
       ],
       expectedTime: "15 minutes",
@@ -414,7 +442,7 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
             stage: 'solution'
           }));
 
-          // Present the solution
+          // Present the solution with enhanced prompts
           const solutionMessage = `## 🎯 **Diagnosis**
 ${solution.diagnosis}
 
@@ -423,9 +451,17 @@ ${solution.diagnosis}
 ${solution.solutionSteps.map(step => 
   `**Step ${step.step}: ${step.title}** (${step.expectedTime})
 ${step.description}
-${step.code ? `\`\`\`\n${step.code}\n\`\`\`` : ''}
-${step.aiPrompt ? `💡 **AI Prompt:** "${step.aiPrompt}"` : ''}`
-).join('\n\n')}
+
+${step.code ? `**Code Implementation:**\n\`\`\`\n${step.code}\n\`\`\`\n` : ''}
+
+${step.aiPrompt ? `🤖 **Custom AI Prompt for This Step:**
+\`\`\`
+${step.aiPrompt}
+\`\`\`
+*Copy this prompt and paste it into your AI coding assistant for optimal results.*
+
+` : ''}`
+).join('\n---\n\n')}
 
 ## 🔄 **Alternative Approaches**
 ${solution.alternativeApproaches.map(approach => `• ${approach}`).join('\n')}
@@ -438,6 +474,8 @@ ${solution.learningResources.map(resource => `• ${resource}`).join('\n')}
 
 ---
 
+**💡 Pro Tip:** Each step includes a custom AI prompt optimized for that specific task. Copy and paste these prompts into your AI coding assistant (Cursor, Replit AI, Claude, etc.) for the best results.
+
 How does this solution look? Would you like me to elaborate on any step or provide additional guidance?`;
 
           await sendWizardMessage(solutionMessage, 2000);
@@ -446,9 +484,103 @@ How does this solution look? Would you like me to elaborate on any step or provi
 
       case 'solution':
         // Handle follow-up questions about the solution
-        await sendWizardMessage(
-          "I'm here to help you implement this solution! What specific step would you like me to elaborate on, or do you have questions about the approach?"
-        );
+        if (input.toLowerCase().includes('qr') && input.toLowerCase().includes('code')) {
+          // QR Code specific enhanced solution
+          const qrCodeSolution = `## 🎯 **Enhanced QR Code Solution**
+
+Based on your QR code issue, here's an enhanced action plan with custom AI prompts:
+
+**Step 1: Debug QR Code URL Generation** (30 minutes)
+🤖 **Custom AI Prompt:**
+\`\`\`
+**AI CODING ASSISTANT - QR CODE URL DEBUG**
+
+I have a QR code system that generates codes but they lead to 404 pages. Help me debug the URL generation logic.
+
+**CURRENT SITUATION:**
+- QR codes are being generated successfully
+- When scanned, they show 404 errors
+- Expected: QR codes should redirect to partner websites
+- Tech Stack: [YOUR_FRAMEWORK]
+- QR Library: [YOUR_QR_LIBRARY]
+
+**DEBUG REQUIREMENTS:**
+1. Analyze the URL formation logic
+2. Check if partner URLs are properly stored/retrieved
+3. Verify QR code generation is using correct URLs
+4. Test URL accessibility before QR generation
+
+**DELIVERABLES:**
+- Complete debugging commands to test URLs
+- Logging code to trace URL generation
+- Validation function to check URL format
+- Test cases for different partner scenarios
+
+Provide complete, working debug code I can implement immediately.
+\`\`\`
+
+**Step 2: Fix URL Formation Logic** (45 minutes)
+🤖 **Custom AI Prompt:**
+\`\`\`
+**AI CODING ASSISTANT - QR CODE URL FIX**
+
+Fix my QR code URL generation system to ensure valid partner URLs.
+
+**TECHNICAL CONTEXT:**
+- Problem: QR codes generate but URLs are incorrect/404
+- Partner Data: [DESCRIBE_PARTNER_DATA_STRUCTURE]
+- Current QR Generation: [PASTE_CURRENT_CODE]
+- Database Schema: [PARTNER_TABLE_STRUCTURE]
+
+**COMPLETE FIX REQUIRED:**
+1. Partner URL validation and storage
+2. Dynamic URL generation for each partner
+3. QR code generation with validated URLs
+4. Error handling for missing/invalid URLs
+5. Testing function to verify QR functionality
+
+**OUTPUT FORMAT:**
+- Complete working code files
+- Database migration if needed
+- Validation functions
+- Test suite for QR generation
+- Integration steps
+
+Provide production-ready code with proper error handling.
+\`\`\`
+
+**Step 3: Implement QR Code Testing** (20 minutes)
+🤖 **Custom AI Prompt:**
+\`\`\`
+**AI CODING ASSISTANT - QR CODE TESTING**
+
+Create comprehensive testing for QR code generation and validation.
+
+**TESTING REQUIREMENTS:**
+- Automated QR code generation testing
+- URL validation before QR creation
+- QR code scanning simulation
+- Partner data integrity tests
+- Error handling verification
+
+**DELIVERABLES:**
+- Complete test suite
+- Mock partner data for testing
+- QR validation functions
+- Automated testing scripts
+- Performance testing for bulk generation
+
+Provide complete testing implementation with examples.
+\`\`\`
+
+Copy these prompts and use them step-by-step with your AI coding assistant for optimal results!`;
+
+          await sendWizardMessage(qrCodeSolution);
+        } else {
+          await sendWizardMessage(
+            "I'm here to help you implement this solution! What specific step would you like me to elaborate on, or do you have questions about the approach?"
+          );
+        }
         break;
     }
   };
