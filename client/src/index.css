@@ -5,31 +5,37 @@
 @tailwind utilities;
 
 :root {
-  --background: 222 84% 5%; /* #0F172A */
-  --foreground: 210 40% 98%; /* #F8FAFC */
-  --muted: 215 28% 17%; /* #1E293B */
-  --muted-foreground: 215 20% 65%; /* #94A3B8 */
-  --popover: 222 84% 5%; /* #0F172A */
-  --popover-foreground: 210 40% 98%; /* #F8FAFC */
-  --card: 215 28% 17%; /* #1E293B */
-  --card-foreground: 210 40% 98%; /* #F8FAFC */
-  --border: 215 28% 17%; /* #334155 */
-  --input: 215 28% 17%; /* #334155 */
-  --primary: 207 90% 54%; /* #3B82F6 */
-  --primary-foreground: 210 40% 98%; /* #F8FAFC */
-  --secondary: 215 25% 27%; /* #475569 */
-  --secondary-foreground: 210 40% 98%; /* #F8FAFC */
-  --accent: 215 25% 27%; /* #475569 */
-  --accent-foreground: 210 40% 98%; /* #F8FAFC */
+  --background: 260 50% 5%; /* #1a0b2e to #0f0419 */
+  --foreground: 0 0% 100%; /* #ffffff */
+  --muted: 260 30% 8%; /* #1f1136 */
+  --muted-foreground: 240 5% 84%; /* #e5e7eb */
+  --popover: 260 50% 5%; /* #1a0b2e */
+  --popover-foreground: 0 0% 100%; /* #ffffff */
+  --card: 260 40% 8%; /* #241447 */
+  --card-foreground: 0 0% 100%; /* #ffffff */
+  --border: 262 30% 15%; /* #312249 */
+  --input: 260 40% 8%; /* #241447 */
+  --primary: 262 83% 58%; /* #6366f1 */
+  --primary-foreground: 0 0% 100%; /* #ffffff */
+  --secondary: 271 81% 56%; /* #8b5cf6 */
+  --secondary-foreground: 0 0% 100%; /* #ffffff */
+  --accent: 316 73% 52%; /* #a855f7 */
+  --accent-foreground: 0 0% 100%; /* #ffffff */
   --destructive: 0 84% 60%; /* #EF4444 */
-  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
-  --ring: 207 90% 54%; /* #3B82F6 */
-  --radius: 0.5rem;
+  --destructive-foreground: 0 0% 100%; /* #ffffff */
+  --ring: 262 83% 58%; /* #6366f1 */
+  --radius: 0.75rem;
   
-  /* Custom colors for CodeBreaker */
-  --surface-800: 215 28% 17%; /* #1E293B */
-  --surface-700: 215 25% 27%; /* #334155 */
-  --surface-600: 215 20% 35%; /* #475569 */
+  /* Custom colors for CodeBreaker - Cosmic Purple Theme */
+  --surface-900: 260 50% 3%; /* #0f0419 */
+  --surface-800: 260 40% 6%; /* #1a0b2e */
+  --surface-700: 260 30% 10%; /* #241447 */
+  --surface-600: 260 25% 15%; /* #2d1b69 */
+  
+  --cosmic-purple: 262 83% 58%; /* #6366f1 */
+  --cosmic-violet: 271 81% 56%; /* #8b5cf6 */
+  --cosmic-pink: 316 73% 52%; /* #a855f7 */
+  --cosmic-magenta: 328 85% 70%; /* #ec4899 */
   
   --amber-400: 45 96% 64%; /* #FBBF24 */
   --amber-500: 45 93% 58%; /* #F59E0B */
@@ -140,25 +146,25 @@
 }
 
 .dark {
-  --background: 222 84% 5%; /* #0F172A */
-  --foreground: 210 40% 98%; /* #F8FAFC */
-  --muted: 215 28% 17%; /* #1E293B */
-  --muted-foreground: 215 20% 65%; /* #94A3B8 */
-  --popover: 222 84% 5%; /* #0F172A */
-  --popover-foreground: 210 40% 98%; /* #F8FAFC */
-  --card: 215 28% 17%; /* #1E293B */
-  --card-foreground: 210 40% 98%; /* #F8FAFC */
-  --border: 215 28% 17%; /* #334155 */
-  --input: 215 28% 17%; /* #334155 */
-  --primary: 207 90% 54%; /* #3B82F6 */
-  --primary-foreground: 210 40% 98%; /* #F8FAFC */
-  --secondary: 215 25% 27%; /* #475569 */
-  --secondary-foreground: 210 40% 98%; /* #F8FAFC */
-  --accent: 215 25% 27%; /* #475569 */
-  --accent-foreground: 210 40% 98%; /* #F8FAFC */
+  --background: 260 50% 5%; /* #1a0b2e */
+  --foreground: 0 0% 100%; /* #ffffff */
+  --muted: 260 30% 8%; /* #1f1136 */
+  --muted-foreground: 240 5% 84%; /* #e5e7eb */
+  --popover: 260 50% 5%; /* #1a0b2e */
+  --popover-foreground: 0 0% 100%; /* #ffffff */
+  --card: 260 40% 8%; /* #241447 */
+  --card-foreground: 0 0% 100%; /* #ffffff */
+  --border: 262 30% 15%; /* #312249 */
+  --input: 260 40% 8%; /* #241447 */
+  --primary: 262 83% 58%; /* #6366f1 */
+  --primary-foreground: 0 0% 100%; /* #ffffff */
+  --secondary: 271 81% 56%; /* #8b5cf6 */
+  --secondary-foreground: 0 0% 100%; /* #ffffff */
+  --accent: 316 73% 52%; /* #a855f7 */
+  --accent-foreground: 0 0% 100%; /* #ffffff */
   --destructive: 0 84% 60%; /* #EF4444 */
-  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
-  --ring: 207 90% 54%; /* #3B82F6 */
+  --destructive-foreground: 0 0% 100%; /* #ffffff */
+  --ring: 262 83% 58%; /* #6366f1 */
 }
 
 @layer base {
@@ -169,6 +175,8 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(135deg, #1a0b2e 0%, #0f0419 50%, #1a0b2e 100%);
+    min-height: 100vh;
   }
 
   .font-mono {
@@ -270,8 +278,95 @@
   }
 }
 
-/* Animation utilities */
+/* Cosmic theme utilities and effects */
 @layer utilities {
+  .cosmic-background {
+    background: linear-gradient(135deg, #1a0b2e 0%, #0f0419 25%, #241447 50%, #0f0419 75%, #1a0b2e 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cosmic-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(168, 85, 247, 0.4), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(99, 102, 241, 0.3), transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(236, 72, 153, 0.2), transparent),
+      radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.2), transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: starfield 20s linear infinite;
+    pointer-events: none;
+  }
+
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .glassmorphism-dark {
+    background: rgba(26, 11, 46, 0.3);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    box-shadow: 
+      0 8px 32px rgba(168, 85, 247, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .cosmic-glow {
+    box-shadow: 
+      0 0 20px rgba(168, 85, 247, 0.3),
+      0 0 40px rgba(99, 102, 241, 0.2),
+      0 0 60px rgba(236, 72, 153, 0.1);
+  }
+
+  .cosmic-glow-hover:hover {
+    box-shadow: 
+      0 0 30px rgba(168, 85, 247, 0.5),
+      0 0 60px rgba(99, 102, 241, 0.3),
+      0 0 90px rgba(236, 72, 153, 0.2);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+  }
+
+  .cosmic-gradient-text {
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cosmic-gradient-bg {
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #ec4899 100%);
+  }
+
+  .cosmic-button {
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    box-shadow: 
+      0 4px 15px rgba(168, 85, 247, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .cosmic-button:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    box-shadow: 
+      0 6px 20px rgba(168, 85, 247, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+
   .animate-fade-in {
     animation: fadeIn 0.3s ease-in-out;
   }
@@ -302,5 +397,36 @@
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@keyframes starfield {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100px);
+  }
+}
+
+@keyframes floatAnimation {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(168, 85, 247, 0.3),
+      0 0 40px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(168, 85, 247, 0.5),
+      0 0 60px rgba(99, 102, 241, 0.3);
   }
 }

@@ -1,0 +1,92 @@
+
+**UI Redesign Prompt for Codebreaker Platform**
+
+Transform the current Codebreaker interface to match the modern, sleek design aesthetic shown in the reference image. Focus ONLY on visual design changes - do not modify functionality, features, or core content.
+
+**Overall Design Direction:**
+
+- Implement a dark theme with deep purple/violet gradients as the primary background
+- Use a cosmic/space-inspired aesthetic with subtle particle effects or starfield background
+- Apply modern glassmorphism effects with semi-transparent elements
+- Maintain clean, minimalist layout with generous white space
+
+**Color Palette:**
+
+- Primary background: Deep purple to black gradient (`#1a0b2e` to `#0f0419`)
+- Secondary: Purple/violet accents (`#6366f1`, `#8b5cf6`)
+- Text: White/light gray (`#ffffff`, `#e5e7eb`)
+- Accent colors: Bright purple/pink for CTAs (`#a855f7`, `#ec4899`)
+- Cards/containers: Semi-transparent dark with subtle borders
+
+**Typography:**
+
+- Use modern, clean sans-serif fonts (similar to Inter or Poppins)
+- Implement proper font hierarchy with varied weights
+- Ensure excellent readability on dark backgrounds
+
+**Layout & Components:**
+
+**Hero Section:**
+
+- Large, bold headline with gradient text effect
+- Subtitle in lighter weight
+- Prominent CTA button with gradient background and hover effects
+- Featured product screenshot with glassmorphism frame effect
+- Floating UI elements with subtle shadows and glows
+
+**Navigation:**
+
+- Clean, minimal top navigation bar
+- Logo on the left, menu items centered/right
+- Transparent background with backdrop blur
+- Highlight active states with purple accents
+
+**Feature Cards:**
+
+- Use card layouts with glass-like transparency
+- Subtle borders and inner glows
+- Icons should be modern, outlined style
+- Each card should have hover animations (lift effect, glow)
+
+**Pricing Section:**
+
+- Maintain current two-tier structure (free and 4,99€)
+- Apply dark card design with purple accents
+- Highlight the middle tier with special styling
+- Use modern pricing typography
+
+**Interactive Elements:**
+
+- Buttons: Rounded corners, gradient backgrounds, hover animations
+- Form fields: Dark backgrounds with purple focus states
+- Add subtle micro-animations throughout
+- Implement smooth scroll animations
+
+**Technical Implementation Notes:**
+
+- Keep all existing HTML structure and classes
+- Focus changes on CSS styling only
+- Ensure responsive design is maintained
+- Add CSS animations and transitions for smooth interactions
+- Use CSS gradients, backdrop-filter, and box-shadow for effects
+
+**Specific Elements to Update:**
+
+1. Replace current color scheme with dark purple theme
+2. Add gradient overlays to backgrounds
+3. Implement glassmorphism on all card elements
+4. Update button styles with modern gradients
+5. Add subtle animations and hover effects
+6. Ensure all text remains readable with proper contrast
+7. Update any icons to match the modern aesthetic
+
+**Do NOT change:**
+
+- Page structure or layout flow
+- Text content or copy
+- Feature descriptions
+- Pricing information
+- Navigation menu items
+- Core functionality
+
+Transform the interface to look premium, modern, and cutting-edge while maintaining all existing functionality and content. The result should feel like a high-end SaaS product that developers would trust and want to use.

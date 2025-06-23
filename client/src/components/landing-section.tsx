@@ -27,25 +27,25 @@ interface LandingSectionProps {
 
 export function LandingSection({ onGetStarted }: LandingSectionProps) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen cosmic-background">
       {/* Hero Section */}
-      <section className="text-center mb-20 animate-fade-in">
+      <section className="text-center mb-20 animate-fade-in pt-20">
         <div className="max-w-6xl mx-auto px-4">
           {/* Hero Badge */}
-          <div className="mb-6">
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-4 py-2 animate-pulse">
-              <Zap className="w-4 h-4 mr-2" />
-              🎉 NEW: AI Development Wizard + Free Templates Available!
+          <div className="mb-8">
+            <Badge className="glassmorphism cosmic-glow px-6 py-3 text-base font-medium border-purple-400/30 animate-pulse">
+              <Zap className="w-5 h-5 mr-2 text-purple-300" />
+              NEW: AI Development Wizard + Free Templates Available!
             </Badge>
           </div>
           
           {/* Main Headlines */}
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
-            AI Assistant<br />
-            <span className="text-slate-200">Got Stuck?</span>
+          <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
+            <span className="cosmic-gradient-text">AI Assistant</span><br />
+            <span className="text-white">Got Stuck?</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-slate-300 mb-4 max-w-3xl mx-auto font-medium">
+          <p className="text-2xl md:text-3xl text-gray-200 mb-6 max-w-4xl mx-auto font-medium">
             Break free in under 10 minutes with battle-tested strategies
           </p>
           
