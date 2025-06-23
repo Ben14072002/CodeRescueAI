@@ -83,6 +83,58 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
   } | null>(null);
   const [copiedPrompts, setCopiedPrompts] = useState<Set<number>>(new Set());
 
+  // Save conversation to database
+  const saveConversation = async (updatedSession?: Partial<WizardSession>) => {
+    if (!user?.id) return;
+    
+    const currentSession = { ...session, ...updatedSession };
+    
+    try {
+      const existingResponse = await fetch(`/api/wizard/conversation/${currentSession.sessionId}`);
+      
+      const conversationData = {
+        userId: user.id,
+        sessionId: currentSession.sessionId,
+        title: currentSession.title || generateConversationTitle(currentSession),
+        classification: currentSession.classification,
+        messages: messages,
+        solution: currentSession.solution,
+        status: currentSession.stage === 'solution' ? 'completed' : 'active'
+      };
+
+      if (existingResponse.ok) {
+        // Update existing conversation
+        await fetch(`/api/wizard/update-conversation/${currentSession.sessionId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(conversationData)
+        });
+      } else {
+        // Create new conversation
+        await fetch('/api/wizard/save-conversation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(conversationData)
+        });
+      }
+    } catch (error) {
+      console.error('Failed to save conversation:', error);
+    }
+  };
+
+  const generateConversationTitle = (session: WizardSession): string => {
+    if (session.classification?.category) {
+      return `${session.classification.category} - ${new Date().toLocaleDateString()}`;
+    }
+    if (session.userResponses && session.userResponses.length > 0) {
+      const firstResponse = session.userResponses[0];
+      return firstResponse.length > 50 
+        ? `${firstResponse.substring(0, 50)}...` 
+        : firstResponse;
+    }
+    return `Wizard Session - ${new Date().toLocaleDateString()}`;
+  };
+
   const copyPromptToClipboard = async (prompt: string, stepNumber: number) => {
     try {
       await navigator.clipboard.writeText(prompt);
@@ -395,7 +447,11 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
         };
         
         setSession(updatedSession);
-        await saveConversation(updatedSession);
+        
+        // Save conversation after state update
+        setTimeout(async () => {
+          await saveConversation(updatedSession);
+        }, 100);
 
         const analysisMessage = classification.technicalIndicators?.length ? 
           `Technical Analysis Complete! I've identified this as a **${classification.complexity}** ${classification.category} issue with these indicators: ${classification.technicalIndicators.join(', ')}.\n\nTo create the most effective solution, I need additional context:\n\n**Question 1:** ${questions[0]}` :
@@ -440,7 +496,11 @@ export function AIDevelopmentWizard({ onBack }: AIWizardProps) {
             };
             
             setSession(updatedSession);
-            await saveConversation(updatedSession);
+            
+            // Save conversation after state update
+            setTimeout(async () => {
+              await saveConversation(updatedSession);
+            }, 100);
 
             // Present diagnosis first
             await sendWizardMessage(`## 🎯 **Deep Analysis & Diagnosis**

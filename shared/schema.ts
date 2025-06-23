@@ -184,6 +184,13 @@ export const projectsRelations = relations(projects, ({ one }) => ({
   }),
 }));
 
+export const wizardConversationsRelations = relations(wizardConversations, ({ one }) => ({
+  user: one(users, {
+    fields: [wizardConversations.userId],
+    references: [users.id],
+  }),
+}));
+
 // Zod Schemas
 export const sessionSchema = z.object({
   id: z.number(),
