@@ -107,8 +107,8 @@ export default function Pricing() {
 
   if (loading || subLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-12 h-12 border-4 border-purple-400 border-t-transparent rounded-full cosmic-glow" />
       </div>
     );
   }
