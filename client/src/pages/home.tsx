@@ -102,15 +102,15 @@ export default function Home() {
     <div className="min-h-screen text-white">
       {/* Header */}
       <header className="fixed top-0 z-50 w-full backdrop-blur-sm bg-slate-900/80 border-b border-purple-500/20">
-        <div className="container flex h-24 items-center justify-between px-8 mx-auto max-w-7xl">
+        <div className="container flex h-28 items-center justify-between px-8 mx-auto max-w-7xl">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-4">
               <img 
                 src="/src/assets/codebreaker-logo.png" 
                 alt="CodeBreaker Logo" 
-                className="w-12 h-12 cosmic-glow"
+                className="w-16 h-16 cosmic-glow"
               />
-              <h1 className="text-2xl font-bold text-white cosmic-glow">CodeBreaker</h1>
+              <h1 className="text-3xl font-bold text-white cosmic-glow">CodeBreaker</h1>
             </div>
           </div>
           <div className="flex items-center space-x-6">
@@ -155,7 +155,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 pt-32 pb-12">
+      <main className="container mx-auto px-6 pt-36 pb-12">
         {/* Trial Countdown - Show only for authenticated users on non-landing pages */}
         {user && currentSection !== "landing" && !isPro && (
           <TrialCountdown 
