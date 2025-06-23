@@ -1,0 +1,77 @@
+👋 Hi! I'm your AI Development Wizard. I'm here to help you get unstuck on any coding problem you're facing with AI tools like Cursor, Replit, Claude, or any other development challenge.
+
+Think of me as a senior developer who's seen every problem before and knows exactly how to guide you through it. What's got you stuck today?
+11:58:31
+I want to create a system that generates QR codes for every partner added to the system - my ai agent gets stuck and the qr code leads to a 404 page
+11:59:23
+I understand you're dealing with a coding challenge. Let me analyze this and ask a few targeted questions to give you the most effective solution.
+
+Analyzing your problem...
+11:59:24
+Got it! I can see this is a medium general issue. Let me ask you a few quick questions to nail down the exact solution:
+
+**Question 1:** What specific error message or behavior are you seeing?
+11:59:25
+its generating qr codes but when i scan them they dont work
+11:59:54
+Perfect! **Question 2:** What did you expect to happen instead?
+11:59:55
+i want to qr code to send me to the partners website
+12:00:14
+Perfect! **Question 3:** What was the last thing you tried before getting stuck?
+12:00:15
+changing the url
+12:00:30
+Excellent! I have all the information I need. Let me create your personalized action plan...
+12:00:31
+## 🎯 **Diagnosis**
+The AI assistant is generating QR codes that lead to incorrect or non-existent URLs, resulting in 404 errors. This issue likely stems from incorrect URL formation or a failure to update the URL dynamically for each partner.
+
+## 📋 **Action Plan** (7 hours)
+
+**Step 1: Verify Partner URL Data** (1 hour)
+Ensure that the partner URLs are correctly stored and accessible in your database or data source. Check for any missing or malformed URLs.
+
+
+
+**Step 2: Update QR Code Generation Logic** (2 hours)
+Modify the logic that generates the QR codes to ensure it uses the correct partner URL. Ensure that the URL is dynamically fetched and correctly formatted before generating the QR code.
+```
+qr_code = generate_qr_code(partner.url)
+```
+💡 **AI Prompt:** "Generate a QR code using the URL provided for each partner."
+
+**Step 3: Test QR Code Generation** (1 hour)
+Test the QR code generation process with a few sample partners to ensure the URLs are correctly embedded in the QR codes.
+
+
+
+**Step 4: Implement Error Handling** (1 hour)
+Add error handling to catch and log any issues that occur during the QR code generation process, such as missing URLs or failed QR code generation.
+```
+try { qr_code = generate_qr_code(partner.url) } catch (error) { logError(error) }
+```
+
+
+**Step 5: Deploy and Monitor** (2 hours)
+Deploy the updated system and monitor the QR code generation and scanning process to ensure that the issue is resolved and no new issues arise.
+
+
+
+## 🔄 **Alternative Approaches**
+• Use a third-party QR code generation service that automatically handles URL validation and QR code creation.
+• Implement a URL shortener service to simplify URL management and ensure all URLs are valid before QR code generation.
+
+## 🛡️ **Prevention Tips**
+• Regularly validate partner URLs to ensure they are correct and accessible.
+• Implement automated tests to verify that QR codes lead to the correct URLs.
+• Use logging to track QR code generation and identify any recurring issues.
+
+## 📚 **Learning Resources**
+• https://realpython.com/python-generate-qr-code/
+• https://developers.google.com/chart/infographics/docs/qr_codes
+• https://www.twilio.com/blog/2017/08/http-status-code-404.html
+
+---
+
+How does this solution look? Would you like me to elaborate on any step or provide additional guidance?
