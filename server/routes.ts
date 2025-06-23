@@ -1342,6 +1342,12 @@ PROMPT GENERATION RULES:
 - Provide complete debugging workflows
 - Include validation steps and success criteria
 
+CRITICAL FORMATTING REQUIREMENTS:
+- Return ONLY valid JSON content
+- Do NOT wrap in markdown code blocks (no backticks)
+- Do NOT include any explanatory text before or after the JSON
+- Start directly with { and end with }
+
 Return valid JSON with this structure:
 {
   "diagnosis": "detailed root cause analysis with technical depth",
@@ -1413,7 +1419,28 @@ Generate specific, context-aware prompts that address QR code URL routing, serve
       
       let solutionData;
       try {
-        solutionData = JSON.parse(rawContent);
+        // Clean the content by removing markdown code blocks if present
+        let cleanContent = rawContent.trim();
+        
+        // Handle markdown code blocks more robustly
+        if (cleanContent.includes('```')) {
+          // Extract content between code blocks using a more flexible approach
+          const codeBlockMatch = cleanContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+          if (codeBlockMatch && codeBlockMatch[1]) {
+            cleanContent = codeBlockMatch[1].trim();
+          } else {
+            // Alternative approach: find the JSON object boundaries
+            const jsonStart = cleanContent.indexOf('{');
+            const jsonEnd = cleanContent.lastIndexOf('}');
+            if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+              cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
+            }
+          }
+        }
+        
+        console.log('Cleaned content preview:', cleanContent.substring(0, 200));
+        solutionData = JSON.parse(cleanContent);
+        console.log('Successfully parsed OpenAI solution');
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
         console.error('Raw content:', rawContent.substring(0, 500));
