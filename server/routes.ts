@@ -4,6 +4,51 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import { storage } from "./storage";
 
+// Global error handling middleware
+const errorHandler = (err: any, req: any, res: any, next: any) => {
+  console.error('Error Handler:', {
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
+
+  // Handle specific error types
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Validation failed',
+      details: err.message
+    });
+  }
+
+  if (err.code === 'ECONNREFUSED') {
+    return res.status(503).json({
+      error: 'Database connection failed',
+      code: 'DB_CONNECTION_ERROR'
+    });
+  }
+
+  if (err.type === 'StripeInvalidRequestError') {
+    return res.status(400).json({
+      error: 'Payment processing error',
+      code: 'STRIPE_ERROR'
+    });
+  }
+
+  // Generic server error
+  res.status(500).json({
+    error: 'Internal server error',
+    code: 'INTERNAL_ERROR',
+    timestamp: new Date().toISOString()
+  });
+};
+
+// Async route wrapper to catch async errors
+const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
 // Comprehensive input validation schemas
 const validateCreateCheckoutSession = (req: any, res: any, next: any) => {
   const { plan, userId } = req.body;
@@ -110,97 +155,72 @@ const PRICING_PLANS = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health", asyncHandler((req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
-  });
+  }));
 
   // User registration endpoint
-  app.post("/api/register-user", validateUserRegistration, async (req, res) => {
-    try {
-      const { uid, email, username } = req.body;
+  app.post("/api/register-user", validateUserRegistration, asyncHandler(async (req, res) => {
+    const { uid, email, username } = req.body;
 
-      if (!uid || !email) {
-        return res.status(400).json({ error: "Firebase UID and email are required" });
-      }
-
-      // Check if user already exists
-      let existingUser = await storage.getUserByFirebaseUid(uid);
-      if (existingUser) {
-        return res.json({ success: true, user: existingUser, message: "User already exists" });
-      }
-
-      // Create new user with Firebase UID
-      const newUser = await storage.createUser({
-        username: username || `user_${uid.substring(0, 8)}`,
-        email: email,
-        role: "user",
-        firebaseUid: uid
-      });
-
-      console.log(`✅ User registered: ${newUser.id} (Firebase UID: ${uid})`);
-      res.json({ success: true, user: newUser, message: "User registered successfully" });
-    } catch (error) {
-      console.error('Error registering user:', error);
-      res.status(500).json({ error: 'Failed to register user' });
+    // Check if user already exists
+    let existingUser = await storage.getUserByFirebaseUid(uid);
+    if (existingUser) {
+      return res.json({ success: true, user: existingUser, message: "User already exists" });
     }
-  });
+
+    // Create new user with Firebase UID
+    const newUser = await storage.createUser({
+      username: username || `user_${uid.substring(0, 8)}`,
+      email: email,
+      role: "user",
+      firebaseUid: uid
+    });
+
+    console.log(`✅ User registered: ${newUser.id} (Firebase UID: ${uid})`);
+    res.json({ success: true, user: newUser, message: "User registered successfully" });
+  }));
 
   // Stripe regular checkout session creation (for paid subscriptions)
-  app.post("/api/create-checkout-session", validateCreateCheckoutSession, async (req, res) => {
-    try {
-      const { plan, userId } = req.body;
+  app.post("/api/create-checkout-session", validateCreateCheckoutSession, asyncHandler(async (req, res) => {
+    const { plan, userId } = req.body;
 
-      if (!plan || !userId) {
-        return res.status(400).json({ error: "Plan and user ID are required" });
-      }
-
-      // Find user by Firebase UID first, then fallback to database ID
-      let user = await storage.getUserByFirebaseUid(userId);
-      if (!user && !isNaN(parseInt(userId))) {
-        user = await storage.getUser(parseInt(userId));
-      }
-
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      // Validate plan
-      const planConfig = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
-      if (!planConfig) {
-        return res.status(400).json({ error: "Invalid plan selected" });
-      }
-
-      // Create Stripe checkout session for regular subscription
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        mode: 'subscription',
-        customer_email: user.email,
-        line_items: [{
-          price: planConfig.priceId,
-          quantity: 1,
-        }],
-        metadata: {
-          userId: userId,
-          plan: plan,
-          signupType: 'subscription'
-        },
-        success_url: `${req.headers.origin || 'https://localhost:5000'}/?upgrade=success`,
-        cancel_url: `${req.headers.origin || 'https://localhost:5000'}/pricing?upgrade=cancelled`,
-      });
-
-      res.json({ url: session.url });
-    } catch (error: any) {
-      console.error('Error creating checkout session:', {
-        error: error.message,
-        userId: req.body.userId,
-        plan: req.body.plan
-      });
-      res.status(500).json({ 
-        error: 'Failed to create checkout session',
-        code: 'CHECKOUT_SESSION_ERROR'
-      });
+    // Find user by Firebase UID first, then fallback to database ID
+    let user = await storage.getUserByFirebaseUid(userId);
+    if (!user && !isNaN(parseInt(userId))) {
+      user = await storage.getUser(parseInt(userId));
     }
-  });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Validate plan
+    const planConfig = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+    if (!planConfig) {
+      return res.status(400).json({ error: "Invalid plan selected" });
+    }
+
+    // Create Stripe checkout session for regular subscription
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      customer_email: user.email,
+      line_items: [{
+        price: planConfig.priceId,
+        quantity: 1,
+      }],
+      metadata: {
+        userId: userId,
+        plan: plan,
+        signupType: 'subscription'
+      },
+      success_url: `${req.headers.origin || 'https://localhost:5000'}/?upgrade=success`,
+      cancel_url: `${req.headers.origin || 'https://localhost:5000'}/pricing?upgrade=cancelled`,
+    });
+
+    res.json({ url: session.url });
+  }));
 
   // Complete trial setup after payment method collection
   app.post("/api/complete-trial-setup", async (req, res) => {
@@ -1801,6 +1821,9 @@ Provide production-ready code with proper error handling and validation.`,
       res.status(500).json({ error: error.message });
     }
   });
+
+  // Apply error handling middleware (must be last)
+  app.use(errorHandler);
 
   const httpServer = createServer(app);
 
