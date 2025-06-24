@@ -49,15 +49,6 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  // Import and use the comprehensive error handler
-  const { errorHandler, notFoundHandler } = await import("./middleware/errorHandler");
-  
-  // 404 handler for undefined routes
-  app.use(notFoundHandler);
-  
-  // Error handling middleware (must be last)
-  app.use(errorHandler);
-
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
@@ -66,6 +57,15 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
+
+  // Import and use the comprehensive error handler AFTER frontend setup
+  const { errorHandler, notFoundHandler } = await import("./middleware/errorHandler");
+  
+  // 404 handler for undefined API routes only (not frontend routes)
+  app.use('/api/*', notFoundHandler);
+  
+  // Error handling middleware (must be last)
+  app.use(errorHandler);
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
