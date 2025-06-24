@@ -33,9 +33,37 @@ export function registerAuthRoutes(app: Express) {
         return res.json({ success: true, user: existingUser, message: "User already exists" });
       }
 
+      // Generate unique username to avoid conflicts
+      const baseUsername = username || `user_${uid.substring(0, 8)}`;
+      let finalUsername = baseUsername;
+      
+      // Check if username exists and generate unique one if needed
+      let counter = 1;
+      let isUsernameUnique = false;
+      while (!isUsernameUnique && counter <= 100) { // Safety limit
+        try {
+          const existingUserByUsername = await storage.getUserByUsername(finalUsername);
+          if (!existingUserByUsername) {
+            isUsernameUnique = true;
+          } else {
+            finalUsername = `${baseUsername}_${counter}`;
+            counter++;
+          }
+        } catch (error) {
+          // Fallback: use timestamp to ensure uniqueness
+          finalUsername = `${baseUsername}_${Date.now().toString().slice(-6)}`;
+          isUsernameUnique = true;
+        }
+      }
+      
+      // Final safety check
+      if (!isUsernameUnique) {
+        finalUsername = `user_${uid}_${Date.now().toString().slice(-6)}`;
+      }
+
       // Create new user with Firebase UID
       const newUser = await storage.createUser({
-        username: username || `user_${uid.substring(0, 8)}`,
+        username: finalUsername,
         email: email,
         role: "user",
         firebaseUid: uid
