@@ -4,159 +4,7 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import { storage } from "./storage";
 
-// Enhanced logging utility
-const logger = {
-  info: (message: string, data?: any) => {
-    console.log(`INFO [${new Date().toISOString()}]: ${message}`, data ? JSON.stringify(data, null, 2) : '');
-  },
-  error: (message: string, error?: any, context?: any) => {
-    console.error(`ERROR [${new Date().toISOString()}]: ${message}`, {
-      error: error?.message || error,
-      stack: error?.stack,
-      context
-    });
-  },
-  warn: (message: string, data?: any) => {
-    console.warn(`WARN [${new Date().toISOString()}]: ${message}`, data ? JSON.stringify(data, null, 2) : '');
-  },
-  debug: (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug(`DEBUG [${new Date().toISOString()}]: ${message}`, data ? JSON.stringify(data, null, 2) : '');
-    }
-  }
-};
-
-// Data integrity validation
-const validateDatabaseUser = (user: any) => {
-  const requiredFields = ['id', 'email', 'username', 'createdAt'];
-  const missingFields = requiredFields.filter(field => !user[field]);
-  
-  if (missingFields.length > 0) {
-    throw new Error(`Database integrity error: Missing required fields: ${missingFields.join(', ')}`);
-  }
-  
-  // Validate email format
-  if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
-    throw new Error('Database integrity error: Invalid email format');
-  }
-  
-  return true;
-};
-
-// Global error handling middleware with enhanced error classification
-const errorHandler = (err: any, req: any, res: any, next: any) => {
-  const errorId = `ERR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  logger.error('Request failed', err, {
-    errorId,
-    url: req.url,
-    method: req.method,
-    userAgent: req.headers['user-agent'],
-    ip: req.ip,
-    body: req.method !== 'GET' ? req.body : undefined
-  });
-
-  // Handle specific error types with detailed responses
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      error: 'Validation failed',
-      details: err.message,
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND') {
-    return res.status(503).json({
-      error: 'Service temporarily unavailable',
-      code: 'SERVICE_UNAVAILABLE',
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  if (err.type === 'StripeInvalidRequestError' || err.type === 'StripeCardError') {
-    return res.status(400).json({
-      error: 'Payment processing failed',
-      code: 'PAYMENT_ERROR',
-      details: err.message,
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  if (err.name === 'UnauthorizedError' || err.status === 401) {
-    return res.status(401).json({
-      error: 'Authentication required',
-      code: 'AUTH_REQUIRED',
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  if (err.status === 403) {
-    return res.status(403).json({
-      error: 'Access denied',
-      code: 'ACCESS_DENIED',
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  if (err.status === 404) {
-    return res.status(404).json({
-      error: 'Resource not found',
-      code: 'NOT_FOUND',
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  // Database-specific errors
-  if (err.message?.includes('duplicate key') || err.code === '23505') {
-    return res.status(409).json({
-      error: 'Resource already exists',
-      code: 'DUPLICATE_RESOURCE',
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  if (err.message?.includes('foreign key') || err.code === '23503') {
-    return res.status(400).json({
-      error: 'Invalid reference',
-      code: 'INVALID_REFERENCE',
-      errorId,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  // Rate limiting
-  if (err.status === 429) {
-    return res.status(429).json({
-      error: 'Too many requests',
-      code: 'RATE_LIMITED',
-      errorId,
-      timestamp: new Date().toISOString(),
-      retryAfter: err.retryAfter || 60
-    });
-  }
-
-  // Generic server error with minimal information exposure
-  res.status(500).json({
-    error: 'Internal server error',
-    code: 'INTERNAL_ERROR',
-    errorId,
-    timestamp: new Date().toISOString()
-  });
-};
-
-// Async route wrapper to catch async errors
-const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-// Comprehensive input validation schemas
+// Input validation schemas
 const validateCreateCheckoutSession = (req: any, res: any, next: any) => {
   const { plan, userId } = req.body;
   
@@ -168,49 +16,8 @@ const validateCreateCheckoutSession = (req: any, res: any, next: any) => {
     return res.status(400).json({ error: "Invalid plan selected" });
   }
   
-  if (typeof userId !== 'string' || userId.length < 1 || userId.length > 100) {
-    return res.status(400).json({ error: "Invalid user ID format" });
-  }
-  
-  // Sanitize userId to prevent injection
-  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
-    return res.status(400).json({ error: "User ID contains invalid characters" });
-  }
-  
-  next();
-};
-
-const validateUserRegistration = (req: any, res: any, next: any) => {
-  const { uid, email, username } = req.body;
-  
-  if (!uid || !email) {
-    return res.status(400).json({ error: "Firebase UID and email are required" });
-  }
-  
-  if (typeof uid !== 'string' || uid.length < 1 || uid.length > 100) {
-    return res.status(400).json({ error: "Invalid Firebase UID format" });
-  }
-  
-  if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: "Invalid email format" });
-  }
-  
-  if (username && (typeof username !== 'string' || username.length > 50)) {
-    return res.status(400).json({ error: "Username too long" });
-  }
-  
-  next();
-};
-
-const validateUserId = (req: any, res: any, next: any) => {
-  const userId = req.params.userId || req.body.userId;
-  
-  if (!userId) {
-    return res.status(400).json({ error: "User ID is required" });
-  }
-  
-  if (typeof userId !== 'string' || userId.length < 1 || userId.length > 100) {
-    return res.status(400).json({ error: "Invalid user ID format" });
+  if (typeof userId !== 'string' || userId.length < 1) {
+    return res.status(400).json({ error: "Invalid user ID" });
   }
   
   next();
@@ -262,128 +69,97 @@ const PRICING_PLANS = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
-  app.get("/api/health", asyncHandler((req, res) => {
+  app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
-  }));
+  });
 
-  // User registration endpoint with enhanced error handling
-  app.post("/api/register-user", validateUserRegistration, asyncHandler(async (req, res) => {
-    const { uid, email, username } = req.body;
-
+  // User registration endpoint
+  app.post("/api/register-user", async (req, res) => {
     try {
-      logger.info('User registration attempt', { uid, email, username });
+      const { uid, email, username } = req.body;
 
-      // Check if user already exists by Firebase UID
+      if (!uid || !email) {
+        return res.status(400).json({ error: "Firebase UID and email are required" });
+      }
+
+      // Check if user already exists
       let existingUser = await storage.getUserByFirebaseUid(uid);
       if (existingUser) {
-        // Validate existing user data integrity
-        validateDatabaseUser(existingUser);
-        logger.info('Existing user found during registration', { userId: existingUser.id, uid });
-        return res.json({ 
-          success: true, 
-          user: existingUser, 
-          message: "User already exists",
-          isExisting: true
-        });
+        return res.json({ success: true, user: existingUser, message: "User already exists" });
       }
 
-      // Check if email is already in use by different user
-      const existingEmailUser = await storage.getUserByEmail(email);
-      if (existingEmailUser && existingEmailUser.firebaseUid !== uid) {
-        logger.warn('Email already registered to different user', { email, existingUid: existingEmailUser.firebaseUid, attemptedUid: uid });
-        return res.status(409).json({ 
-          error: "Email is already registered to a different account",
-          code: "EMAIL_CONFLICT"
-        });
-      }
-
-      // Create new user with validation
-      const userData = {
+      // Create new user with Firebase UID
+      const newUser = await storage.createUser({
         username: username || `user_${uid.substring(0, 8)}`,
         email: email,
-        role: "user" as const,
+        role: "user",
         firebaseUid: uid
-      };
+      });
 
-      const newUser = await storage.createUser(userData);
-      
-      // Validate created user
-      validateDatabaseUser(newUser);
-      
-      logger.info('User registered successfully', { 
-        userId: newUser.id, 
-        uid, 
-        email,
-        username: newUser.username
-      });
-      
-      res.json({ 
-        success: true, 
-        user: {
-          id: newUser.id,
-          username: newUser.username,
-          email: newUser.email,
-          role: newUser.role,
-          subscriptionStatus: newUser.subscriptionStatus,
-          subscriptionTier: newUser.subscriptionTier
-        }, 
-        message: "User registered successfully",
-        isExisting: false
-      });
-    } catch (error: any) {
-      logger.error('User registration failed', error, { uid, email, username });
-      
-      if (error.message?.includes('duplicate key') || error.code === '23505') {
-        return res.status(409).json({
-          error: "User with this information already exists",
-          code: "DUPLICATE_USER"
-        });
-      }
-      
-      throw error; // Re-throw for global error handler
+      console.log(`✅ User registered: ${newUser.id} (Firebase UID: ${uid})`);
+      res.json({ success: true, user: newUser, message: "User registered successfully" });
+    } catch (error) {
+      console.error('Error registering user:', error);
+      res.status(500).json({ error: 'Failed to register user' });
     }
-  }));
+  });
 
   // Stripe regular checkout session creation (for paid subscriptions)
-  app.post("/api/create-checkout-session", validateCreateCheckoutSession, asyncHandler(async (req, res) => {
-    const { plan, userId } = req.body;
+  app.post("/api/create-checkout-session", validateCreateCheckoutSession, async (req, res) => {
+    try {
+      const { plan, userId } = req.body;
 
-    // Find user by Firebase UID first, then fallback to database ID
-    let user = await storage.getUserByFirebaseUid(userId);
-    if (!user && !isNaN(parseInt(userId))) {
-      user = await storage.getUser(parseInt(userId));
+      if (!plan || !userId) {
+        return res.status(400).json({ error: "Plan and user ID are required" });
+      }
+
+      // Find user by Firebase UID first, then fallback to database ID
+      let user = await storage.getUserByFirebaseUid(userId);
+      if (!user && !isNaN(parseInt(userId))) {
+        user = await storage.getUser(parseInt(userId));
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Validate plan
+      const planConfig = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      if (!planConfig) {
+        return res.status(400).json({ error: "Invalid plan selected" });
+      }
+
+      // Create Stripe checkout session for regular subscription
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        customer_email: user.email,
+        line_items: [{
+          price: planConfig.priceId,
+          quantity: 1,
+        }],
+        metadata: {
+          userId: userId,
+          plan: plan,
+          signupType: 'subscription'
+        },
+        success_url: `${req.headers.origin || 'https://localhost:5000'}/?upgrade=success`,
+        cancel_url: `${req.headers.origin || 'https://localhost:5000'}/pricing?upgrade=cancelled`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error('Error creating checkout session:', {
+        error: error.message,
+        userId: req.body.userId,
+        plan: req.body.plan
+      });
+      res.status(500).json({ 
+        error: 'Failed to create checkout session',
+        code: 'CHECKOUT_SESSION_ERROR'
+      });
     }
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Validate plan
-    const planConfig = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
-    if (!planConfig) {
-      return res.status(400).json({ error: "Invalid plan selected" });
-    }
-
-    // Create Stripe checkout session for regular subscription
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      customer_email: user.email,
-      line_items: [{
-        price: planConfig.priceId,
-        quantity: 1,
-      }],
-      metadata: {
-        userId: userId,
-        plan: plan,
-        signupType: 'subscription'
-      },
-      success_url: `${req.headers.origin || 'https://localhost:5000'}/?upgrade=success`,
-      cancel_url: `${req.headers.origin || 'https://localhost:5000'}/pricing?upgrade=cancelled`,
-    });
-
-    res.json({ url: session.url });
-  }));
+  });
 
   // Complete trial setup after payment method collection
   app.post("/api/complete-trial-setup", async (req, res) => {
@@ -628,7 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual trial activation endpoint (for testing/emergency use)
-  app.post("/api/start-trial", validateUserId, async (req, res) => {
+  app.post("/api/start-trial", async (req, res) => {
     try {
       const { userId } = req.body;
 
@@ -668,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // URGENT: Manual Pro activation endpoint for paid users
-  app.post("/api/activate-pro", validateUserId, async (req, res) => {
+  app.post("/api/activate-pro", async (req, res) => {
     try {
       const { userId, plan = 'pro_monthly' } = req.body;
 
@@ -719,33 +495,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe webhook endpoint with enhanced security and error handling
-  app.post("/api/webhooks/stripe", asyncHandler(async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
-
-    // Enhanced webhook signature verification
+  // Stripe webhook endpoint for trial signup completion
+  app.post("/api/webhooks/stripe", async (req, res) => {
     try {
-      if (!process.env.STRIPE_WEBHOOK_SECRET) {
-        logger.error('CRITICAL: Webhook secret not configured - this is required for security');
-        return res.status(500).json({ 
-          error: 'Server configuration error',
-          code: 'WEBHOOK_CONFIG_ERROR'
-        });
+      const sig = req.headers['stripe-signature'];
+      let event;
+
+      try {
+        if (!process.env.STRIPE_WEBHOOK_SECRET) {
+          console.log('WEBHOOK ERROR: Webhook secret not configured');
+          return res.status(400).send('Webhook secret not configured');
+        }
+        
+        event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
+        console.log('WEBHOOK: Signature verified for event:', event.type);
+      } catch (err: any) {
+        console.log(`WEBHOOK ERROR: Signature verification failed:`, err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
       }
-      
-      event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
-      logger.info('Webhook signature verified', { eventType: event.type, eventId: event.id });
-    } catch (err: any) {
-      logger.error('Webhook signature verification failed', err, { 
-        signature: sig ? 'present' : 'missing',
-        bodyLength: req.body?.length || 0
-      });
-      return res.status(401).json({ 
-        error: 'Webhook signature verification failed',
-        code: 'INVALID_SIGNATURE'
-      });
-    }
 
       // Handle the event
       switch (event.type) {
@@ -1029,20 +796,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get subscription status for a user with enhanced error handling and validation
-  app.get("/api/subscription-status/:userId", asyncHandler(async (req, res) => {
-    const { userId } = req.params;
-    
-    logger.debug('Subscription status check', { userId });
-
-    // Set cache headers for frequently accessed endpoint
-    res.set({
-      'Cache-Control': 'private, max-age=30', // Cache for 30 seconds
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
-
+  // Get subscription status for a user with enhanced Pro detection
+  app.get("/api/subscription-status/:userId", async (req, res) => {
     try {
+      const { userId } = req.params;
+      
       // Find user by Firebase UID first, then by ID
       let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
@@ -1050,119 +808,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!user) {
-        logger.warn('User not found for subscription status check', { userId });
         return res.json({
           tier: "free",
           status: "none",
-          currentPeriodEnd: null,
-          userExists: false
+          currentPeriodEnd: null
         });
       }
 
-      // Validate user data integrity
-      validateDatabaseUser(user);
-
-      // Check trial status with error handling
-      let trialStatus;
-      try {
-        trialStatus = await storage.checkTrialStatus(user.id);
-      } catch (trialError) {
-        logger.error('Failed to check trial status', trialError, { userId: user.id });
-        trialStatus = { isTrialActive: false, daysRemaining: 0 };
-      }
+      // Check trial status
+      const trialStatus = await storage.checkTrialStatus(user.id);
       
-      // Enhanced Pro detection with comprehensive error handling
+      // Enhanced Pro detection for paid users with proper validation
       let finalTier = user.subscriptionTier || 'free';
       let finalStatus = user.subscriptionStatus || 'none';
       let autoUpgraded = false;
-      let stripeVerificationError = null;
 
-      // Verify Stripe subscription status with enhanced error handling
+      // Verify Stripe subscription status before auto-upgrade
       if (user.stripeSubscriptionId && finalTier === 'free') {
         try {
-          logger.debug('Verifying Stripe subscription', { 
-            userId: user.id, 
-            stripeSubscriptionId: user.stripeSubscriptionId 
-          });
-          
-          const stripeSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
-            expand: ['latest_invoice']
-          });
+          const stripeSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           
           // Only auto-upgrade if Stripe confirms active subscription
           if (stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing') {
-            logger.info('Auto-upgrading user with verified Stripe subscription', {
-              userId: user.id,
-              stripeStatus: stripeSubscription.status,
-              subscriptionId: user.stripeSubscriptionId
-            });
+            console.log(`VALIDATED FIX: User ${userId} has verified active Stripe subscription ${user.stripeSubscriptionId}. Auto-upgrading to Pro.`);
             
             finalTier = stripeSubscription.status === 'trialing' ? 'trial' : 'pro_monthly';
             finalStatus = stripeSubscription.status;
             autoUpgraded = true;
             
             // Update in database with verified Stripe data
-            try {
-              await storage.updateUserSubscription(user.id, {
-                subscriptionTier: finalTier,
-                subscriptionStatus: finalStatus,
-                subscriptionCurrentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000)
-              });
-              
-              logger.info('Database updated with verified Stripe subscription data', { userId: user.id });
-            } catch (updateError) {
-              logger.error('Failed to update user subscription in database', updateError, { userId: user.id });
-              // Continue with response even if DB update fails
-            }
-          } else {
-            logger.warn('User has inactive Stripe subscription', {
-              userId: user.id,
-              stripeStatus: stripeSubscription.status,
-              subscriptionId: user.stripeSubscriptionId
+            await storage.updateUserSubscription(user.id, {
+              subscriptionTier: finalTier,
+              subscriptionStatus: finalStatus,
+              subscriptionCurrentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000)
             });
+          } else {
+            console.log(`SECURITY: User ${userId} has inactive Stripe subscription ${stripeSubscription.status}. Not upgrading.`);
           }
-        } catch (stripeError: any) {
-          logger.error('Failed to verify Stripe subscription', stripeError, { 
-            userId: user.id,
-            stripeSubscriptionId: user.stripeSubscriptionId
-          });
-          stripeVerificationError = stripeError.message;
+        } catch (stripeError) {
+          console.error(`SECURITY: Failed to verify Stripe subscription for user ${userId}:`, stripeError);
           // Don't auto-upgrade if we can't verify with Stripe
         }
       }
 
-      const response = {
+      res.json({
         tier: finalTier,
         status: finalStatus,
         currentPeriodEnd: user.subscriptionCurrentPeriodEnd,
         stripeSubscriptionId: user.stripeSubscriptionId,
         stripeCustomerId: user.stripeCustomerId,
         autoUpgraded: autoUpgraded,
-        userExists: true,
         trial: {
           isActive: trialStatus.isTrialActive,
           daysRemaining: trialStatus.daysRemaining,
           startDate: user.trialStartDate,
           endDate: user.trialEndDate
-        },
-        ...(stripeVerificationError && { stripeVerificationError })
-      };
-
-      logger.debug('Subscription status response', { userId: user.id, response });
-      res.json(response);
-    } catch (error: any) {
-      logger.error('Subscription status check failed', error, { userId });
-      
-      if (error.message?.includes('Database integrity error')) {
-        return res.status(500).json({ 
-          error: "Data integrity issue detected",
-          code: "DATA_INTEGRITY_ERROR"
-        });
-      }
-      
-      throw error; // Re-throw for global error handler
+        }
+      });
+    } catch (error) {
+      console.error('Error getting subscription status:', error);
+      res.status(500).json({ error: "Failed to get subscription status" });
     }
-  }));
+  });
 
   // Test endpoint to simulate user creation and webhook events for development
   app.post("/api/test-webhook", async (req, res) => {
@@ -2053,9 +1760,6 @@ Provide production-ready code with proper error handling and validation.`,
       res.status(500).json({ error: error.message });
     }
   });
-
-  // Apply error handling middleware (must be last)
-  app.use(errorHandler);
 
   const httpServer = createServer(app);
 

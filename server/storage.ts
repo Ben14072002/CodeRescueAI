@@ -27,7 +27,7 @@ export interface IStorage {
   ratePrompt(rating: InsertPromptRating): Promise<PromptRating>;
   getPromptSuccessRate(problemType: string): Promise<{ positiveCount: number; totalCount: number; }>;
   getUserRecentSessions(userId: number, limit?: number): Promise<Session[]>;
-
+  
   // Project persistence methods
   createProject(project: InsertProject): Promise<Project>;
   updateProject(projectId: number, updates: Partial<InsertProject>): Promise<Project>;
@@ -36,16 +36,13 @@ export interface IStorage {
   deleteProject(projectId: number): Promise<void>;
   updateProjectProgress(projectId: number, progress: any): Promise<Project>;
   markProjectCompleted(projectId: number): Promise<Project>;
-
+  
   // Wizard Conversation methods
   createWizardConversation(conversation: InsertWizardConversation): Promise<WizardConversation>;
   updateWizardConversation(sessionId: string, updates: Partial<InsertWizardConversation>): Promise<WizardConversation>;
   getWizardConversation(sessionId: string): Promise<WizardConversation | undefined>;
   getUserWizardConversations(userId: number): Promise<WizardConversation[]>;
   deleteWizardConversation(sessionId: string): Promise<void>;
-
-  // Database health check
-  healthCheck(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -69,7 +66,7 @@ export class MemStorage implements IStorage {
     this.currentSessionId = 1;
     this.currentRatingId = 1;
     this.currentProjectId = 1;
-
+    
     // Initialize with your Pro subscription
     this.createUser({
       username: 'benpaltinat',
@@ -117,7 +114,7 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
     const now = new Date();
-
+    
     const user: User = { 
       ...insertUser, 
       id, 
@@ -145,12 +142,12 @@ export class MemStorage implements IStorage {
     if (!user) {
       throw new Error("User not found");
     }
-
+    
     const updatedUser = {
       ...user,
       ...subscriptionData
     };
-
+    
     this.users.set(userId, updatedUser);
     return updatedUser;
   }
@@ -222,7 +219,7 @@ export class MemStorage implements IStorage {
 
     const now = new Date();
     const trialEndDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
-
+    
     const updatedUser: User = {
       ...user,
       subscriptionStatus: "trial",
@@ -232,7 +229,7 @@ export class MemStorage implements IStorage {
       hasUsedTrial: true, // SECURITY: Mark trial as used permanently
       trialCount: (user.trialCount || 0) + 1 // SECURITY: Increment trial count
     };
-
+    
     this.users.set(userId, updatedUser);
     console.log(`🔒 Trial activated for user ${userId}. hasUsedTrial: true, trialCount: ${updatedUser.trialCount}`);
     return updatedUser;
@@ -262,7 +259,7 @@ export class MemStorage implements IStorage {
   async getUserSessionsThisMonth(userId: number): Promise<Session[]> {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
+    
     return Array.from(this.sessions.values()).filter(session => 
       session.userId === userId && 
       session.startTime >= startOfMonth
@@ -285,7 +282,7 @@ export class MemStorage implements IStorage {
       totalTimeSpent: session.totalTimeSpent || 0,
       completedAt: session.completedAt,
     };
-
+    
     this.sessions.set(newSession.id, newSession);
     return newSession;
   }
@@ -301,7 +298,7 @@ export class MemStorage implements IStorage {
       problemType: rating.problemType,
       createdAt: new Date(),
     };
-
+    
     this.promptRatings.set(newRating.id, newRating);
     return newRating;
   }
@@ -310,10 +307,10 @@ export class MemStorage implements IStorage {
     const ratings = Array.from(this.promptRatings.values()).filter(
       rating => rating.problemType === problemType
     );
-
+    
     const positiveCount = ratings.filter(rating => rating.rating === 'positive').length;
     const totalCount = ratings.length;
-
+    
     return { positiveCount, totalCount };
   }
 
@@ -322,7 +319,7 @@ export class MemStorage implements IStorage {
       .filter(session => session.userId === userId)
       .sort((a, b) => b.startTime.getTime() - a.startTime.getTime())
       .slice(0, limit);
-
+    
     return userSessions;
   }
 
@@ -334,7 +331,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       lastModified: new Date(),
     };
-
+    
     this.projects.set(newProject.id, newProject);
     return newProject;
   }
@@ -400,17 +397,6 @@ export class MemStorage implements IStorage {
     this.projects.set(projectId, updatedProject);
     return updatedProject;
   }
-
-    // Database health check
-    async healthCheck(): Promise<void> {
-      try {
-        // Simple query to test database connection
-        console.log("Performing in-memory database health check...");
-      } catch (error) {
-        console.error('Database health check failed:', error);
-        throw new Error('Database connection failed');
-      }
-    }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -509,7 +495,7 @@ export class DatabaseStorage implements IStorage {
   async startTrial(userId: number): Promise<User> {
     const now = new Date();
     const trialEndDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-
+    
     const [user] = await db
       .update(users)
       .set({
@@ -540,7 +526,7 @@ export class DatabaseStorage implements IStorage {
   async getUserSessionsThisMonth(userId: number): Promise<Session[]> {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
+    
     const userSessions = await db
       .select()
       .from(sessions)
@@ -550,7 +536,7 @@ export class DatabaseStorage implements IStorage {
           gte(sessions.startTime, startOfMonth)
         )
       );
-
+    
     return userSessions;
   }
 
@@ -575,10 +561,10 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(promptRatings)
       .where(eq(promptRatings.problemType, problemType));
-
+    
     const positiveCount = ratings.filter(rating => rating.rating === 'positive').length;
     const totalCount = ratings.length;
-
+    
     return { positiveCount, totalCount };
   }
 
@@ -589,7 +575,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(sessions.userId, userId))
       .orderBy(sessions.startTime)
       .limit(limit);
-
+    
     return userSessions;
   }
 
@@ -608,11 +594,11 @@ export class DatabaseStorage implements IStorage {
       .set({ ...updates, lastModified: new Date() })
       .where(eq(projects.id, projectId))
       .returning();
-
+    
     if (!updatedProject) {
       throw new Error(`Project with id ${projectId} not found`);
     }
-
+    
     return updatedProject;
   }
 
@@ -637,11 +623,11 @@ export class DatabaseStorage implements IStorage {
       .set({ projectProgress: progress, lastModified: new Date() })
       .where(eq(projects.id, projectId))
       .returning();
-
+    
     if (!updatedProject) {
       throw new Error(`Project with id ${projectId} not found`);
     }
-
+    
     return updatedProject;
   }
 
@@ -651,11 +637,11 @@ export class DatabaseStorage implements IStorage {
       .set({ isCompleted: true, lastModified: new Date() })
       .where(eq(projects.id, projectId))
       .returning();
-
+    
     if (!updatedProject) {
       throw new Error(`Project with id ${projectId} not found`);
     }
-
+    
     return updatedProject;
   }
 
@@ -673,11 +659,11 @@ export class DatabaseStorage implements IStorage {
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(wizardConversations.sessionId, sessionId))
       .returning();
-
+    
     if (!updatedConversation) {
       throw new Error('Wizard conversation not found');
     }
-
+    
     return updatedConversation;
   }
 
@@ -701,18 +687,6 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(wizardConversations)
       .where(eq(wizardConversations.sessionId, sessionId));
-  }
-
-  // Database health check
-  async healthCheck(): Promise<void> {
-    try {
-      // Simple query to test database connection
-      await db.select().from(users).limit(1);
-      console.log("Database health check passed.");
-    } catch (error) {
-      console.error('Database health check failed:', error);
-      throw new Error('Database connection failed');
-    }
   }
 }
 
