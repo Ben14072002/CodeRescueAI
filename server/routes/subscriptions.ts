@@ -1,6 +1,10 @@
 import type { Express } from "express";
 import Stripe from "stripe";
 import { storage } from "../storage";
+import { RateLimiters } from "../middleware/rateLimiting";
+import { validateRequest, ValidationSchemas } from "../middleware/validation";
+import { ApiResponseUtil } from "../utils/ApiResponse";
+import { asyncHandler } from "../middleware/errorHandler";
 
 // Use live Stripe key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -62,8 +66,10 @@ const validateTrialSession = (req: any, res: any, next: any) => {
 
 export function registerSubscriptionRoutes(app: Express) {
   // Stripe regular checkout session creation (for paid subscriptions)
-  app.post("/api/create-checkout-session", validateCreateCheckoutSession, async (req, res) => {
-    try {
+  app.post("/api/create-checkout-session", 
+    RateLimiters.subscription,
+    validateRequest(ValidationSchemas.checkoutSession),
+    asyncHandler(async (req, res) => {
       const { plan, userId } = req.body;
 
       // Find user by Firebase UID first, then fallback to database ID
@@ -73,13 +79,13 @@ export function registerSubscriptionRoutes(app: Express) {
       }
 
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return res.status(404).json(ApiResponseUtil.notFound("User"));
       }
 
       // Validate plan
       const planConfig = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
       if (!planConfig) {
-        return res.status(400).json({ error: "Invalid plan selected" });
+        return res.status(400).json(ApiResponseUtil.validationError("Invalid plan selected"));
       }
 
       // Create Stripe checkout session for regular subscription
@@ -100,19 +106,8 @@ export function registerSubscriptionRoutes(app: Express) {
         cancel_url: `${req.headers.origin || 'https://localhost:5000'}/pricing?upgrade=cancelled`,
       });
 
-      res.json({ url: session.url });
-    } catch (error: any) {
-      console.error('Error creating checkout session:', {
-        error: error.message,
-        userId: req.body.userId,
-        plan: req.body.plan
-      });
-      res.status(500).json({ 
-        error: 'Failed to create checkout session',
-        code: 'CHECKOUT_SESSION_ERROR'
-      });
-    }
-  });
+      res.json(ApiResponseUtil.success({ url: session.url }, "Checkout session created successfully"));
+    }));
 
   // Create trial session with Stripe checkout
   app.post("/api/create-trial-session", async (req, res) => {
