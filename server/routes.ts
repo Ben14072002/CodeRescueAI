@@ -4,6 +4,43 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import { storage } from "./storage";
 
+// Rate limiting middleware
+const rateLimitMap = new Map();
+
+const createRateLimit = (windowMs: number, maxRequests: number) => {
+  return (req: any, res: any, next: any) => {
+    const clientId = req.ip || 'unknown';
+    const now = Date.now();
+    const windowStart = now - windowMs;
+    
+    if (!rateLimitMap.has(clientId)) {
+      rateLimitMap.set(clientId, []);
+    }
+    
+    const requests = rateLimitMap.get(clientId);
+    
+    // Remove old requests outside the window
+    const validRequests = requests.filter((timestamp: number) => timestamp > windowStart);
+    
+    if (validRequests.length >= maxRequests) {
+      return res.status(429).json({
+        error: 'Too many requests',
+        retryAfter: Math.ceil((validRequests[0] + windowMs - now) / 1000)
+      });
+    }
+    
+    validRequests.push(now);
+    rateLimitMap.set(clientId, validRequests);
+    
+    next();
+  };
+};
+
+// Different rate limits for different endpoints
+const generalRateLimit = createRateLimit(60000, 100); // 100 requests per minute
+const authRateLimit = createRateLimit(300000, 10); // 10 requests per 5 minutes for auth
+const paymentRateLimit = createRateLimit(60000, 5); // 5 payment requests per minute
+
 // Global error handling middleware
 const errorHandler = (err: any, req: any, res: any, next: any) => {
   console.error('Error Handler:', {
@@ -44,9 +81,40 @@ const errorHandler = (err: any, req: any, res: any, next: any) => {
   });
 };
 
-// Async route wrapper to catch async errors
-const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
+// Database connection validation
+const validateDatabaseConnection = async (req: any, res: any, next: any) => {
+  try {
+    // Simple database health check
+    await storage.healthCheck();
+    next();
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(503).json({
+      error: 'Database temporarily unavailable',
+      code: 'DB_CONNECTION_ERROR'
+    });
+  }
+};
+
+// Enhanced async route wrapper with timeout and better error handling
+const asyncHandler = (fn: any, timeoutMs: number = 30000) => (req: any, res: any, next: any) => {
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+  });
+
+  Promise.race([
+    Promise.resolve(fn(req, res, next)),
+    timeoutPromise
+  ]).catch((error) => {
+    if (error.message === 'Request timeout') {
+      res.status(504).json({
+        error: 'Request timeout',
+        code: 'REQUEST_TIMEOUT'
+      });
+    } else {
+      next(error);
+    }
+  });
 };
 
 // Comprehensive input validation schemas
@@ -106,6 +174,25 @@ const validateUserId = (req: any, res: any, next: any) => {
     return res.status(400).json({ error: "Invalid user ID format" });
   }
   
+  // Sanitize userId to prevent injection
+  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
+    return res.status(400).json({ error: "User ID contains invalid characters" });
+  }
+  
+  next();
+};
+
+const validateSubscriptionUpdate = (req: any, res: any, next: any) => {
+  const { plan, status } = req.body;
+  
+  if (plan && !['pro_monthly', 'pro_yearly', 'trial', 'free'].includes(plan)) {
+    return res.status(400).json({ error: "Invalid subscription plan" });
+  }
+  
+  if (status && !['active', 'trialing', 'canceled', 'incomplete', 'past_due'].includes(status)) {
+    return res.status(400).json({ error: "Invalid subscription status" });
+  }
+  
   next();
 };
 
@@ -155,12 +242,26 @@ const PRICING_PLANS = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
-  app.get("/api/health", asyncHandler((req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  app.get("/api/health", asyncHandler(async (req, res) => {
+    try {
+      await storage.healthCheck();
+      res.json({ 
+        status: "ok", 
+        timestamp: new Date().toISOString(),
+        database: "connected"
+      });
+    } catch (error) {
+      res.status(503).json({ 
+        status: "degraded", 
+        timestamp: new Date().toISOString(),
+        database: "disconnected",
+        error: "Database health check failed"
+      });
+    }
   }));
 
   // User registration endpoint
-  app.post("/api/register-user", validateUserRegistration, asyncHandler(async (req, res) => {
+  app.post("/api/register-user", authRateLimit, validateUserRegistration, validateDatabaseConnection, asyncHandler(async (req, res) => {
     const { uid, email, username } = req.body;
 
     // Check if user already exists
@@ -182,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Stripe regular checkout session creation (for paid subscriptions)
-  app.post("/api/create-checkout-session", validateCreateCheckoutSession, asyncHandler(async (req, res) => {
+  app.post("/api/create-checkout-session", paymentRateLimit, validateCreateCheckoutSession, validateDatabaseConnection, asyncHandler(async (req, res) => {
     const { plan, userId } = req.body;
 
     // Find user by Firebase UID first, then fallback to database ID
@@ -465,61 +566,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual trial activation endpoint (for testing/emergency use)
-  app.post("/api/start-trial", validateUserId, async (req, res) => {
+  app.post("/api/start-trial", authRateLimit, validateUserId, validateDatabaseConnection, asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+
+    // Find user by Firebase UID with proper error handling
+    let user;
     try {
-      const { userId } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-      }
-
-      // Find user by Firebase UID
-      let user = await storage.getUserByFirebaseUid(userId);
+      user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
-
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      // Check trial eligibility
-      const eligibility = await storage.isTrialEligible(user.id);
-      if (!eligibility.eligible) {
-        return res.status(400).json({ error: `Trial not available: ${eligibility.reason}` });
-      }
-
-      // Activate trial
-      const updatedUser = await storage.startTrial(user.id);
-      
-      console.log(`✅ Manual trial activated for user ${userId} (ID: ${user.id})`);
-      res.json({ 
-        success: true, 
-        message: "Trial activated successfully",
-        user: updatedUser
-      });
-    } catch (error) {
-      console.error('Error starting trial:', error);
-      res.status(500).json({ error: 'Failed to start trial' });
+    } catch (dbError) {
+      console.error('Database error during user lookup:', dbError);
+      return res.status(503).json({ error: "Database temporarily unavailable" });
     }
-  });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check trial eligibility with proper validation
+    let eligibility;
+    try {
+      eligibility = await storage.isTrialEligible(user.id);
+    } catch (dbError) {
+      console.error('Database error during eligibility check:', dbError);
+      return res.status(503).json({ error: "Unable to verify trial eligibility" });
+    }
+
+    if (!eligibility.eligible) {
+      return res.status(400).json({ 
+        error: `Trial not available: ${eligibility.reason}`,
+        code: 'TRIAL_NOT_ELIGIBLE'
+      });
+    }
+
+    // Activate trial with transaction-like behavior
+    let updatedUser;
+    try {
+      updatedUser = await storage.startTrial(user.id);
+      
+      // Verify the trial was actually activated
+      const verifyTrial = await storage.checkTrialStatus(user.id);
+      if (!verifyTrial.isTrialActive) {
+        throw new Error('Trial activation verification failed');
+      }
+      
+      console.log(`✅ Manual trial activated and verified for user ${userId} (ID: ${user.id})`);
+    } catch (activationError) {
+      console.error('Trial activation error:', activationError);
+      return res.status(500).json({ 
+        error: 'Failed to activate trial',
+        code: 'TRIAL_ACTIVATION_FAILED'
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Trial activated successfully",
+      user: {
+        id: updatedUser.id,
+        trialStartDate: updatedUser.trialStartDate,
+        trialEndDate: updatedUser.trialEndDate
+      }
+    });
+  }));
 
   // URGENT: Manual Pro activation endpoint for paid users
-  app.post("/api/activate-pro", validateUserId, async (req, res) => {
+  app.post("/api/activate-pro", authRateLimit, validateUserId, validateSubscriptionUpdate, validateDatabaseConnection, asyncHandler(async (req, res) => {
+    const { userId, plan = 'pro_monthly' } = req.body;
+
+    // Validate plan format
+    if (!['pro_monthly', 'pro_yearly'].includes(plan)) {
+      return res.status(400).json({ 
+        error: "Invalid plan. Must be 'pro_monthly' or 'pro_yearly'",
+        code: 'INVALID_PLAN'
+      });
+    }
+
+    // Find user by Firebase UID with comprehensive error handling
+    let user;
     try {
-      const { userId, plan = 'pro_monthly' } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-      }
-
-      // Find user by Firebase UID or create if doesn't exist
-      let user = await storage.getUserByFirebaseUid(userId);
+      user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
+    } catch (dbError) {
+      console.error('Database error during Pro activation user lookup:', dbError);
+      return res.status(503).json({ 
+        error: "Database temporarily unavailable",
+        code: 'DB_CONNECTION_ERROR'
+      });
+    }
 
-      // If user doesn't exist, create them immediately
+    // Create user if doesn't exist OR update existing user
+    try {
       if (!user) {
         console.log(`Creating new user for Pro activation: ${userId}`);
         user = await storage.createUser({
@@ -531,30 +672,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscriptionTier: plan
         });
       } else {
-        // Update existing user to Pro
+        // Update existing user to Pro with proper validation
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + (plan === 'pro_yearly' ? 12 : 1));
+        
         user = await storage.updateUserSubscription(user.id, {
           subscriptionStatus: 'active',
           subscriptionTier: plan,
-          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          subscriptionCurrentPeriodEnd: endDate
         });
       }
       
-      console.log(`🔥 URGENT: Manual Pro activation completed for user ${userId} (ID: ${user.id})`);
-      res.json({ 
-        success: true, 
-        message: "Pro subscription activated successfully",
-        user: {
-          id: user.id,
-          subscriptionStatus: user.subscriptionStatus,
-          subscriptionTier: user.subscriptionTier
-        },
-        plan: plan
+      // Verify the Pro activation was successful
+      const verifyUser = await storage.getUser(user.id);
+      if (!verifyUser || verifyUser.subscriptionStatus !== 'active') {
+        throw new Error('Pro activation verification failed');
+      }
+      
+      console.log(`🔥 URGENT: Manual Pro activation completed and verified for user ${userId} (ID: ${user.id})`);
+      
+    } catch (activationError) {
+      console.error('Pro activation error:', activationError);
+      return res.status(500).json({ 
+        error: 'Failed to activate Pro subscription',
+        code: 'PRO_ACTIVATION_FAILED',
+        details: activationError.message
       });
-    } catch (error) {
-      console.error('Error activating Pro:', error);
-      res.status(500).json({ error: `Failed to activate Pro subscription: ${error.message}` });
     }
-  });
+    
+    res.json({ 
+      success: true, 
+      message: "Pro subscription activated successfully",
+      user: {
+        id: user.id,
+        subscriptionStatus: user.subscriptionStatus,
+        subscriptionTier: user.subscriptionTier,
+        subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd
+      },
+      plan: plan
+    });
+  }));
 
   // Stripe webhook endpoint for trial signup completion
   app.post("/api/webhooks/stripe", async (req, res) => {
