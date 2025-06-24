@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import { storage } from "./storage";
 
-// Input validation schemas
+// Comprehensive input validation schemas
 const validateCreateCheckoutSession = (req: any, res: any, next: any) => {
   const { plan, userId } = req.body;
   
@@ -16,8 +16,49 @@ const validateCreateCheckoutSession = (req: any, res: any, next: any) => {
     return res.status(400).json({ error: "Invalid plan selected" });
   }
   
-  if (typeof userId !== 'string' || userId.length < 1) {
-    return res.status(400).json({ error: "Invalid user ID" });
+  if (typeof userId !== 'string' || userId.length < 1 || userId.length > 100) {
+    return res.status(400).json({ error: "Invalid user ID format" });
+  }
+  
+  // Sanitize userId to prevent injection
+  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
+    return res.status(400).json({ error: "User ID contains invalid characters" });
+  }
+  
+  next();
+};
+
+const validateUserRegistration = (req: any, res: any, next: any) => {
+  const { uid, email, username } = req.body;
+  
+  if (!uid || !email) {
+    return res.status(400).json({ error: "Firebase UID and email are required" });
+  }
+  
+  if (typeof uid !== 'string' || uid.length < 1 || uid.length > 100) {
+    return res.status(400).json({ error: "Invalid Firebase UID format" });
+  }
+  
+  if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+  
+  if (username && (typeof username !== 'string' || username.length > 50)) {
+    return res.status(400).json({ error: "Username too long" });
+  }
+  
+  next();
+};
+
+const validateUserId = (req: any, res: any, next: any) => {
+  const userId = req.params.userId || req.body.userId;
+  
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+  
+  if (typeof userId !== 'string' || userId.length < 1 || userId.length > 100) {
+    return res.status(400).json({ error: "Invalid user ID format" });
   }
   
   next();
@@ -74,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User registration endpoint
-  app.post("/api/register-user", async (req, res) => {
+  app.post("/api/register-user", validateUserRegistration, async (req, res) => {
     try {
       const { uid, email, username } = req.body;
 
@@ -404,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual trial activation endpoint (for testing/emergency use)
-  app.post("/api/start-trial", async (req, res) => {
+  app.post("/api/start-trial", validateUserId, async (req, res) => {
     try {
       const { userId } = req.body;
 
@@ -444,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // URGENT: Manual Pro activation endpoint for paid users
-  app.post("/api/activate-pro", async (req, res) => {
+  app.post("/api/activate-pro", validateUserId, async (req, res) => {
     try {
       const { userId, plan = 'pro_monthly' } = req.body;
 
@@ -503,15 +544,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       try {
         if (!process.env.STRIPE_WEBHOOK_SECRET) {
-          console.log('WEBHOOK ERROR: Webhook secret not configured');
-          return res.status(400).send('Webhook secret not configured');
+          console.error('CRITICAL: Webhook secret not configured - this is required for security');
+          return res.status(500).send('Server configuration error');
         }
         
         event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
         console.log('WEBHOOK: Signature verified for event:', event.type);
       } catch (err: any) {
-        console.log(`WEBHOOK ERROR: Signature verification failed:`, err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
+        console.error(`WEBHOOK SECURITY ERROR: Signature verification failed:`, err.message);
+        return res.status(401).send('Unauthorized webhook request');
       }
 
       // Handle the event
