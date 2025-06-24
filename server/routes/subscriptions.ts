@@ -362,55 +362,17 @@ export function registerSubscriptionRoutes(app: Express) {
     }
   });
 
-  // URGENT: Manual Pro activation endpoint for paid users
+  // SECURITY: Disabled manual Pro activation endpoint - CRITICAL VULNERABILITY FIXED
   app.post("/api/activate-pro", async (req, res) => {
-    try {
-      const { userId, plan = 'pro_monthly' } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-      }
-
-      // Find user by Firebase UID or create if doesn't exist
-      let user = await storage.getUserByFirebaseUid(userId);
-      if (!user && !isNaN(parseInt(userId))) {
-        user = await storage.getUser(parseInt(userId));
-      }
-
-      // If user doesn't exist, create them immediately
-      if (!user) {
-        console.log(`Creating new user for Pro activation: ${userId}`);
-        user = await storage.createUser({
-          username: `user_${userId.substring(0, 8)}`,
-          email: `${userId}@firebase.temp`,
-          firebaseUid: userId,
-          role: "user",
-          subscriptionStatus: 'active',
-          subscriptionTier: plan
-        });
-      } else {
-        // Update existing user to Pro
-        user = await storage.updateUserSubscription(user.id, {
-          subscriptionStatus: 'active',
-          subscriptionTier: plan,
-          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        });
-      }
-      
-      console.log(`🔥 URGENT: Manual Pro activation completed for user ${userId} (ID: ${user.id})`);
-      res.json({ 
-        success: true, 
-        message: "Pro subscription activated successfully",
-        user: {
-          id: user.id,
-          subscriptionStatus: user.subscriptionStatus,
-          subscriptionTier: user.subscriptionTier
-        },
-        plan: plan
-      });
-    } catch (error) {
-      console.error('Error activating Pro:', error);
-      res.status(500).json({ error: `Failed to activate Pro subscription: ${error.message}` });
-    }
+    // SECURITY BLOCK: This endpoint has been disabled due to critical security vulnerability
+    // allowing unauthorized Pro access. Only legitimate Stripe webhook activations are allowed.
+    
+    console.error(`🚨 SECURITY ALERT: Unauthorized attempt to access disabled Pro activation endpoint from IP: ${req.ip}`);
+    
+    res.status(403).json({ 
+      success: false,
+      error: "This endpoint has been disabled for security reasons. Pro subscriptions can only be activated through legitimate payment verification.",
+      securityNote: "Unauthorized access attempts are logged and monitored."
+    });
   });
 }
