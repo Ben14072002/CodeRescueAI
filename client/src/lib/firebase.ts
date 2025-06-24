@@ -52,6 +52,11 @@ try {
 export { auth, googleProvider };
 
 // Configure Google provider
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
+if (googleProvider) {
+  googleProvider.setCustomParameters({
+    prompt: 'select_account',
+    // Add parameters to help with mobile compatibility
+    'include_granted_scopes': 'true',
+    'access_type': 'online'
+  });
+}

@@ -70,11 +70,26 @@ export function useAuth() {
       .then((result) => {
         if (result?.user) {
           console.log('Google sign-in successful via redirect');
+          // Clear the redirect flag
+          sessionStorage.removeItem('googleAuthRedirect');
+        } else {
+          // Check if we were expecting a redirect result
+          const wasRedirectInitiated = sessionStorage.getItem('googleAuthRedirect');
+          if (wasRedirectInitiated) {
+            console.log('Redirect was initiated but no result found');
+            sessionStorage.removeItem('googleAuthRedirect');
+          }
         }
       })
       .catch((error) => {
         console.error('Google sign-in redirect error:', error);
-        setError(error.message);
+        sessionStorage.removeItem('googleAuthRedirect');
+        
+        // Don't set error for common redirect issues that are user-initiated
+        if (error.code !== 'auth/popup-closed-by-user' && 
+            error.code !== 'auth/user-cancelled') {
+          setError(`Authentication failed: ${error.message}`);
+        }
       });
 
     return unsubscribe;
@@ -106,17 +121,34 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     try {
       setError(null);
-      // Try popup first, fallback to redirect if popup fails
+      
+      // Check if we're on mobile or in an environment where popups might not work
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        console.log('Mobile device detected, using redirect flow');
+        // Store a flag to indicate we initiated the redirect
+        sessionStorage.setItem('googleAuthRedirect', 'true');
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      }
+      
+      // Desktop: try popup first, fallback to redirect if popup fails
       try {
         const result = await signInWithPopup(auth, googleProvider);
         return result;
       } catch (popupError: any) {
-        // If popup is blocked or unauthorized domain, use redirect
+        console.log('Popup failed:', popupError.code, popupError.message);
+        
+        // If popup is blocked, cancelled, or unauthorized domain, use redirect
         if (popupError.code === 'auth/unauthorized-domain' || 
-            popupError.code === 'auth/popup-blocked') {
-          console.log('Popup blocked or unauthorized domain, using redirect...');
+            popupError.code === 'auth/popup-blocked' ||
+            popupError.code === 'auth/popup-closed-by-user' ||
+            popupError.code === 'auth/cancelled-popup-request') {
+          console.log('Using redirect flow as fallback');
+          // Store a flag to indicate we initiated the redirect
+          sessionStorage.setItem('googleAuthRedirect', 'true');
           await signInWithRedirect(auth, googleProvider);
-          // signInWithRedirect doesn't return a result, user will be redirected
           return null;
         }
         throw popupError;
