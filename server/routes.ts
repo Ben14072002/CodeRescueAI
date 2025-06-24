@@ -4,117 +4,156 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import { storage } from "./storage";
 
-// Rate limiting middleware
-const rateLimitMap = new Map();
-
-const createRateLimit = (windowMs: number, maxRequests: number) => {
-  return (req: any, res: any, next: any) => {
-    const clientId = req.ip || 'unknown';
-    const now = Date.now();
-    const windowStart = now - windowMs;
-    
-    if (!rateLimitMap.has(clientId)) {
-      rateLimitMap.set(clientId, []);
+// Enhanced logging utility
+const logger = {
+  info: (message: string, data?: any) => {
+    console.log(`INFO [${new Date().toISOString()}]: ${message}`, data ? JSON.stringify(data, null, 2) : '');
+  },
+  error: (message: string, error?: any, context?: any) => {
+    console.error(`ERROR [${new Date().toISOString()}]: ${message}`, {
+      error: error?.message || error,
+      stack: error?.stack,
+      context
+    });
+  },
+  warn: (message: string, data?: any) => {
+    console.warn(`WARN [${new Date().toISOString()}]: ${message}`, data ? JSON.stringify(data, null, 2) : '');
+  },
+  debug: (message: string, data?: any) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`DEBUG [${new Date().toISOString()}]: ${message}`, data ? JSON.stringify(data, null, 2) : '');
     }
-    
-    const requests = rateLimitMap.get(clientId);
-    
-    // Remove old requests outside the window
-    const validRequests = requests.filter((timestamp: number) => timestamp > windowStart);
-    
-    if (validRequests.length >= maxRequests) {
-      return res.status(429).json({
-        error: 'Too many requests',
-        retryAfter: Math.ceil((validRequests[0] + windowMs - now) / 1000)
-      });
-    }
-    
-    validRequests.push(now);
-    rateLimitMap.set(clientId, validRequests);
-    
-    next();
-  };
+  }
 };
 
-// Different rate limits for different endpoints
-const generalRateLimit = createRateLimit(60000, 100); // 100 requests per minute
-const authRateLimit = createRateLimit(300000, 10); // 10 requests per 5 minutes for auth
-const paymentRateLimit = createRateLimit(60000, 5); // 5 payment requests per minute
+// Data integrity validation
+const validateDatabaseUser = (user: any) => {
+  const requiredFields = ['id', 'email', 'username', 'createdAt'];
+  const missingFields = requiredFields.filter(field => !user[field]);
+  
+  if (missingFields.length > 0) {
+    throw new Error(`Database integrity error: Missing required fields: ${missingFields.join(', ')}`);
+  }
+  
+  // Validate email format
+  if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+    throw new Error('Database integrity error: Invalid email format');
+  }
+  
+  return true;
+};
 
-// Global error handling middleware
+// Global error handling middleware with enhanced error classification
 const errorHandler = (err: any, req: any, res: any, next: any) => {
-  console.error('Error Handler:', {
-    message: err.message,
-    stack: err.stack,
+  const errorId = `ERR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  logger.error('Request failed', err, {
+    errorId,
     url: req.url,
     method: req.method,
-    timestamp: new Date().toISOString()
+    userAgent: req.headers['user-agent'],
+    ip: req.ip,
+    body: req.method !== 'GET' ? req.body : undefined
   });
 
-  // Handle specific error types
+  // Handle specific error types with detailed responses
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       error: 'Validation failed',
-      details: err.message
+      details: err.message,
+      errorId,
+      timestamp: new Date().toISOString()
     });
   }
 
-  if (err.code === 'ECONNREFUSED') {
+  if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND') {
     return res.status(503).json({
-      error: 'Database connection failed',
-      code: 'DB_CONNECTION_ERROR'
+      error: 'Service temporarily unavailable',
+      code: 'SERVICE_UNAVAILABLE',
+      errorId,
+      timestamp: new Date().toISOString()
     });
   }
 
-  if (err.type === 'StripeInvalidRequestError') {
+  if (err.type === 'StripeInvalidRequestError' || err.type === 'StripeCardError') {
     return res.status(400).json({
-      error: 'Payment processing error',
-      code: 'STRIPE_ERROR'
+      error: 'Payment processing failed',
+      code: 'PAYMENT_ERROR',
+      details: err.message,
+      errorId,
+      timestamp: new Date().toISOString()
     });
   }
 
-  // Generic server error
+  if (err.name === 'UnauthorizedError' || err.status === 401) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      code: 'AUTH_REQUIRED',
+      errorId,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  if (err.status === 403) {
+    return res.status(403).json({
+      error: 'Access denied',
+      code: 'ACCESS_DENIED',
+      errorId,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  if (err.status === 404) {
+    return res.status(404).json({
+      error: 'Resource not found',
+      code: 'NOT_FOUND',
+      errorId,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Database-specific errors
+  if (err.message?.includes('duplicate key') || err.code === '23505') {
+    return res.status(409).json({
+      error: 'Resource already exists',
+      code: 'DUPLICATE_RESOURCE',
+      errorId,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  if (err.message?.includes('foreign key') || err.code === '23503') {
+    return res.status(400).json({
+      error: 'Invalid reference',
+      code: 'INVALID_REFERENCE',
+      errorId,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Rate limiting
+  if (err.status === 429) {
+    return res.status(429).json({
+      error: 'Too many requests',
+      code: 'RATE_LIMITED',
+      errorId,
+      timestamp: new Date().toISOString(),
+      retryAfter: err.retryAfter || 60
+    });
+  }
+
+  // Generic server error with minimal information exposure
   res.status(500).json({
     error: 'Internal server error',
     code: 'INTERNAL_ERROR',
+    errorId,
     timestamp: new Date().toISOString()
   });
 };
 
-// Database connection validation
-const validateDatabaseConnection = async (req: any, res: any, next: any) => {
-  try {
-    // Simple database health check
-    await storage.healthCheck();
-    next();
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(503).json({
-      error: 'Database temporarily unavailable',
-      code: 'DB_CONNECTION_ERROR'
-    });
-  }
-};
-
-// Enhanced async route wrapper with timeout and better error handling
-const asyncHandler = (fn: any, timeoutMs: number = 30000) => (req: any, res: any, next: any) => {
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
-  });
-
-  Promise.race([
-    Promise.resolve(fn(req, res, next)),
-    timeoutPromise
-  ]).catch((error) => {
-    if (error.message === 'Request timeout') {
-      res.status(504).json({
-        error: 'Request timeout',
-        code: 'REQUEST_TIMEOUT'
-      });
-    } else {
-      next(error);
-    }
-  });
+// Async route wrapper to catch async errors
+const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 // Comprehensive input validation schemas
@@ -174,25 +213,6 @@ const validateUserId = (req: any, res: any, next: any) => {
     return res.status(400).json({ error: "Invalid user ID format" });
   }
   
-  // Sanitize userId to prevent injection
-  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
-    return res.status(400).json({ error: "User ID contains invalid characters" });
-  }
-  
-  next();
-};
-
-const validateSubscriptionUpdate = (req: any, res: any, next: any) => {
-  const { plan, status } = req.body;
-  
-  if (plan && !['pro_monthly', 'pro_yearly', 'trial', 'free'].includes(plan)) {
-    return res.status(400).json({ error: "Invalid subscription plan" });
-  }
-  
-  if (status && !['active', 'trialing', 'canceled', 'incomplete', 'past_due'].includes(status)) {
-    return res.status(400).json({ error: "Invalid subscription status" });
-  }
-  
   next();
 };
 
@@ -242,48 +262,90 @@ const PRICING_PLANS = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
-  app.get("/api/health", asyncHandler(async (req, res) => {
-    try {
-      await storage.healthCheck();
-      res.json({ 
-        status: "ok", 
-        timestamp: new Date().toISOString(),
-        database: "connected"
-      });
-    } catch (error) {
-      res.status(503).json({ 
-        status: "degraded", 
-        timestamp: new Date().toISOString(),
-        database: "disconnected",
-        error: "Database health check failed"
-      });
-    }
+  app.get("/api/health", asyncHandler((req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
   }));
 
-  // User registration endpoint
-  app.post("/api/register-user", authRateLimit, validateUserRegistration, validateDatabaseConnection, asyncHandler(async (req, res) => {
+  // User registration endpoint with enhanced error handling
+  app.post("/api/register-user", validateUserRegistration, asyncHandler(async (req, res) => {
     const { uid, email, username } = req.body;
 
-    // Check if user already exists
-    let existingUser = await storage.getUserByFirebaseUid(uid);
-    if (existingUser) {
-      return res.json({ success: true, user: existingUser, message: "User already exists" });
+    try {
+      logger.info('User registration attempt', { uid, email, username });
+
+      // Check if user already exists by Firebase UID
+      let existingUser = await storage.getUserByFirebaseUid(uid);
+      if (existingUser) {
+        // Validate existing user data integrity
+        validateDatabaseUser(existingUser);
+        logger.info('Existing user found during registration', { userId: existingUser.id, uid });
+        return res.json({ 
+          success: true, 
+          user: existingUser, 
+          message: "User already exists",
+          isExisting: true
+        });
+      }
+
+      // Check if email is already in use by different user
+      const existingEmailUser = await storage.getUserByEmail(email);
+      if (existingEmailUser && existingEmailUser.firebaseUid !== uid) {
+        logger.warn('Email already registered to different user', { email, existingUid: existingEmailUser.firebaseUid, attemptedUid: uid });
+        return res.status(409).json({ 
+          error: "Email is already registered to a different account",
+          code: "EMAIL_CONFLICT"
+        });
+      }
+
+      // Create new user with validation
+      const userData = {
+        username: username || `user_${uid.substring(0, 8)}`,
+        email: email,
+        role: "user" as const,
+        firebaseUid: uid
+      };
+
+      const newUser = await storage.createUser(userData);
+      
+      // Validate created user
+      validateDatabaseUser(newUser);
+      
+      logger.info('User registered successfully', { 
+        userId: newUser.id, 
+        uid, 
+        email,
+        username: newUser.username
+      });
+      
+      res.json({ 
+        success: true, 
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+          role: newUser.role,
+          subscriptionStatus: newUser.subscriptionStatus,
+          subscriptionTier: newUser.subscriptionTier
+        }, 
+        message: "User registered successfully",
+        isExisting: false
+      });
+    } catch (error: any) {
+      logger.error('User registration failed', error, { uid, email, username });
+      
+      if (error.message?.includes('duplicate key') || error.code === '23505') {
+        return res.status(409).json({
+          error: "User with this information already exists",
+          code: "DUPLICATE_USER"
+        });
+      }
+      
+      throw error; // Re-throw for global error handler
     }
-
-    // Create new user with Firebase UID
-    const newUser = await storage.createUser({
-      username: username || `user_${uid.substring(0, 8)}`,
-      email: email,
-      role: "user",
-      firebaseUid: uid
-    });
-
-    console.log(`✅ User registered: ${newUser.id} (Firebase UID: ${uid})`);
-    res.json({ success: true, user: newUser, message: "User registered successfully" });
   }));
 
   // Stripe regular checkout session creation (for paid subscriptions)
-  app.post("/api/create-checkout-session", paymentRateLimit, validateCreateCheckoutSession, validateDatabaseConnection, asyncHandler(async (req, res) => {
+  app.post("/api/create-checkout-session", validateCreateCheckoutSession, asyncHandler(async (req, res) => {
     const { plan, userId } = req.body;
 
     // Find user by Firebase UID first, then fallback to database ID
@@ -566,101 +628,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual trial activation endpoint (for testing/emergency use)
-  app.post("/api/start-trial", authRateLimit, validateUserId, validateDatabaseConnection, asyncHandler(async (req, res) => {
-    const { userId } = req.body;
-
-    // Find user by Firebase UID with proper error handling
-    let user;
+  app.post("/api/start-trial", validateUserId, async (req, res) => {
     try {
-      user = await storage.getUserByFirebaseUid(userId);
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Find user by Firebase UID
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
-    } catch (dbError) {
-      console.error('Database error during user lookup:', dbError);
-      return res.status(503).json({ error: "Database temporarily unavailable" });
-    }
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Check trial eligibility with proper validation
-    let eligibility;
-    try {
-      eligibility = await storage.isTrialEligible(user.id);
-    } catch (dbError) {
-      console.error('Database error during eligibility check:', dbError);
-      return res.status(503).json({ error: "Unable to verify trial eligibility" });
-    }
-
-    if (!eligibility.eligible) {
-      return res.status(400).json({ 
-        error: `Trial not available: ${eligibility.reason}`,
-        code: 'TRIAL_NOT_ELIGIBLE'
-      });
-    }
-
-    // Activate trial with transaction-like behavior
-    let updatedUser;
-    try {
-      updatedUser = await storage.startTrial(user.id);
-      
-      // Verify the trial was actually activated
-      const verifyTrial = await storage.checkTrialStatus(user.id);
-      if (!verifyTrial.isTrialActive) {
-        throw new Error('Trial activation verification failed');
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
       }
-      
-      console.log(`✅ Manual trial activated and verified for user ${userId} (ID: ${user.id})`);
-    } catch (activationError) {
-      console.error('Trial activation error:', activationError);
-      return res.status(500).json({ 
-        error: 'Failed to activate trial',
-        code: 'TRIAL_ACTIVATION_FAILED'
-      });
-    }
-    
-    res.json({ 
-      success: true, 
-      message: "Trial activated successfully",
-      user: {
-        id: updatedUser.id,
-        trialStartDate: updatedUser.trialStartDate,
-        trialEndDate: updatedUser.trialEndDate
+
+      // Check trial eligibility
+      const eligibility = await storage.isTrialEligible(user.id);
+      if (!eligibility.eligible) {
+        return res.status(400).json({ error: `Trial not available: ${eligibility.reason}` });
       }
-    });
-  }));
+
+      // Activate trial
+      const updatedUser = await storage.startTrial(user.id);
+      
+      console.log(`✅ Manual trial activated for user ${userId} (ID: ${user.id})`);
+      res.json({ 
+        success: true, 
+        message: "Trial activated successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Error starting trial:', error);
+      res.status(500).json({ error: 'Failed to start trial' });
+    }
+  });
 
   // URGENT: Manual Pro activation endpoint for paid users
-  app.post("/api/activate-pro", authRateLimit, validateUserId, validateSubscriptionUpdate, validateDatabaseConnection, asyncHandler(async (req, res) => {
-    const { userId, plan = 'pro_monthly' } = req.body;
-
-    // Validate plan format
-    if (!['pro_monthly', 'pro_yearly'].includes(plan)) {
-      return res.status(400).json({ 
-        error: "Invalid plan. Must be 'pro_monthly' or 'pro_yearly'",
-        code: 'INVALID_PLAN'
-      });
-    }
-
-    // Find user by Firebase UID with comprehensive error handling
-    let user;
+  app.post("/api/activate-pro", validateUserId, async (req, res) => {
     try {
-      user = await storage.getUserByFirebaseUid(userId);
+      const { userId, plan = 'pro_monthly' } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Find user by Firebase UID or create if doesn't exist
+      let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
         user = await storage.getUser(parseInt(userId));
       }
-    } catch (dbError) {
-      console.error('Database error during Pro activation user lookup:', dbError);
-      return res.status(503).json({ 
-        error: "Database temporarily unavailable",
-        code: 'DB_CONNECTION_ERROR'
-      });
-    }
 
-    // Create user if doesn't exist OR update existing user
-    try {
+      // If user doesn't exist, create them immediately
       if (!user) {
         console.log(`Creating new user for Pro activation: ${userId}`);
         user = await storage.createUser({
@@ -672,65 +694,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscriptionTier: plan
         });
       } else {
-        // Update existing user to Pro with proper validation
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + (plan === 'pro_yearly' ? 12 : 1));
-        
+        // Update existing user to Pro
         user = await storage.updateUserSubscription(user.id, {
           subscriptionStatus: 'active',
           subscriptionTier: plan,
-          subscriptionCurrentPeriodEnd: endDate
+          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
         });
       }
       
-      // Verify the Pro activation was successful
-      const verifyUser = await storage.getUser(user.id);
-      if (!verifyUser || verifyUser.subscriptionStatus !== 'active') {
-        throw new Error('Pro activation verification failed');
+      console.log(`🔥 URGENT: Manual Pro activation completed for user ${userId} (ID: ${user.id})`);
+      res.json({ 
+        success: true, 
+        message: "Pro subscription activated successfully",
+        user: {
+          id: user.id,
+          subscriptionStatus: user.subscriptionStatus,
+          subscriptionTier: user.subscriptionTier
+        },
+        plan: plan
+      });
+    } catch (error) {
+      console.error('Error activating Pro:', error);
+      res.status(500).json({ error: `Failed to activate Pro subscription: ${error.message}` });
+    }
+  });
+
+  // Stripe webhook endpoint with enhanced security and error handling
+  app.post("/api/webhooks/stripe", asyncHandler(async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    // Enhanced webhook signature verification
+    try {
+      if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        logger.error('CRITICAL: Webhook secret not configured - this is required for security');
+        return res.status(500).json({ 
+          error: 'Server configuration error',
+          code: 'WEBHOOK_CONFIG_ERROR'
+        });
       }
       
-      console.log(`🔥 URGENT: Manual Pro activation completed and verified for user ${userId} (ID: ${user.id})`);
-      
-    } catch (activationError) {
-      console.error('Pro activation error:', activationError);
-      return res.status(500).json({ 
-        error: 'Failed to activate Pro subscription',
-        code: 'PRO_ACTIVATION_FAILED',
-        details: activationError.message
+      event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
+      logger.info('Webhook signature verified', { eventType: event.type, eventId: event.id });
+    } catch (err: any) {
+      logger.error('Webhook signature verification failed', err, { 
+        signature: sig ? 'present' : 'missing',
+        bodyLength: req.body?.length || 0
+      });
+      return res.status(401).json({ 
+        error: 'Webhook signature verification failed',
+        code: 'INVALID_SIGNATURE'
       });
     }
-    
-    res.json({ 
-      success: true, 
-      message: "Pro subscription activated successfully",
-      user: {
-        id: user.id,
-        subscriptionStatus: user.subscriptionStatus,
-        subscriptionTier: user.subscriptionTier,
-        subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd
-      },
-      plan: plan
-    });
-  }));
-
-  // Stripe webhook endpoint for trial signup completion
-  app.post("/api/webhooks/stripe", async (req, res) => {
-    try {
-      const sig = req.headers['stripe-signature'];
-      let event;
-
-      try {
-        if (!process.env.STRIPE_WEBHOOK_SECRET) {
-          console.error('CRITICAL: Webhook secret not configured - this is required for security');
-          return res.status(500).send('Server configuration error');
-        }
-        
-        event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
-        console.log('WEBHOOK: Signature verified for event:', event.type);
-      } catch (err: any) {
-        console.error(`WEBHOOK SECURITY ERROR: Signature verification failed:`, err.message);
-        return res.status(401).send('Unauthorized webhook request');
-      }
 
       // Handle the event
       switch (event.type) {
@@ -1014,11 +1029,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get subscription status for a user with enhanced Pro detection
-  app.get("/api/subscription-status/:userId", async (req, res) => {
+  // Get subscription status for a user with enhanced error handling and validation
+  app.get("/api/subscription-status/:userId", asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    
+    logger.debug('Subscription status check', { userId });
+
+    // Set cache headers for frequently accessed endpoint
+    res.set({
+      'Cache-Control': 'private, max-age=30', // Cache for 30 seconds
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
     try {
-      const { userId } = req.params;
-      
       // Find user by Firebase UID first, then by ID
       let user = await storage.getUserByFirebaseUid(userId);
       if (!user && !isNaN(parseInt(userId))) {
@@ -1026,68 +1050,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!user) {
+        logger.warn('User not found for subscription status check', { userId });
         return res.json({
           tier: "free",
           status: "none",
-          currentPeriodEnd: null
+          currentPeriodEnd: null,
+          userExists: false
         });
       }
 
-      // Check trial status
-      const trialStatus = await storage.checkTrialStatus(user.id);
+      // Validate user data integrity
+      validateDatabaseUser(user);
+
+      // Check trial status with error handling
+      let trialStatus;
+      try {
+        trialStatus = await storage.checkTrialStatus(user.id);
+      } catch (trialError) {
+        logger.error('Failed to check trial status', trialError, { userId: user.id });
+        trialStatus = { isTrialActive: false, daysRemaining: 0 };
+      }
       
-      // Enhanced Pro detection for paid users with proper validation
+      // Enhanced Pro detection with comprehensive error handling
       let finalTier = user.subscriptionTier || 'free';
       let finalStatus = user.subscriptionStatus || 'none';
       let autoUpgraded = false;
+      let stripeVerificationError = null;
 
-      // Verify Stripe subscription status before auto-upgrade
+      // Verify Stripe subscription status with enhanced error handling
       if (user.stripeSubscriptionId && finalTier === 'free') {
         try {
-          const stripeSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          logger.debug('Verifying Stripe subscription', { 
+            userId: user.id, 
+            stripeSubscriptionId: user.stripeSubscriptionId 
+          });
+          
+          const stripeSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
+            expand: ['latest_invoice']
+          });
           
           // Only auto-upgrade if Stripe confirms active subscription
           if (stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing') {
-            console.log(`VALIDATED FIX: User ${userId} has verified active Stripe subscription ${user.stripeSubscriptionId}. Auto-upgrading to Pro.`);
+            logger.info('Auto-upgrading user with verified Stripe subscription', {
+              userId: user.id,
+              stripeStatus: stripeSubscription.status,
+              subscriptionId: user.stripeSubscriptionId
+            });
             
             finalTier = stripeSubscription.status === 'trialing' ? 'trial' : 'pro_monthly';
             finalStatus = stripeSubscription.status;
             autoUpgraded = true;
             
             // Update in database with verified Stripe data
-            await storage.updateUserSubscription(user.id, {
-              subscriptionTier: finalTier,
-              subscriptionStatus: finalStatus,
-              subscriptionCurrentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000)
-            });
+            try {
+              await storage.updateUserSubscription(user.id, {
+                subscriptionTier: finalTier,
+                subscriptionStatus: finalStatus,
+                subscriptionCurrentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000)
+              });
+              
+              logger.info('Database updated with verified Stripe subscription data', { userId: user.id });
+            } catch (updateError) {
+              logger.error('Failed to update user subscription in database', updateError, { userId: user.id });
+              // Continue with response even if DB update fails
+            }
           } else {
-            console.log(`SECURITY: User ${userId} has inactive Stripe subscription ${stripeSubscription.status}. Not upgrading.`);
+            logger.warn('User has inactive Stripe subscription', {
+              userId: user.id,
+              stripeStatus: stripeSubscription.status,
+              subscriptionId: user.stripeSubscriptionId
+            });
           }
-        } catch (stripeError) {
-          console.error(`SECURITY: Failed to verify Stripe subscription for user ${userId}:`, stripeError);
+        } catch (stripeError: any) {
+          logger.error('Failed to verify Stripe subscription', stripeError, { 
+            userId: user.id,
+            stripeSubscriptionId: user.stripeSubscriptionId
+          });
+          stripeVerificationError = stripeError.message;
           // Don't auto-upgrade if we can't verify with Stripe
         }
       }
 
-      res.json({
+      const response = {
         tier: finalTier,
         status: finalStatus,
         currentPeriodEnd: user.subscriptionCurrentPeriodEnd,
         stripeSubscriptionId: user.stripeSubscriptionId,
         stripeCustomerId: user.stripeCustomerId,
         autoUpgraded: autoUpgraded,
+        userExists: true,
         trial: {
           isActive: trialStatus.isTrialActive,
           daysRemaining: trialStatus.daysRemaining,
           startDate: user.trialStartDate,
           endDate: user.trialEndDate
-        }
-      });
-    } catch (error) {
-      console.error('Error getting subscription status:', error);
-      res.status(500).json({ error: "Failed to get subscription status" });
+        },
+        ...(stripeVerificationError && { stripeVerificationError })
+      };
+
+      logger.debug('Subscription status response', { userId: user.id, response });
+      res.json(response);
+    } catch (error: any) {
+      logger.error('Subscription status check failed', error, { userId });
+      
+      if (error.message?.includes('Database integrity error')) {
+        return res.status(500).json({ 
+          error: "Data integrity issue detected",
+          code: "DATA_INTEGRITY_ERROR"
+        });
+      }
+      
+      throw error; // Re-throw for global error handler
     }
-  });
+  }));
 
   // Test endpoint to simulate user creation and webhook events for development
   app.post("/api/test-webhook", async (req, res) => {
