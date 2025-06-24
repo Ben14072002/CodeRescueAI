@@ -19,28 +19,49 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      
-      // Register user in backend when they authenticate
-      if (user) {
+    if (!auth) {
+      console.log('⚠️ Firebase auth not available, skipping auth state listener');
+      setLoading(false);
+      return;
+    }
+
+    console.log('🔄 Setting up Firebase auth state listener');
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('🔄 Auth state changed:', firebaseUser ? `User: ${firebaseUser.uid}` : 'No user');
+
+      if (firebaseUser) {
         try {
-          await fetch('/api/register-user', {
+          console.log('📝 Registering user in backend:', {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName
+          });
+
+          // Register user in our backend
+          const response = await fetch('/api/register-user', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              uid: user.uid,
-              email: user.email,
-              username: user.displayName || user.email?.split('@')[0] || 'user'
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              username: firebaseUser.displayName || firebaseUser.email?.split('@')[0]
             })
           });
+
+          if (response.ok) {
+            const data = await response.json();
+            setUser(firebaseUser);
+            console.log('✅ User registered/logged in successfully:', data.user);
+          } else {
+            console.error('❌ User registration failed:', response.status, response.statusText);
+          }
         } catch (error) {
-          console.error('Failed to register user in backend:', error);
+          console.error('❌ Error during user registration:', error);
         }
+      } else {
+        setUser(null);
+        console.log('👋 User logged out');
       }
-      
       setLoading(false);
     });
 

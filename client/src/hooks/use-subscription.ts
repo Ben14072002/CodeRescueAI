@@ -17,12 +17,21 @@ export function useSubscription() {
     queryKey: ['/api/subscription-status', user?.uid],
     queryFn: async () => {
       if (!user?.uid) return null;
-      
-      const response = await fetch(`/api/subscription-status/${user.uid}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch subscription status');
+
+      try {
+        console.log('🔄 Fetching subscription status for user:', user.uid);
+        const response = await fetch(`/api/subscription-status/${user.uid}`);
+        if (!response.ok) {
+          console.error('❌ Subscription status fetch failed:', response.status, response.statusText);
+          throw new Error('Failed to fetch subscription status');
+        }
+        const data = await response.json() as Promise<SubscriptionData>;
+        console.log('✅ Subscription status updated:', data);
+        return data;
+      } catch (error) {
+        console.error('❌ Error fetching subscription status:', error);
+        throw error;
       }
-      return response.json() as Promise<SubscriptionData>;
     },
     enabled: !!user?.uid,
     staleTime: 0, // Always consider data stale
@@ -36,12 +45,21 @@ export function useSubscription() {
     queryKey: ['/api/trial-status', user?.uid],
     queryFn: async () => {
       if (!user?.uid) return { isTrialActive: false, daysRemaining: 0 };
-      
-      const response = await fetch(`/api/trial-status/${user.uid}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch trial status');
+
+      try {
+        console.log('🔄 Fetching trial status for user:', user.uid);
+        const response = await fetch(`/api/trial-status/${user.uid}`);
+        if (!response.ok) {
+          console.error('❌ Trial status fetch failed:', response.status, response.statusText);
+          throw new Error('Failed to fetch trial status');
+        }
+        const data = await response.json() as Promise<{ isTrialActive: boolean; daysRemaining: number }>;
+        console.log('✅ Trial status updated:', data);
+        return data;
+      } catch (error) {
+        console.error('❌ Error fetching trial status:', error);
+        throw error;
       }
-      return response.json() as Promise<{ isTrialActive: boolean; daysRemaining: number }>;
     },
     enabled: !!user?.uid,
     staleTime: 0, // Always consider data stale
@@ -59,21 +77,21 @@ export function useSubscription() {
                         subscriptionData.tier === 'pro_yearly' ||
                         subscriptionData.tier === 'pro') &&
                        subscriptionData.status === 'active';
-      
+
       // Check if user has Stripe subscription (indicates payment)
       const hasStripeSubscription = (subscriptionData as any).stripeSubscriptionId;
-      
+
       // Trial users also get Pro access during their trial period
       const hasTrialAccess = trialData.isTrialActive;
-      
+
       // Check if server auto-upgraded user
       const wasAutoUpgraded = (subscriptionData as any).autoUpgraded;
-      
+
       // LIBERAL PRO ACCESS: Grant Pro if any indicator suggests payment
       const hasProAccess = isPaidPro || hasTrialAccess || hasStripeSubscription;
-      
+
       setIsProUser(hasProAccess);
-      
+
       console.log('🔍 SUBSCRIPTION ANALYSIS:', {
         tier: subscriptionData.tier,
         status: subscriptionData.status,
@@ -83,7 +101,7 @@ export function useSubscription() {
         hasProAccess,
         autoUpgraded: wasAutoUpgraded
       });
-      
+
       // If auto-upgraded by server, log success and force refresh
       if (wasAutoUpgraded) {
         console.log('✅ CRITICAL FIX APPLIED: User was automatically upgraded to Pro after payment detection');
@@ -99,12 +117,12 @@ export function useSubscription() {
     const upgradeStatus = urlParams.get('upgrade');
     const trialStatus = urlParams.get('trial');
     const uid = urlParams.get('uid');
-    
+
     if (upgradeStatus === 'success') {
       console.log('Payment success detected, refreshing subscription status');
       // Invalidate subscription query to force refresh
       queryClient.invalidateQueries({ queryKey: ['/api/subscription-status'] });
-      
+
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -114,7 +132,7 @@ export function useSubscription() {
     if ((trialStatus === 'success' || window.location.search.includes('trial=success')) && user?.uid) {
       const userIdToActivate = uid || user.uid;
       console.log('AUTO-ACTIVATING TRIAL: User returned from Stripe checkout, activating trial for:', userIdToActivate);
-      
+
       // Immediately activate trial via API call
       fetch('/api/start-trial', {
         method: 'POST',
@@ -141,7 +159,7 @@ export function useSubscription() {
       .catch(error => {
         console.error('❌ Network error during trial activation:', error);
       });
-      
+
       // Clear URL parameters after processing
       if (window.location.search.includes('trial=success')) {
         window.history.replaceState({}, document.title, window.location.pathname);
