@@ -1,0 +1,478 @@
+// comprehensive-test-suite.js
+// Run with: node comprehensive-test-suite.js
+
+const axios = require('axios');
+const crypto = require('crypto');
+
+// Configuration
+const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:5000';
+const TEST_USER_ID = `test_${Date.now()}`;
+const TEST_EMAIL = `test_${Date.now()}@example.com`;
+
+// Colors for console output
+const colors = {
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  reset: '\x1b[0m',
+  bold: '\x1b[1m'
+};
+
+// Test results tracking
+let testResults = {
+  total: 0,
+  passed: 0,
+  failed: 0,
+  errors: []
+};
+
+// Helper functions
+function log(color, message) {
+  console.log(`${color}${message}${colors.reset}`);
+}
+
+function logTest(testName, passed, details = '') {
+  testResults.total++;
+  if (passed) {
+    testResults.passed++;
+    log(colors.green, `✅ ${testName}`);
+  } else {
+    testResults.failed++;
+    testResults.errors.push({ test: testName, details });
+    log(colors.red, `❌ ${testName}`);
+    if (details) log(colors.yellow, `   Details: ${details}`);
+  }
+}
+
+async function makeRequest(method, endpoint, data = null, headers = {}) {
+  try {
+    const config = {
+      method,
+      url: `${BASE_URL}${endpoint}`,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      }
+    };
+    
+    if (data) config.data = data;
+    
+    const response = await axios(config);
+    return { success: true, data: response.data, status: response.status };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error.response?.data || error.message,
+      status: error.response?.status || 0
+    };
+  }
+}
+
+// Test Categories
+class TestSuite {
+  async runAllTests() {
+    log(colors.blue + colors.bold, '🧪 Starting Comprehensive Test Suite');
+    log(colors.blue, `Testing server at: ${BASE_URL}`);
+    log(colors.blue, `Test user ID: ${TEST_USER_ID}`);
+    console.log('');
+
+    // Run test categories in order
+    await this.testBasicEndpoints();
+    await this.testUserManagement();
+    await this.testSubscriptionFlow();
+    await this.testTrialSystem();
+    await this.testSecurityFeatures();
+    await this.testWizardFeatures();
+    await this.testEdgeCases();
+    await this.testErrorHandling();
+
+    this.printSummary();
+  }
+
+  async testBasicEndpoints() {
+    log(colors.blue + colors.bold, '\n📡 Testing Basic Endpoints');
+    
+    // Health check
+    const health = await makeRequest('GET', '/api/health');
+    logTest('Health Check', 
+      health.success && health.data.status === 'ok',
+      health.success ? '' : health.error
+    );
+    
+    // Verify server is responding with proper headers
+    logTest('Health Check Response Format',
+      health.data?.timestamp && new Date(health.data.timestamp).getTime() > 0,
+      'Should include valid timestamp'
+    );
+  }
+
+  async testUserManagement() {
+    log(colors.blue + colors.bold, '\n👤 Testing User Management');
+    
+    // Register new user
+    const registration = await makeRequest('POST', '/api/register-user', {
+      uid: TEST_USER_ID,
+      email: TEST_EMAIL,
+      username: `testuser_${Date.now()}`
+    });
+    
+    logTest('User Registration',
+      registration.success && registration.data.success,
+      registration.success ? '' : registration.error
+    );
+    
+    // Try to register same user again (should handle gracefully)
+    const duplicateReg = await makeRequest('POST', '/api/register-user', {
+      uid: TEST_USER_ID,
+      email: TEST_EMAIL,
+      username: `testuser_duplicate`
+    });
+    
+    logTest('Duplicate User Registration Handling',
+      duplicateReg.success && duplicateReg.data.message?.includes('already exists'),
+      'Should handle duplicate registration gracefully'
+    );
+    
+    // Debug user endpoint
+    const debugUser = await makeRequest('GET', `/api/debug/current-user/${TEST_USER_ID}`);
+    logTest('Debug User Endpoint',
+      debugUser.success && debugUser.data.user,
+      debugUser.success ? '' : debugUser.error
+    );
+  }
+
+  async testSubscriptionFlow() {
+    log(colors.blue + colors.bold, '\n💳 Testing Subscription Flow');
+    
+    // Test checkout session creation
+    const checkout = await makeRequest('POST', '/api/create-checkout-session', {
+      plan: 'pro_monthly',
+      userId: TEST_USER_ID
+    });
+    
+    logTest('Create Checkout Session',
+      checkout.success && checkout.data.url,
+      checkout.success ? '' : checkout.error
+    );
+    
+    // Test subscription status check
+    const subStatus = await makeRequest('GET', `/api/subscription-status/${TEST_USER_ID}`);
+    logTest('Subscription Status Check',
+      subStatus.success && subStatus.data.tier !== undefined,
+      subStatus.success ? '' : subStatus.error
+    );
+    
+    // Test manual Pro activation (emergency endpoint)
+    const proActivation = await makeRequest('POST', '/api/activate-pro', {
+      userId: TEST_USER_ID,
+      plan: 'pro_monthly'
+    });
+    
+    logTest('Manual Pro Activation',
+      proActivation.success && proActivation.data.success,
+      proActivation.success ? '' : proActivation.error
+    );
+    
+    // Verify Pro status was set
+    const verifyPro = await makeRequest('GET', `/api/subscription-status/${TEST_USER_ID}`);
+    logTest('Pro Status Verification',
+      verifyPro.success && (verifyPro.data.tier === 'pro_monthly' || verifyPro.data.tier === 'pro'),
+      verifyPro.success ? `Tier: ${verifyPro.data.tier}` : verifyPro.error
+    );
+  }
+
+  async testTrialSystem() {
+    log(colors.blue + colors.bold, '\n🆓 Testing Trial System');
+    
+    // Create new user for trial testing
+    const trialUserId = `trial_${Date.now()}`;
+    await makeRequest('POST', '/api/register-user', {
+      uid: trialUserId,
+      email: `trial_${Date.now()}@example.com`,
+      username: `trialuser`
+    });
+    
+    // Check trial eligibility
+    const eligibility = await makeRequest('GET', `/api/trial-eligibility/${trialUserId}`);
+    logTest('Trial Eligibility Check',
+      eligibility.success && eligibility.data.eligible !== undefined,
+      eligibility.success ? `Eligible: ${eligibility.data.eligible}` : eligibility.error
+    );
+    
+    // Start trial
+    const startTrial = await makeRequest('POST', '/api/start-trial', {
+      userId: trialUserId
+    });
+    
+    logTest('Start Trial',
+      startTrial.success && startTrial.data.success,
+      startTrial.success ? '' : startTrial.error
+    );
+    
+    // Check trial status
+    const trialStatus = await makeRequest('GET', `/api/trial-status/${trialUserId}`);
+    logTest('Trial Status Check',
+      trialStatus.success && trialStatus.data.isTrialActive !== undefined,
+      trialStatus.success ? `Active: ${trialStatus.data.isTrialActive}` : trialStatus.error
+    );
+    
+    // Try to start trial again (should be blocked)
+    const duplicateTrial = await makeRequest('POST', '/api/start-trial', {
+      userId: trialUserId
+    });
+    
+    logTest('Trial Abuse Prevention',
+      !duplicateTrial.success || duplicateTrial.data.error?.includes('not available'),
+      'Should prevent multiple trials'
+    );
+  }
+
+  async testSecurityFeatures() {
+    log(colors.blue + colors.bold, '\n🔒 Testing Security Features');
+    
+    // Test input validation - missing required fields
+    const invalidCheckout = await makeRequest('POST', '/api/create-checkout-session', {
+      plan: 'invalid_plan'
+      // Missing userId
+    });
+    
+    logTest('Input Validation - Missing Fields',
+      !invalidCheckout.success && invalidCheckout.status === 400,
+      'Should reject requests with missing required fields'
+    );
+    
+    // Test invalid plan
+    const invalidPlan = await makeRequest('POST', '/api/create-checkout-session', {
+      plan: 'hacker_plan',
+      userId: TEST_USER_ID
+    });
+    
+    logTest('Input Validation - Invalid Plan',
+      !invalidPlan.success && invalidPlan.status === 400,
+      'Should reject invalid subscription plans'
+    );
+    
+    // Test user not found scenarios
+    const nonExistentUser = await makeRequest('GET', '/api/subscription-status/nonexistent_user_12345');
+    logTest('Non-existent User Handling',
+      nonExistentUser.success || nonExistentUser.status === 404,
+      'Should handle non-existent users gracefully'
+    );
+  }
+
+  async testWizardFeatures() {
+    log(colors.blue + colors.bold, '\n🧙 Testing AI Wizard Features');
+    
+    // Test problem classification
+    const classification = await makeRequest('POST', '/api/wizard/classify-problem', {
+      userInput: "My QR codes are generating but when I scan them I get 404 errors",
+      sessionId: `session_${Date.now()}`
+    });
+    
+    logTest('Problem Classification',
+      classification.success && classification.data.category,
+      classification.success ? `Category: ${classification.data.category}` : classification.error
+    );
+    
+    // Test question generation
+    const questions = await makeRequest('POST', '/api/wizard/generate-questions', {
+      classification: {
+        category: 'qr_codes',
+        complexity: 'medium',
+        experience: 'intermediate'
+      },
+      sessionId: `session_${Date.now()}`
+    });
+    
+    logTest('Question Generation',
+      questions.success && Array.isArray(questions.data),
+      questions.success ? `Generated ${questions.data?.length} questions` : questions.error
+    );
+    
+    // Test solution generation
+    const solution = await makeRequest('POST', '/api/wizard/generate-solution', {
+      classification: {
+        category: 'qr_codes',
+        complexity: 'medium',
+        experience: 'intermediate'
+      },
+      responses: [
+        "QR codes generate but lead to 404",
+        "404 Not Found error",
+        "Should redirect to partner page",
+        "Checked URLs and database"
+      ],
+      sessionId: `session_${Date.now()}`
+    });
+    
+    logTest('Solution Generation',
+      solution.success && solution.data.solutionSteps,
+      solution.success ? `Generated ${solution.data.solutionSteps?.length} steps` : solution.error
+    );
+    
+    // Test custom prompt generation
+    const customPrompt = await makeRequest('POST', '/api/generate-custom-prompt', {
+      problem: "Need to debug API authentication issues",
+      techStack: "Node.js, Express",
+      complexity: "medium"
+    });
+    
+    logTest('Custom Prompt Generation',
+      customPrompt.success && customPrompt.data.prompt,
+      customPrompt.success ? '' : customPrompt.error
+    );
+  }
+
+  async testEdgeCases() {
+    log(colors.blue + colors.bold, '\n🎯 Testing Edge Cases');
+    
+    // Test complete testing scenarios
+    const testScenarios = ['free_user', 'trial_user', 'pro_user'];
+    
+    for (const testType of testScenarios) {
+      const testUserId = `${testType}_${Date.now()}`;
+      const testResult = await makeRequest('POST', '/api/test-complete-signup', {
+        testType,
+        userId: testUserId
+      });
+      
+      logTest(`Test Scenario: ${testType}`,
+        testResult.success && testResult.data.success,
+        testResult.success ? `User type: ${testResult.data.userType}` : testResult.error
+      );
+    }
+    
+    // Test webhook simulation
+    const webhookTest = await makeRequest('POST', '/api/test-webhook', {
+      eventType: 'create_free_user',
+      userId: `webhook_test_${Date.now()}`
+    });
+    
+    logTest('Webhook Simulation',
+      webhookTest.success && webhookTest.data.success,
+      webhookTest.success ? '' : webhookTest.error
+    );
+  }
+
+  async testErrorHandling() {
+    log(colors.blue + colors.bold, '\n⚠️  Testing Error Handling');
+    
+    // Test malformed JSON
+    const malformedRequest = await makeRequest('POST', '/api/register-user', 'invalid json');
+    logTest('Malformed JSON Handling',
+      !malformedRequest.success,
+      'Should reject malformed JSON'
+    );
+    
+    // Test empty request body
+    const emptyBody = await makeRequest('POST', '/api/create-checkout-session', {});
+    logTest('Empty Request Body Handling',
+      !emptyBody.success && emptyBody.status === 400,
+      'Should handle empty request bodies'
+    );
+    
+    // Test extremely long input
+    const longInput = 'x'.repeat(10000);
+    const longRequest = await makeRequest('POST', '/api/wizard/classify-problem', {
+      userInput: longInput,
+      sessionId: 'test'
+    });
+    
+    logTest('Long Input Handling',
+      longRequest.success || longRequest.status === 400,
+      'Should handle or reject extremely long inputs'
+    );
+  }
+
+  printSummary() {
+    console.log('\n' + '='.repeat(60));
+    log(colors.blue + colors.bold, '📊 TEST SUMMARY');
+    console.log('='.repeat(60));
+    
+    log(colors.blue, `Total Tests: ${testResults.total}`);
+    log(colors.green, `Passed: ${testResults.passed}`);
+    log(colors.red, `Failed: ${testResults.failed}`);
+    
+    const successRate = ((testResults.passed / testResults.total) * 100).toFixed(1);
+    log(colors.blue, `Success Rate: ${successRate}%`);
+    
+    if (testResults.failed > 0) {
+      console.log('\n❌ Failed Tests:');
+      testResults.errors.forEach((error, index) => {
+        log(colors.red, `${index + 1}. ${error.test}`);
+        if (error.details) {
+          log(colors.yellow, `   ${error.details}`);
+        }
+      });
+    }
+    
+    console.log('\n' + '='.repeat(60));
+    
+    if (successRate >= 90) {
+      log(colors.green + colors.bold, '🎉 EXCELLENT! Your implementation is working great!');
+    } else if (successRate >= 75) {
+      log(colors.yellow + colors.bold, '👍 GOOD! Most features working, some issues to address.');
+    } else {
+      log(colors.red + colors.bold, '⚠️  NEEDS WORK! Several critical issues found.');
+    }
+    
+    console.log('');
+  }
+}
+
+// Performance testing helper
+async function runPerformanceTest() {
+  log(colors.blue + colors.bold, '\n⚡ Running Performance Test');
+  
+  const startTime = Date.now();
+  const promises = [];
+  
+  // Run 10 concurrent health checks
+  for (let i = 0; i < 10; i++) {
+    promises.push(makeRequest('GET', '/api/health'));
+  }
+  
+  const results = await Promise.all(promises);
+  const endTime = Date.now();
+  
+  const successCount = results.filter(r => r.success).length;
+  const avgResponseTime = (endTime - startTime) / 10;
+  
+  logTest('Concurrent Request Handling',
+    successCount === 10,
+    `${successCount}/10 requests successful, avg ${avgResponseTime}ms`
+  );
+}
+
+// Main execution
+async function main() {
+  const testSuite = new TestSuite();
+  
+  try {
+    await testSuite.runAllTests();
+    await runPerformanceTest();
+    
+    // Final recommendations
+    console.log('\n💡 Recommendations for your AI coding agent:');
+    console.log('1. Ensure all security validations are properly implemented');
+    console.log('2. Add comprehensive error handling for all edge cases');
+    console.log('3. Implement proper logging for production monitoring');
+    console.log('4. Add rate limiting to prevent abuse');
+    console.log('5. Set up automated testing in your CI/CD pipeline');
+    
+  } catch (error) {
+    log(colors.red, `Test suite failed to run: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+// Run the tests
+if (require.main === module) {
+  main().catch(error => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { TestSuite, makeRequest };
