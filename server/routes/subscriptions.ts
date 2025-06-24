@@ -384,7 +384,7 @@ export function registerSubscriptionRoutes(app: Express) {
       // Find user by Firebase UID
       const user = await storage.getUserByFirebaseUid(userId);
       if (!user) {
-        return ApiResponse.error(res, "User not found", 404);
+        return ApiResponseUtil.error(res, "User not found", 404);
       }
 
       // Check if user has an active subscription or trial
@@ -393,7 +393,7 @@ export function registerSubscriptionRoutes(app: Express) {
         new Date(user.trialStartDate).getTime() + (3 * 24 * 60 * 60 * 1000) > Date.now();
 
       if (currentStatus !== 'active' && !isTrialActive) {
-        return ApiResponse.error(res, "No active subscription to cancel", 400);
+        return ApiResponseUtil.error(res, "No active subscription to cancel", 400);
       }
 
       // For trial users, immediately deactivate
@@ -405,7 +405,7 @@ export function registerSubscriptionRoutes(app: Express) {
         });
 
         console.log(`Trial cancelled for user ${userId} (ID: ${user.id})`);
-        return ApiResponse.success(res, {
+        return ApiResponseUtil.success(res, {
           success: true,
           message: "Trial subscription cancelled successfully"
         });
@@ -426,7 +426,7 @@ export function registerSubscriptionRoutes(app: Express) {
           });
 
           console.log(`Stripe subscription cancelled for user ${userId} (ID: ${user.id})`);
-          return ApiResponse.success(res, {
+          return ApiResponseUtil.success(res, {
             success: true,
             message: "Subscription cancelled successfully. Access will continue until the end of your current billing period.",
             currentPeriodEnd: subscription.current_period_end
@@ -440,7 +440,7 @@ export function registerSubscriptionRoutes(app: Express) {
             subscriptionStatus: 'canceled'
           });
 
-          return ApiResponse.success(res, {
+          return ApiResponseUtil.success(res, {
             success: true,
             message: "Subscription cancelled locally. Please contact support if billing issues persist."
           });
@@ -453,7 +453,7 @@ export function registerSubscriptionRoutes(app: Express) {
         });
 
         console.log(`Local subscription cancelled for user ${userId} (ID: ${user.id})`);
-        return ApiResponse.success(res, {
+        return ApiResponseUtil.success(res, {
           success: true,
           message: "Subscription cancelled successfully"
         });
@@ -461,7 +461,7 @@ export function registerSubscriptionRoutes(app: Express) {
 
     } catch (error) {
       console.error('Error cancelling subscription:', error);
-      return ApiResponse.error(res, "Failed to cancel subscription. Please try again.", 500);
+      return ApiResponseUtil.error(res, "Failed to cancel subscription. Please try again.", 500);
     }
   });
 }
