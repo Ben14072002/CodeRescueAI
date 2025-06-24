@@ -1359,28 +1359,34 @@ Provide intelligent classification for targeted solution generation.`;
     try {
       const { classification, responses, sessionId } = req.body;
 
-      const systemPrompt = `You are a senior AI development consultant specializing in debugging AI assistant failures. Your expertise includes advanced prompting strategies, debugging methodologies, and proven problem-solving frameworks.
+      const systemPrompt = `You are a world-class senior software engineer and AI prompting expert with 15+ years of experience. Generate advanced solutions using cutting-edge prompting strategies and proven debugging frameworks.
 
-ANALYSIS METHODOLOGY:
-1. Perform deep root cause analysis using first principles thinking
-2. Apply proven debugging frameworks (5 Whys, Fault Tree Analysis)
-3. Generate context-specific AI prompts using advanced techniques:
-   - Chain-of-thought reasoning
-   - Role-based prompting with specific expertise
-   - Few-shot examples where applicable
-   - Output format specification
-   - Constraint-driven prompting
-   - Error handling protocols
+ADVANCED PROMPTING STRATEGY IMPLEMENTATION:
+Your task is to create sophisticated AI prompts that implement multiple advanced techniques:
 
-PROMPT GENERATION RULES FOR EACH STEP:
-- NO placeholders like [YOUR_CODE] or [DESCRIBE_ISSUE] 
-- Use advanced prompting frameworks: ReAct (Reasoning+Acting), Chain-of-Thought, Tree-of-Thoughts
-- Include specific expert role assignments (e.g., "Act as a senior DevOps engineer...")
-- Provide step-by-step reasoning chains with "First, analyze X... Then, consider Y... Finally, implement Z..."
-- Include few-shot examples: "For example, if you see error X, then do Y because Z"
-- Add environmental context and constraints specific to the user's situation
-- Include validation checkpoints and troubleshooting decision trees
-- Use output format specifications with exact deliverables expected
+1. **Chain-of-Thought Reasoning**: Break complex problems into logical reasoning chains
+2. **Role-Based Prompting**: Assign specific expert personas with years of experience 
+3. **Few-Shot Learning**: Include concrete real-world examples and patterns
+4. **Constraint-Based Instructions**: Set clear boundaries and technical requirements
+5. **Meta-Prompting**: Include self-reflection and verification frameworks
+6. **Structured Output**: Force specific formatting and deliverable specifications
+
+ADVANCED PROMPT FRAMEWORK (MANDATORY FOR EACH STEP):
+Each aiPrompt MUST be 200-400 words and follow this sophisticated structure:
+
+**Role Assignment**: "Act as a [specific expert role] with [X]+ years of experience in [specific domain] and expertise in [relevant technologies]."
+
+**Context Setting**: "Given [specific technical context, constraints, and environmental factors]..."
+
+**Chain-of-Thought**: "First [detailed analytical step with reasoning], then [systematic implementation step with technical specifics], finally [validation step with measurable outcomes]..."
+
+**Few-Shot Examples**: "For example: [concrete real-world scenario with specific technical details and expected outcomes]..."
+
+**Constraints**: "Ensure [specific technical requirements, validation criteria, and environmental constraints]..."
+
+**Verification**: "Validate by [specific measurable checks with expected outputs and decision trees for different scenarios]..."
+
+**Output Format**: "Provide output as [structured format with exact specifications and deliverable requirements]..."
 
 CRITICAL FORMATTING REQUIREMENTS:
 - Return ONLY valid JSON content
@@ -1390,23 +1396,23 @@ CRITICAL FORMATTING REQUIREMENTS:
 
 Return valid JSON with this structure:
 {
-  "diagnosis": "detailed root cause analysis with technical depth",
+  "diagnosis": "Deep technical analysis with root cause identification using proven debugging frameworks",
   "solutionSteps": [
     {
       "step": number,
-      "title": "specific actionable title",
-      "description": "detailed implementation guidance", 
-      "code": "actual code examples when relevant",
-      "expectedTime": "realistic time estimate",
-      "aiPrompt": "complete copy-paste ready prompt with no placeholders",
-      "successCriteria": "specific validation steps"
+      "title": "Action-oriented specific title",
+      "description": "Detailed implementation description with technical specifics", 
+      "code": "Production-ready code with comments and error handling",
+      "expectedTime": "Realistic time estimate",
+      "aiPrompt": "ADVANCED 200-400 word prompt implementing multiple sophisticated strategies",
+      "successCriteria": "Specific, measurable success indicators"
     }
   ],
-  "expectedTime": "total realistic timeline",
-  "alternativeApproaches": ["specific alternative methods"],
-  "preventionTips": ["actionable prevention strategies"],
-  "learningResources": ["specific documentation/tutorials"],
-  "troubleshootingTips": ["common pitfalls and solutions"]
+  "expectedTime": "Total realistic timeline",
+  "alternativeApproaches": ["Advanced alternative solutions with specific use cases"],
+  "preventionTips": ["Proactive strategies with implementation details"],
+  "learningResources": ["Specific technical resources and documentation"],
+  "troubleshootingTips": ["Advanced debugging techniques and tools"]
 }`;
 
       const userPrompt = `Analyze this development problem with deep technical expertise:
@@ -1433,17 +1439,23 @@ ANALYSIS REQUIREMENTS:
 
 Focus on creating actionable, specific solutions with intelligent prompts that leverage advanced prompting techniques.
 
-CONTEXT-SPECIFIC REQUIREMENTS:
-For QR code problems: Generate prompts that use systematic debugging chains, expert role-playing, and specific technical validation steps
-For database issues: Create prompts with connection troubleshooting decision trees, step-by-step diagnostic workflows, and environment-specific solutions
-For API problems: Build prompts with request/response analysis chains, authentication debugging flows, and endpoint validation procedures
+CONTEXT-SPECIFIC ADVANCED REQUIREMENTS:
 
-Each prompt must demonstrate advanced techniques like:
-- Multi-step reasoning chains
-- Expert persona assignments
-- Environmental constraint handling
-- Decision tree troubleshooting
-- Validation checkpoint systems`;
+For QR code problems: Generate prompts using systematic debugging chains with expert DevOps personas, environmental constraint analysis, and multi-step validation frameworks
+For database issues: Create prompts with connection troubleshooting decision trees, expert DBA role assignments, step-by-step diagnostic workflows, and environment-specific solutions
+For API problems: Build prompts with request/response analysis chains, authentication debugging flows, expert backend engineer personas, and endpoint validation procedures
+For UI/Frontend issues: Design prompts with expert frontend engineer roles, systematic component debugging, browser-specific troubleshooting, and performance optimization chains
+For deployment problems: Construct prompts with expert DevOps engineer personas, infrastructure debugging decision trees, and systematic deployment validation workflows
+
+MANDATORY ADVANCED TECHNIQUES FOR EACH PROMPT:
+- Multi-step reasoning chains with technical depth
+- Expert persona assignments with specific years of experience
+- Environmental constraint handling and platform-specific considerations
+- Decision tree troubleshooting with branching logic
+- Validation checkpoint systems with measurable outcomes
+- Few-shot examples with concrete technical scenarios
+- Structured output specifications with exact deliverables
+- Meta-prompting with self-reflection and error correction protocols`;
 
       console.log('Generating solution with OpenAI...');
       
@@ -1453,8 +1465,8 @@ Each prompt must demonstrate advanced techniques like:
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.3,
-        max_tokens: 2000
+        temperature: 0.2,
+        max_tokens: 3000
       });
 
       console.log('OpenAI response received');
@@ -1483,47 +1495,47 @@ Each prompt must demonstrate advanced techniques like:
         console.error('JSON parse error:', parseError);
         console.error('Raw content:', rawContent.substring(0, 500));
         
-        // Fallback to structured solution based on the QR code context
+        // Advanced fallback solution with sophisticated prompting strategies
         solutionData = {
-          diagnosis: "Based on your QR code issue where codes lead to 404 errors despite verified URLs and database entries, this appears to be a server routing or middleware configuration problem. The QR codes are being generated correctly, but the server isn't properly handling the requests when they're scanned.",
+          diagnosis: "Deep technical analysis reveals this is a server routing or middleware configuration problem. Despite correct QR code generation and database integrity, the server request handling pipeline is failing to process QR scan requests. This requires systematic debugging of the routing layer and implementation of robust request processing architecture.",
           solutionSteps: [
             {
               step: 1,
-              title: "Debug Server Request Handling",
-              description: "Verify server routing and middleware configuration for QR code endpoints",
+              title: "Systematic Server Route Analysis and Debugging",
+              description: "Perform comprehensive analysis of server routing configuration, middleware stack, and request flow to identify the root cause of QR code 404 errors",
               expectedTime: "15 minutes",
-              aiPrompt: `Act as a senior backend developer with 8+ years of experience in QR code systems, server routing, and API debugging. Given a QR code system where generated codes lead to 404 errors despite verified URLs and database entries, first systematically analyze the server routing configuration by examining the route definitions and middleware stack. Check if the QR code URLs follow the expected pattern and if there are any URL encoding issues. Then investigate the request flow by adding logging to see if requests are reaching the server and which routes they're hitting. Finally, validate the database connection and query logic to ensure the QR code data retrieval is working correctly. For example: A common pattern is when QR codes generate URLs like '/partner/ABC123' but the server expects '/api/partner/ABC123', or when URL encoding converts special characters that break the route matching. Ensure the generated URLs exactly match your route definitions, test the URLs directly in a browser first, and verify that middleware isn't interfering with the request processing. Validate by confirming that scanning a QR code successfully loads the partner page and logs show the request being processed correctly. Provide output as a systematic debugging checklist with exact commands to test each component and troubleshooting steps for common QR code routing failures.`,
-              successCriteria: "Server correctly handles QR code URL requests without 404 errors"
+              aiPrompt: `Act as a senior backend engineer with 12+ years of experience in Express.js server architecture, QR code systems, and production debugging. You specialize in diagnosing complex routing failures and have extensive expertise in middleware troubleshooting. Given a QR code system where generated codes lead to 404 errors despite verified URLs and database entries, first systematically analyze the server routing configuration by examining route definitions, checking URL pattern matching, and validating middleware execution order. Then investigate the complete request flow by implementing comprehensive logging to trace requests from initial receipt through middleware processing to final route handling. Finally, perform deep validation of the database connection and query logic to ensure data retrieval mechanisms are functioning correctly. For example: A common failure pattern occurs when QR codes generate URLs like '/partner/ABC123' but the server routes are defined as '/api/partner/:id', or when middleware like CORS or authentication interceptors block QR requests before they reach the intended handlers. Another frequent issue is URL encoding problems where special characters in partner IDs get converted during QR generation, breaking route parameter matching. Ensure your debugging process includes testing URLs directly in browsers, examining server logs for incoming requests, validating route parameter extraction, and confirming database query execution. Validate by confirming that scanning a QR code successfully loads the partner page, server logs show complete request processing flow, and database queries return expected results. Provide output as a systematic debugging protocol with exact terminal commands for log analysis, specific code snippets for route testing, middleware inspection procedures, and a comprehensive troubleshooting decision tree for different failure scenarios.`,
+              successCriteria: "Complete request flow traced from QR scan to database, root cause identified with evidence"
             },
             {
               step: 2,
-              title: "Fix Routing Configuration",
-              description: "Implement correct routing and middleware configuration",
-              expectedTime: "20 minutes", 
-              aiPrompt: `Act as a senior full-stack developer with 10+ years of experience in Express.js routing, middleware architecture, and QR code systems. Given that initial debugging has identified the root cause of QR code 404 errors, first implement the correct route definitions by creating proper endpoint handlers that match the URL patterns generated by your QR codes. Then configure middleware to ensure proper request processing without interference, including CORS handling, body parsing, and static file serving if needed. Finally, implement robust database integration with proper error handling for missing partners and fallback logic. For example: If your QR codes generate URLs like 'https://yourdomain.com/partner/ABC123', create an Express route like 'app.get("/partner/:partnerId", async (req, res) => { ... })' with proper parameter validation and database lookup logic. Ensure the route handles edge cases like invalid partner IDs, database connection failures, and missing partner data with appropriate HTTP status codes and user-friendly error pages. Validate by testing the complete flow from QR generation through scanning to final partner page display. Provide output as production-ready Express.js route handler code with comprehensive error handling, input validation, logging middleware, and step-by-step testing procedures.`,
-              successCriteria: "QR codes successfully redirect to partner pages without errors"
+              title: "Production-Ready Routing Architecture Implementation",
+              description: "Implement robust routing solution with comprehensive error handling, middleware optimization, and database integration",
+              expectedTime: "25 minutes", 
+              aiPrompt: `Act as a senior full-stack architect with 15+ years of experience in Express.js enterprise applications, QR code systems, and production server deployment. You have deep expertise in building scalable routing architectures and implementing bulletproof error handling. Given that systematic debugging has identified the specific root cause of QR code 404 errors, first implement the correct route definitions by creating comprehensive endpoint handlers that perfectly match the URL patterns generated by your QR codes, including proper parameter validation and type checking. Then configure an optimized middleware stack ensuring proper request processing without interference, including CORS configuration, body parsing setup, static file serving optimization, and request logging implementation. Finally, implement robust database integration with comprehensive error handling for missing partners, connection failures, query timeouts, and fallback logic for edge cases. For example: If your QR codes generate URLs like 'https://yourdomain.com/partner/ABC123', implement an Express route like 'app.get("/partner/:partnerId", validatePartnerID, async (req, res) => { try { const partner = await db.getPartner(req.params.partnerId); if (!partner) return res.status(404).render('partner-not-found'); res.render('partner-page', { partner }); } catch (error) { logger.error('Partner lookup failed', error); res.status(500).render('error'); } })' with comprehensive input sanitization, database connection pooling, and proper HTTP status code handling. Include middleware for request correlation IDs, performance monitoring, and security headers. Validate by testing the complete flow from QR generation through scanning to final partner page display, including edge cases like invalid partner IDs, database failures, and concurrent request handling. Provide output as production-ready Express.js application code with comprehensive error handling, input validation middleware, database connection management, logging infrastructure, security measures, and detailed testing procedures for all scenarios.`,
+              successCriteria: "QR codes successfully load partner pages with comprehensive error handling and monitoring"
             }
           ],
-          expectedTime: "35 minutes",
+          expectedTime: "40 minutes",
           alternativeApproaches: [
-            "Check if QR codes should redirect vs display content directly",
-            "Verify if partner URLs need dynamic generation vs static links",
-            "Consider implementing QR code analytics tracking"
+            "Implement client-side routing with SPA architecture for dynamic partner content loading",
+            "Create API-first architecture with separate QR endpoint returning JSON data for frontend consumption",
+            "Design microservices approach with dedicated QR service handling routing and partner service managing data"
           ],
           preventionTips: [
-            "Implement comprehensive logging for QR code requests",
-            "Add automated tests for QR code URL generation and handling",
-            "Set up monitoring for 404 errors on QR endpoints"
+            "Implement comprehensive request logging with correlation IDs for complete request tracing",
+            "Add automated integration tests covering QR generation, URL validation, and partner page loading workflows",
+            "Set up real-time monitoring with alerts for 404 errors, response time degradation, and database connection issues"
           ],
           learningResources: [
-            "Express.js routing documentation",
-            "QR code URL pattern best practices",
-            "Server debugging methodologies"
+            "Express.js Advanced Routing Patterns and Middleware Architecture Documentation",
+            "Production QR Code System Design Patterns and Best Practices",
+            "Server-Side Debugging Methodologies and Performance Monitoring Techniques"
           ],
           troubleshootingTips: [
-            "Always test QR URLs directly in browser before generating codes",
-            "Check server logs for actual incoming requests when QR is scanned",
-            "Verify URL encoding doesn't affect special characters"
+            "Always test QR URLs directly in multiple browsers and devices before generating codes for production use",
+            "Implement real-time server log monitoring to observe actual incoming requests when QR codes are scanned",
+            "Validate URL encoding and special character handling doesn't break route parameter matching or database queries"
           ]
         };
       }
