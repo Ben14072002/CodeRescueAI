@@ -14,7 +14,7 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { UserDashboard } from "@/components/user-dashboard";
 import { TrialCountdown } from "@/components/trial-countdown";
 import { NewFeaturesPopup } from "@/components/new-features-popup";
-import { EmergencyProActivation } from "@/components/emergency-pro-activation";
+// SECURITY: EmergencyProActivation import removed - was critical vulnerability
 import { useSession } from "@/hooks/use-session";
 import { useAuth } from "@/hooks/use-auth";
 import { useTrial } from "@/hooks/use-trial";
@@ -159,12 +159,7 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 pt-36 pb-12">
-        {/* Emergency Pro Activation - Show for authenticated users without Pro access */}
-        {user && !isPro && (
-          <div className="mb-8">
-            <EmergencyProActivation />
-          </div>
-        )}
+        {/* SECURITY: Emergency Pro Activation form removed - was critical vulnerability */}
 
         {/* Trial Countdown - Show only for authenticated users on non-landing pages */}
         {user && currentSection !== "landing" && !isPro && (
