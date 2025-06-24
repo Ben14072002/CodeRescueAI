@@ -4,6 +4,44 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import { storage } from "./storage";
 
+// Input validation schemas
+const validateCreateCheckoutSession = (req: any, res: any, next: any) => {
+  const { plan, userId } = req.body;
+  
+  if (!plan || !userId) {
+    return res.status(400).json({ error: "Plan and user ID are required" });
+  }
+  
+  if (!['pro_monthly', 'pro_yearly'].includes(plan)) {
+    return res.status(400).json({ error: "Invalid plan selected" });
+  }
+  
+  if (typeof userId !== 'string' || userId.length < 1) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+  
+  next();
+};
+
+const validateTrialSession = (req: any, res: any, next: any) => {
+  const { userId, email } = req.body;
+  
+  if (!userId || !email) {
+    return res.status(400).json({ error: "User ID and email are required" });
+  }
+  
+  if (typeof userId !== 'string' || userId.length < 1) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+  
+  next();
+};
+
 // Use live Stripe key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: "2023-10-16" as any,
@@ -67,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe regular checkout session creation (for paid subscriptions)
-  app.post("/api/create-checkout-session", async (req, res) => {
+  app.post("/api/create-checkout-session", validateCreateCheckoutSession, async (req, res) => {
     try {
       const { plan, userId } = req.body;
 
@@ -110,9 +148,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json({ url: session.url });
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-      res.status(500).json({ error: 'Failed to create checkout session' });
+    } catch (error: any) {
+      console.error('Error creating checkout session:', {
+        error: error.message,
+        userId: req.body.userId,
+        plan: req.body.plan
+      });
+      res.status(500).json({ 
+        error: 'Failed to create checkout session',
+        code: 'CHECKOUT_SESSION_ERROR'
+      });
     }
   });
 
@@ -292,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe trial checkout session creation
-  app.post("/api/create-trial-checkout-session", async (req, res) => {
+  app.post("/api/create-trial-checkout-session", validateTrialSession, async (req, res) => {
     try {
       const { userId, email, feature } = req.body;
 
@@ -457,17 +502,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let event;
 
       try {
-        // For development, we'll skip signature verification if no webhook secret is provided
         if (!process.env.STRIPE_WEBHOOK_SECRET) {
-          console.log('WEBHOOK: Development mode - no signature verification');
-          // Parse the raw body as JSON for development
-          event = JSON.parse(req.body.toString());
-          console.log('WEBHOOK: Event type:', event?.type);
-          console.log('WEBHOOK: Event data:', JSON.stringify(event?.data?.object || {}, null, 2));
-        } else {
-          event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
-          console.log('WEBHOOK: Signature verified for event:', event.type);
+          console.log('WEBHOOK ERROR: Webhook secret not configured');
+          return res.status(400).send('Webhook secret not configured');
         }
+        
+        event = stripe.webhooks.constructEvent(req.body, sig!, process.env.STRIPE_WEBHOOK_SECRET);
+        console.log('WEBHOOK: Signature verified for event:', event.type);
       } catch (err: any) {
         console.log(`WEBHOOK ERROR: Signature verification failed:`, err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -777,41 +818,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check trial status
       const trialStatus = await storage.checkTrialStatus(user.id);
       
-      // CRITICAL FIX: Enhanced Pro detection for paid users
+      // Enhanced Pro detection for paid users with proper validation
       let finalTier = user.subscriptionTier || 'free';
       let finalStatus = user.subscriptionStatus || 'none';
       let autoUpgraded = false;
 
-      // If user has Stripe subscription but no Pro tier, they likely paid but system didn't update
+      // Verify Stripe subscription status before auto-upgrade
       if (user.stripeSubscriptionId && finalTier === 'free') {
-        console.log(`CRITICAL FIX: User ${userId} has Stripe subscription ${user.stripeSubscriptionId} but marked as free. Auto-upgrading to Pro.`);
-        
-        // Auto-upgrade to Pro
-        finalTier = 'pro_monthly';
-        finalStatus = 'active';
-        autoUpgraded = true;
-        
-        // Update in database immediately
-        await storage.updateUserSubscription(user.id, {
-          subscriptionTier: 'pro_monthly',
-          subscriptionStatus: 'active',
-          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        });
-      }
-
-      // Check if user has expired trial but paid
-      if (user.stripeSubscriptionId && finalTier === 'trial' && !trialStatus.isTrialActive) {
-        console.log(`CRITICAL FIX: User ${userId} has expired trial but Stripe subscription. Converting to Pro.`);
-        
-        finalTier = 'pro_monthly';
-        finalStatus = 'active';
-        autoUpgraded = true;
-        
-        await storage.updateUserSubscription(user.id, {
-          subscriptionTier: 'pro_monthly',
-          subscriptionStatus: 'active',
-          subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        });
+        try {
+          const stripeSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          
+          // Only auto-upgrade if Stripe confirms active subscription
+          if (stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing') {
+            console.log(`VALIDATED FIX: User ${userId} has verified active Stripe subscription ${user.stripeSubscriptionId}. Auto-upgrading to Pro.`);
+            
+            finalTier = stripeSubscription.status === 'trialing' ? 'trial' : 'pro_monthly';
+            finalStatus = stripeSubscription.status;
+            autoUpgraded = true;
+            
+            // Update in database with verified Stripe data
+            await storage.updateUserSubscription(user.id, {
+              subscriptionTier: finalTier,
+              subscriptionStatus: finalStatus,
+              subscriptionCurrentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000)
+            });
+          } else {
+            console.log(`SECURITY: User ${userId} has inactive Stripe subscription ${stripeSubscription.status}. Not upgrading.`);
+          }
+        } catch (stripeError) {
+          console.error(`SECURITY: Failed to verify Stripe subscription for user ${userId}:`, stripeError);
+          // Don't auto-upgrade if we can't verify with Stripe
+        }
       }
 
       res.json({
