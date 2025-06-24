@@ -375,4 +375,93 @@ export function registerSubscriptionRoutes(app: Express) {
       securityNote: "Unauthorized access attempts are logged and monitored."
     });
   });
+
+  // Cancel subscription endpoint
+  app.post("/api/cancel-subscription", async (req, res) => {
+    try {
+      const { userId } = req.body;
+
+      // Find user by Firebase UID
+      const user = await storage.getUserByFirebaseUid(userId);
+      if (!user) {
+        return ApiResponse.error(res, "User not found", 404);
+      }
+
+      // Check if user has an active subscription or trial
+      const currentStatus = user.subscriptionStatus;
+      const isTrialActive = user.trialUsed && user.trialStartDate && 
+        new Date(user.trialStartDate).getTime() + (3 * 24 * 60 * 60 * 1000) > Date.now();
+
+      if (currentStatus !== 'active' && !isTrialActive) {
+        return ApiResponse.error(res, "No active subscription to cancel", 400);
+      }
+
+      // For trial users, immediately deactivate
+      if (isTrialActive && currentStatus !== 'active') {
+        await storage.updateUserSubscription(user.id, {
+          subscriptionStatus: 'free',
+          subscriptionTier: 'free',
+          trialUsed: true
+        });
+
+        console.log(`Trial cancelled for user ${userId} (ID: ${user.id})`);
+        return ApiResponse.success(res, {
+          success: true,
+          message: "Trial subscription cancelled successfully"
+        });
+      }
+
+      // For paid subscriptions, cancel at Stripe and update status
+      if (user.stripeSubscriptionId) {
+        try {
+          // Cancel the subscription at Stripe
+          const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+            cancel_at_period_end: true
+          });
+
+          // Update user status to cancelled but maintain access until period end
+          await storage.updateUserSubscription(user.id, {
+            subscriptionStatus: 'canceled',
+            subscriptionCurrentPeriodEnd: new Date(subscription.current_period_end * 1000)
+          });
+
+          console.log(`Stripe subscription cancelled for user ${userId} (ID: ${user.id})`);
+          return ApiResponse.success(res, {
+            success: true,
+            message: "Subscription cancelled successfully. Access will continue until the end of your current billing period.",
+            currentPeriodEnd: subscription.current_period_end
+          });
+
+        } catch (stripeError) {
+          console.error('Stripe cancellation error:', stripeError);
+          
+          // Fallback: Update local status even if Stripe fails
+          await storage.updateUserSubscription(user.id, {
+            subscriptionStatus: 'canceled'
+          });
+
+          return ApiResponse.success(res, {
+            success: true,
+            message: "Subscription cancelled locally. Please contact support if billing issues persist."
+          });
+        }
+      } else {
+        // No Stripe subscription ID, just update local status
+        await storage.updateUserSubscription(user.id, {
+          subscriptionStatus: 'free',
+          subscriptionTier: 'free'
+        });
+
+        console.log(`Local subscription cancelled for user ${userId} (ID: ${user.id})`);
+        return ApiResponse.success(res, {
+          success: true,
+          message: "Subscription cancelled successfully"
+        });
+      }
+
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      return ApiResponse.error(res, "Failed to cancel subscription. Please try again.", 500);
+    }
+  });
 }
