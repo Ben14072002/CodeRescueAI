@@ -1,6 +1,6 @@
 import { users, sessions, promptRatings, projects, wizardConversations, type User, type InsertUser, type Session, type InsertSession, type PromptRating, type InsertPromptRating, type Project, type InsertProject, type WizardConversation, type InsertWizardConversation } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte } from "drizzle-orm";
+import { eq, and, gte, desc } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
