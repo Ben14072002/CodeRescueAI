@@ -1,0 +1,64 @@
+Step 1: Critical Security Fix for Replit AI Agent
+Dokument ∙ Version 5 
+Here's step 5 for your Replit AI agent:
+
+For Replit AI Agent:
+
+STEP 5: Create User Lookup Utility Function
+
+TASK: Create a reusable utility function to eliminate repeated user lookup code
+
+PROBLEM: The same user lookup pattern is repeated 15+ times across different route files, making the code hard to maintain.
+
+ACTION NEEDED: Create a new utility file with helper functions
+
+1. CREATE NEW FILE: server/utils/userLookup.ts
+
+2. ADD THIS COMPLETE CODE TO THE NEW FILE:
+
+```typescript
+import { storage } from "../storage";
+import type { User } from "@shared/schema";
+
+/**
+ * Finds a user by Firebase UID or numeric database ID
+ * @param userId - Firebase UID (string) or database ID (number/string)
+ * @returns User object or undefined if not found
+ */
+export async function findUser(userId: string | number): Promise<User | undefined> {
+  // Convert to string for consistent handling
+  const userIdStr = userId.toString();
+  
+  // First try Firebase UID lookup
+  let user = await storage.getUserByFirebaseUid(userIdStr);
+  
+  // If not found and it's a valid number, try database ID lookup
+  if (!user && !isNaN(parseInt(userIdStr))) {
+    user = await storage.getUser(parseInt(userIdStr));
+  }
+  
+  return user;
+}
+
+/**
+ * Finds a user and throws error if not found
+ * @param userId - Firebase UID (string) or database ID (number/string)
+ * @returns User object (guaranteed to exist)
+ * @throws Error if user not found
+ */
+export async function findUserOrThrow(userId: string | number): Promise<User> {
+  const user = await findUser(userId);
+  
+  if (!user) {
+    throw new Error(`User not found: ${userId}`);
+  }
+  
+  return user;
+}
+REQUIREMENTS:
+
+Create the new file in the correct location: server/utils/userLookup.ts
+Make sure the imports are correct
+Include both utility functions as shown
+Verify the file is properly created
+This utility will replace the repeated user lookup pattern throughout the codebase.
