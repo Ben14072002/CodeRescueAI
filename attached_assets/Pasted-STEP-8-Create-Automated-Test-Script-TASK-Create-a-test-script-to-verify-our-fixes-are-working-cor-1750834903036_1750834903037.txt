@@ -1,0 +1,123 @@
+STEP 8: Create Automated Test Script
+
+TASK: Create a test script to verify our fixes are working correctly
+
+ACTION NEEDED: Create a new test file to check all our fixes
+
+1. CREATE NEW FILE: server/test-our-fixes.js
+
+2. ADD THIS COMPLETE TEST SCRIPT:
+
+```javascript
+// Automated test script for our fixes
+console.log("🧪 Testing Codebreaker Fixes...\n");
+
+const baseUrl = 'http://localhost:5000';
+
+const runTests = async () => {
+  let passedTests = 0;
+  let totalTests = 0;
+
+  const test = async (name, testFn) => {
+    totalTests++;
+    try {
+      await testFn();
+      console.log(`✅ ${name}: PASSED`);
+      passedTests++;
+    } catch (error) {
+      console.log(`❌ ${name}: FAILED - ${error.message}`);
+    }
+  };
+
+  // Test 1: Health Endpoint
+  await test("Health Endpoint", async () => {
+    const response = await fetch(`${baseUrl}/api/health`);
+    const data = await response.json();
+    if (!data.status || data.status !== 'ok') {
+      throw new Error('Health check failed');
+    }
+  });
+
+  // Test 2: User Registration
+  await test("User Registration", async () => {
+    const response = await fetch(`${baseUrl}/api/register-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: `test-${Date.now()}`,
+        email: `test-${Date.now()}@example.com`,
+        username: 'testuser'
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Registration failed: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    if (!data.success && !data.user) {
+      throw new Error('Registration response invalid');
+    }
+  });
+
+  // Test 3: Trial Eligibility
+  await test("Trial Eligibility Check", async () => {
+    const testUid = `test-${Date.now()}`;
+    const response = await fetch(`${baseUrl}/api/trial-eligibility/${testUid}`);
+    
+    if (!response.ok) {
+      throw new Error(`Trial eligibility check failed: ${response.status}`);
+    }
+  });
+
+  // Test 4: Webhook Security (should reject unsigned requests)
+  await test("Webhook Security", async () => {
+    const response = await fetch(`${baseUrl}/api/webhooks/stripe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ test: 'data' })
+    });
+    
+    // Should reject with 400 (bad signature)
+    if (response.status !== 400) {
+      throw new Error(`Expected 400 status for unsigned webhook, got ${response.status}`);
+    }
+  });
+
+  // Test 5: Body Parsing (should work correctly)
+  await test("Body Parsing", async () => {
+    const response = await fetch(`${baseUrl}/api/health`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Body parsing middleware issue');
+    }
+  });
+
+  // Summary
+  console.log(`\n📊 Test Results: ${passedTests}/${totalTests} tests passed`);
+  
+  if (passedTests === totalTests) {
+    console.log("🎉 All fixes working correctly!");
+  } else {
+    console.log("⚠️  Some tests failed - check the issues above");
+  }
+};
+
+// Run tests
+runTests().catch(error => {
+  console.error("❌ Test script failed:", error);
+});
+
+REQUIREMENTS:
+
+
+Create the file in the correct location
+Make sure it includes all test cases
+The script should run without requiring additional dependencies
+Include clear pass/fail indicators
+
+This will test all our fixes: import errors, webhook security, user lookup utility, and body parsing order.
+Please create this test file now.
