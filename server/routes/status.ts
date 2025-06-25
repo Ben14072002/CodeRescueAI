@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import Stripe from "stripe";
 import { storage } from "../storage";
+import { findUser, findUserOrThrow } from "../utils/userLookup";
 
 // Use live Stripe key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -18,11 +19,8 @@ export function registerStatusRoutes(app: Express) {
     try {
       const { userId } = req.params;
       
-      // Find user by Firebase UID first, then by ID
-      let user = await storage.getUserByFirebaseUid(userId);
-      if (!user && !isNaN(parseInt(userId))) {
-        user = await storage.getUser(parseInt(userId));
-      }
+      // Find user by Firebase UID or database ID
+      const user = await findUser(userId);
 
       if (!user) {
         return res.json({
