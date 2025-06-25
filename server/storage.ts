@@ -67,20 +67,27 @@ export class MemStorage implements IStorage {
     this.currentRatingId = 1;
     this.currentProjectId = 1;
     
-    // Initialize with your Pro subscription
-    this.createUser({
-      username: 'benpaltinat',
-      email: 'PYVvgDLO2RQYuFx4OVK1UMz7qVG3@firebase.temp',
-      role: 'user'
-    }).then(user => {
-      this.updateUserSubscription(user.id, {
-        stripeCustomerId: 'cus_pro_user',
-        stripeSubscriptionId: 'sub_pro_monthly', 
-        subscriptionStatus: 'active',
-        subscriptionTier: 'pro_monthly',
-        subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+    // Optional demo user creation for development/testing
+    // Set CREATE_DEMO_USER=true and DEMO_USER_EMAIL in environment to enable
+    if (process.env.CREATE_DEMO_USER === 'true' && process.env.DEMO_USER_EMAIL) {
+      this.createUser({
+        username: process.env.DEMO_USER_NAME || 'demo_user',
+        email: process.env.DEMO_USER_EMAIL,
+        role: 'user'
+      }).then(user => {
+        if (process.env.DEMO_USER_SUBSCRIPTION === 'pro') {
+          this.updateUserSubscription(user.id, {
+            stripeCustomerId: 'demo_customer',
+            stripeSubscriptionId: 'demo_subscription',
+            subscriptionStatus: 'active',
+            subscriptionTier: 'pro_monthly',
+            subscriptionCurrentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          });
+        }
+      }).catch(error => {
+        console.log('Demo user creation skipped or failed:', error.message);
       });
-    });
+    }
   }
 
   async getUser(id: number): Promise<User | undefined> {
